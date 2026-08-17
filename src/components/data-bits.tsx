@@ -79,3 +79,29 @@ export function Field({ label, children, hint }: { label: string; children: Reac
     </div>
   );
 }
+
+export function ScoreLine({
+  scoreA,
+  scoreB,
+  final,
+  className,
+}: {
+  scoreA: number | null;
+  scoreB: number | null;
+  final?: boolean;
+  className?: string;
+}) {
+  const has = scoreA != null && scoreB != null;
+  const tone = (mine: number | null, other: number | null) => {
+    if (!has || !final || mine == null || other == null || mine === other) return "text-foreground";
+    return mine > other ? "text-success" : "text-destructive";
+  };
+  return (
+    <span className={cn("font-display text-2xl font-extrabold tabular-nums sm:text-3xl", className)}>
+      <span className={tone(scoreA, scoreB)}>{scoreA ?? "–"}</span>
+      <span className="mx-1.5 text-muted-foreground">:</span>
+      <span className={tone(scoreB, scoreA)}>{scoreB ?? "–"}</span>
+    </span>
+  );
+}
+

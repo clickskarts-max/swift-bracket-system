@@ -8,7 +8,13 @@ export type StandingsMatch = {
   group_label?: string | null;
 };
 
-export type StandingsTeam = { id: string; name: string; logo_url?: string | null; group_label?: string | null };
+export type StandingsTeam = {
+  id: string;
+  name: string;
+  logo_url?: string | null;
+  jersey_color?: string | null;
+  group_label?: string | null;
+};
 
 export type StandingRow = {
   rank: number;
@@ -42,8 +48,8 @@ export function computeStandings(
 
   for (const m of matches) {
     if (!LEAGUE_STAGES.has(m.stage)) continue;
-    if (m.status !== "completed") continue;
     if (m.score_a == null || m.score_b == null) continue;
+    if (m.status === "cancelled" || m.status === "postponed") continue;
     const a = m.team_a_id ? base.get(m.team_a_id) : undefined;
     const b = m.team_b_id ? base.get(m.team_b_id) : undefined;
     if (!a || !b) continue;

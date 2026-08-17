@@ -8,7 +8,7 @@ export function StandingsTable({ teams, matches, groupLabel }: { teams: Team[]; 
   const rows = useMemo(
     () =>
       computeStandings(
-        teams.map((t) => ({ id: t.id, name: t.name, logo_url: t.logo_url, group_label: t.group_label })),
+        teams.map((t) => ({ id: t.id, name: t.name, logo_url: t.logo_url, jersey_color: t.jersey_color, group_label: t.group_label })),
         matches.map((m) => ({
           team_a_id: m.team_a_id, team_b_id: m.team_b_id, score_a: m.score_a, score_b: m.score_b,
           status: m.status, stage: m.stage, group_label: m.group_label,
@@ -40,7 +40,9 @@ export function StandingsTable({ teams, matches, groupLabel }: { teams: Team[]; 
           {rows.map((r) => (
             <TableRow key={r.team.id}>
               <TableCell className="font-display font-bold text-primary">{r.rank}</TableCell>
-              <TableCell><TeamChip name={r.team.name} logoUrl={r.team.logo_url ?? null} /></TableCell>
+              <TableCell>
+                <TeamChip name={r.team.name} logoUrl={r.team.logo_url ?? null} color={r.team.jersey_color ?? null} />
+              </TableCell>
               <TableCell className="text-center tabular-nums">{r.played}</TableCell>
               <TableCell className="text-center tabular-nums">{r.wins}</TableCell>
               <TableCell className="text-center tabular-nums">{r.losses}</TableCell>
