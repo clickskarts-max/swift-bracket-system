@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Field, EmptyState } from "@/components/data-bits";
+import { ImageUpload } from "@/components/image-upload";
 import { POSITIONS } from "@/lib/app";
 import { usePlayers, useTeams, useUpsert, useRemove, type Player } from "@/lib/queries";
 
@@ -105,7 +106,9 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
               </Field>
               <Field label="Age"><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", e.target.value ? Number(e.target.value) : null)} /></Field>
               <Field label="Height (cm)"><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", e.target.value ? Number(e.target.value) : null)} /></Field>
-              <Field label="Photo URL"><Input value={draft.photo_url ?? ""} onChange={(e) => set("photo_url", e.target.value || null)} /></Field>
+              <Field label="Player photo" hint="PNG or JPG, up to 5 MB">
+                <ImageUpload value={draft.photo_url} onChange={(url) => set("photo_url", url)} folder="player-photos" rounded="rounded-full" />
+              </Field>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {STAT_KEYS.map((k) => (
@@ -143,7 +146,18 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                 const stats = (p.stats as Stats) ?? {};
                 return (
                   <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className="flex items-center gap-2">
+                        {p.photo_url ? (
+                          <img src={p.photo_url} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-border" />
+                        ) : (
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                            {p.name.slice(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                        {p.name}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{teamName(p.team_id)}</TableCell>
                     <TableCell>{p.jersey_number ?? "—"}</TableCell>
                     <TableCell>{p.position ?? "—"}</TableCell>
