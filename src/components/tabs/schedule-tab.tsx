@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyState, StatusPill, TeamChip, Field } from "@/components/data-bits";
+import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components/data-bits";
 import { MATCH_STATUSES, formatDateTime, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import { useMatches, useTeams, useUpsert, useRemove, type Match, type Tournament } from "@/lib/queries";
@@ -25,6 +25,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const remove = useRemove("matches", [["matches", tournamentId]]);
   const qc = useQueryClient();
   const [view, setView] = useState("list");
+  const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
   const [editing, setEditing] = useState<Match | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -81,7 +82,8 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
   const grouped = useMemo(() => {
     const map = new Map<string, Match[]>();
-    for (const m of matches) {
+    const pool = matches.filter((m) => (bucket === "results" ? m.status === "completed" : m.status !== "completed"));
+    for (const m of pool) {
       const key =
         view === "calendar"
           ? m.scheduled_at
@@ -91,10 +93,18 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       map.set(key, [...(map.get(key) ?? []), m]);
     }
     return [...map.entries()];
-  }, [matches, view]);
+  }, [matches, view, bucket]);
+
+  const completedCount = matches.filter((m) => m.status === "completed").length;
 
   return (
     <div className="space-y-4">
+      <Tabs value={bucket} onValueChange={(v) => setBucket(v as "fixtures" | "results")}>
+        <TabsList>
+          <TabsTrigger value="fixtures">Upcoming ({matches.length - completedCount})</TabsTrigger>
+          <TabsTrigger value="results">Completed ({completedCount})</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Tabs value={view} onValueChange={setView}>
           <TabsList>
@@ -121,8 +131,15 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         </AlertDialog>
       </div>
 
-      {matches.length === 0 ? (
-        <EmptyState title="No matches yet" description="Generate the fixture list from your teams and format, or import one from a file." />
+      {grouped.length === 0 ? (
+        <EmptyState
+          title={bucket === "results" ? "No completed matches yet" : "No upcoming matches"}
+          description={
+            bucket === "results"
+              ? "Matches move here automatically once their final score is saved."
+              : "Generate the fixture list from your teams and format, or import one from a file."
+          }
+        />
       ) : (
         <div className="space-y-6">
           {grouped.map(([round, list]) => (
@@ -137,9 +154,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                       <span className="w-10 shrink-0 text-xs text-muted-foreground">M{m.match_no ?? "—"}</span>
                       <div className="flex min-w-0 flex-1 items-center gap-3">
                         <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="flex-1" />
-                        <span className="font-display text-sm font-bold tabular-nums">
-                          {m.score_a ?? "–"} : {m.score_b ?? "–"}
-                        </span>
+                        <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
                         <TeamChip name={b.name} logoUrl={b.logo_url} color={b.jersey_color} className="flex-1 justify-end text-right" />
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
@@ -284,11 +299,15 @@ function MatchDialog({
           onClick={() =>
             onSave({
               id: draft.id,
+              status:
+                draft.score_a != null && draft.score_b != null && draft.status === "scheduled"
+                  ? "completed"
+                  : draft.status,
               match_no: draft.match_no,
               placeholder_a: draft.placeholder_a, placeholder_b: draft.placeholder_b,
               team_a_id: draft.team_a_id, team_b_id: draft.team_b_id,
               score_a: draft.score_a, score_b: draft.score_b,
-              scheduled_at: draft.scheduled_at, status: draft.status,
+              scheduled_at: draft.scheduled_at,
               venue: draft.venue, court: draft.court, referee: draft.referee, notes: draft.notes,
               tournament_id: draft.tournament_id, stage: draft.stage, round_index: draft.round_index,
             })
