@@ -36,7 +36,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 export function StatusPill({ status }: { status: string }) {
   return (
-    <Badge variant="outline" className={cn("capitalize", STATUS_STYLES[status] ?? STATUS_STYLES.draft)}>
+    <Badge variant="outline" className={cn("capitalize", STATUS_STYLES[status] ?? STATUS_STYLES["draft"])}>
       {status === "completed" ? "Final" : status}
     </Badge>
   );
