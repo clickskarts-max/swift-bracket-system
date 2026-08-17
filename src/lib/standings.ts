@@ -8,7 +8,13 @@ export type StandingsMatch = {
   group_label?: string | null;
 };
 
-export type StandingsTeam = { id: string; name: string; logo_url?: string | null; group_label?: string | null };
+export type StandingsTeam = {
+  id: string;
+  name: string;
+  logo_url?: string | null;
+  jersey_color?: string | null;
+  group_label?: string | null;
+};
 
 export type StandingRow = {
   rank: number;
