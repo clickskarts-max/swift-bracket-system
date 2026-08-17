@@ -105,12 +105,3 @@ export function ScoreLine({
   );
 }
 
-function Unused({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs uppercase tracking-wide text-muted-foreground">{label}</Label>
-      {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
-  );
-}
