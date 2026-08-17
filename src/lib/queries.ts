@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import type { Tables } from "@/integrations/supabase/types";
 
 export type Tournament = Tables<"tournaments">;
 export type Team = Tables<"teams">;
@@ -85,18 +85,17 @@ export const useOrganization = () =>
 
 type TableName = "tournaments" | "teams" | "players" | "matches" | "sponsors" | "organizations";
 
-export function useUpsert<T extends TableName>(table: T, invalidate: unknown[][]) {
+export function useUpsert(table: TableName, invalidate: unknown[][]) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (values: TablesInsert<T> | (TablesUpdate<T> & { id: string })) => {
+    mutationFn: async (values: Record<string, unknown> & { id?: string }) => {
       const { data: userData } = await supabase.auth.getUser();
       const owner_id = userData.user?.id;
       if (!owner_id) throw new Error("You need to be signed in");
-      const payload = { ...(values as Record<string, unknown>), owner_id };
-      const query =
-        "id" in values && values.id
-          ? supabase.from(table).update(payload as never).eq("id", values.id as string).select().maybeSingle()
-          : supabase.from(table).insert(payload as never).select().maybeSingle();
+      const payload = { ...values, owner_id } as never;
+      const query = values.id
+        ? supabase.from(table).update(payload).eq("id", values.id).select().maybeSingle()
+        : supabase.from(table).insert(payload).select().maybeSingle();
       return unwrap(await query);
     },
     onSuccess: () => invalidate.forEach((key) => qc.invalidateQueries({ queryKey: key })),

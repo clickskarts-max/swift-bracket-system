@@ -67,7 +67,7 @@ function SettingsPage() {
 
   const submit = () => {
     const parsed = schema.safeParse(draft);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Check the form");
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
     save.mutate(draft, { onSuccess: () => toast.success("Settings saved"), onError: (e) => toast.error(e.message) });
   };
 

@@ -22,7 +22,7 @@ export function ImportTab({ tournament }: { tournament: Tournament }) {
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) return toast.error("File is larger than 15 MB");
+    if (file.size > 15 * 1024 * 1024) { toast.error("File is larger than 15 MB"); return; }
     setParsing(true);
     try {
       const text = await extractTextFromFile(file);

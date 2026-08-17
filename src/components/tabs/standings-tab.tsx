@@ -40,7 +40,7 @@ export function StandingsTable({ teams, matches, groupLabel }: { teams: Team[]; 
           {rows.map((r) => (
             <TableRow key={r.team.id}>
               <TableCell className="font-display font-bold text-primary">{r.rank}</TableCell>
-              <TableCell><TeamChip name={r.team.name} logoUrl={r.team.logo_url} /></TableCell>
+              <TableCell><TeamChip name={r.team.name} logoUrl={r.team.logo_url ?? null} /></TableCell>
               <TableCell className="text-center tabular-nums">{r.played}</TableCell>
               <TableCell className="text-center tabular-nums">{r.wins}</TableCell>
               <TableCell className="text-center tabular-nums">{r.losses}</TableCell>

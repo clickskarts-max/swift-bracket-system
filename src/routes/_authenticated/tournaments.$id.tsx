@@ -53,7 +53,7 @@ function TournamentDetail() {
     <div>
       <PageHeader
         title={tournament.name}
-        description={TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label}
+        description={TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label ?? ""}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={tournament.status} />

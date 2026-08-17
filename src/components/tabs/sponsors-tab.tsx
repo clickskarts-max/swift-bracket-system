@@ -38,7 +38,7 @@ export function SponsorsTab({ tournamentId }: { tournamentId: string }) {
 
   const submit = () => {
     const parsed = schema.safeParse(draft);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Check the form");
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
     save.mutate(
       { ...draft, tournament_id: tournamentId },
       { onSuccess: () => { toast.success("Sponsor saved"); setOpen(false); setDraft(blank()); }, onError: (e) => toast.error(e.message) },

@@ -51,7 +51,7 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
 
   const submit = () => {
     const parsed = schema.safeParse(draft);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Check the form");
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
     save.mutate(
       { ...draft, tournament_id: tournamentId, group_label: draft.group_label?.toUpperCase() ?? null },
       {

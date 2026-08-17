@@ -36,7 +36,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   };
 
   const regenerate = async () => {
-    if (teams.length < 2) return toast.error("Add at least two teams first");
+    if (teams.length < 2) { toast.error("Add at least two teams first"); return; }
     setBusy(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
