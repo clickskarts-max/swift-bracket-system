@@ -417,7 +417,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      tournament_is_public: { Args: { _tid: string }; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
