@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { BrandWordmark } from "@/components/brand";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
@@ -45,6 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           <nav className="hidden items-center gap-1 md:flex">{links()}</nav>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button variant="ghost" size="sm" className="hidden md:inline-flex" onClick={signOut}>
               <LogOut className="mr-1.5 h-4 w-4" /> Sign out
             </Button>

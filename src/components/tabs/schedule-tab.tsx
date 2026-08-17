@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, List, Pencil, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeftRight, CalendarDays, List, Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,23 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [busy, setBusy] = useState(false);
 
   const teamById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
+
+  const swapSides = (m: Match) => {
+    save.mutate(
+      {
+        id: m.id,
+        tournament_id: m.tournament_id,
+        team_a_id: m.team_b_id,
+        team_b_id: m.team_a_id,
+        placeholder_a: m.placeholder_b,
+        placeholder_b: m.placeholder_a,
+        score_a: m.score_b,
+        score_b: m.score_a,
+      },
+      { onSuccess: () => toast.success("Home and away switched"), onError: (e) => toast.error(e.message) },
+    );
+  };
+
   const label = (m: Match, side: "a" | "b") => {
     const id = side === "a" ? m.team_a_id : m.team_b_id;
     const team = id ? teamById.get(id) : undefined;
@@ -128,6 +145,9 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                       <div className="flex shrink-0 items-center gap-2">
                         <span className="hidden text-xs text-muted-foreground sm:inline">{formatDateTime(m.scheduled_at)}</span>
                         <StatusPill status={m.status} />
+                        <Button size="icon" variant="ghost" aria-label="Switch home and away" onClick={() => swapSides(m)}>
+                          <ArrowLeftRight className="h-3.5 w-3.5" />
+                        </Button>
                         <Button size="icon" variant="ghost" aria-label="Edit match" onClick={() => setEditing(m)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -183,6 +203,38 @@ function MatchDialog({
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Match {draft.match_no ?? ""} · {draft.round_name}</DialogTitle></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Match number">
+            <Input
+              type="number"
+              min={1}
+              value={draft.match_no ?? ""}
+              onChange={(e) => set("match_no", e.target.value ? Number(e.target.value) : null)}
+            />
+          </Field>
+          <Field label="Home / away">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() =>
+                setDraft((d) =>
+                  d
+                    ? {
+                        ...d,
+                        team_a_id: d.team_b_id,
+                        team_b_id: d.team_a_id,
+                        placeholder_a: d.placeholder_b,
+                        placeholder_b: d.placeholder_a,
+                        score_a: d.score_b,
+                        score_b: d.score_a,
+                      }
+                    : d,
+                )
+              }
+            >
+              <ArrowLeftRight className="mr-1.5 h-3.5 w-3.5" /> Switch sides
+            </Button>
+          </Field>
           <Field label="Home team">
             <Select value={draft.team_a_id ?? "none"} onValueChange={(v) => set("team_a_id", v === "none" ? null : v)}>
               <SelectTrigger><SelectValue placeholder={draft.placeholder_a ?? "TBD"} /></SelectTrigger>
@@ -232,6 +284,8 @@ function MatchDialog({
           onClick={() =>
             onSave({
               id: draft.id,
+              match_no: draft.match_no,
+              placeholder_a: draft.placeholder_a, placeholder_b: draft.placeholder_b,
               team_a_id: draft.team_a_id, team_b_id: draft.team_b_id,
               score_a: draft.score_a, score_b: draft.score_b,
               scheduled_at: draft.scheduled_at, status: draft.status,

@@ -74,7 +74,7 @@ export function roundRobin(teams: TeamRef[], legs = 1, startNo = 1, groupLabel: 
           mk(
             no++,
             groupLabel ? "group" : "league",
-            groupLabel ? `Group ${groupLabel} · Round ${r + 1}` : `Round Robin ${leg} · Round ${r + 1}`,
+            groupLabel ? `Group ${groupLabel} · Round ${leg} · Matchday ${r + 1}` : `Round ${leg} · Matchday ${r + 1}`,
             roundIndex,
             swap ? away : home,
             swap ? home : away,
