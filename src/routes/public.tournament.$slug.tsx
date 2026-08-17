@@ -3,7 +3,7 @@ import { CalendarDays, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { BrandWordmark } from "@/components/brand";
-import { EmptyState, StatusPill, TeamChip } from "@/components/data-bits";
+import { EmptyState, ScoreLine, StatusPill, TeamChip } from "@/components/data-bits";
 import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { formatDate, formatDateTime } from "@/lib/app";
@@ -46,6 +46,27 @@ function PublicTournament() {
     (id ? teamById.get(id) : undefined) ?? { name: fallback ?? "TBD", logo_url: null, jersey_color: null };
   const header = sponsors.filter((s) => s.placement === "public_header");
   const footer = sponsors.filter((s) => s.placement !== "public_header");
+  const upcoming = matches.filter((m) => m.status !== "completed");
+  const results = matches.filter((m) => m.status === "completed");
+
+  const MatchRow = ({ m }: { m: (typeof matches)[number] }) => {
+    const a = side(m.team_a_id, m.placeholder_a);
+    const b = side(m.team_b_id, m.placeholder_b);
+    return (
+      <div className="surface-card flex flex-wrap items-center gap-3 p-3">
+        <span className="w-24 shrink-0 text-xs text-muted-foreground">{m.round_name}</span>
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="flex-1" />
+          <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
+          <TeamChip name={b.name} logoUrl={b.logo_url} color={b.jersey_color} className="flex-1 justify-end text-right" />
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-xs text-muted-foreground">{formatDateTime(m.scheduled_at)}</span>
+          <StatusPill status={m.status} />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen">
@@ -87,7 +108,8 @@ function PublicTournament() {
         <Tabs defaultValue="fixtures">
           <div className="-mx-4 mb-4 overflow-x-auto px-4">
             <TabsList className="w-max">
-              <TabsTrigger value="fixtures">Fixtures & results</TabsTrigger>
+              <TabsTrigger value="fixtures">Fixtures</TabsTrigger>
+              <TabsTrigger value="results">Results ({results.length})</TabsTrigger>
               <TabsTrigger value="standings">Standings</TabsTrigger>
               <TabsTrigger value="bracket">Bracket</TabsTrigger>
               <TabsTrigger value="teams">Teams</TabsTrigger>
@@ -95,28 +117,21 @@ function PublicTournament() {
           </div>
 
           <TabsContent value="fixtures">
-            {matches.length === 0 ? (
+            {upcoming.length === 0 ? (
               <EmptyState title="Fixtures coming soon" description="The schedule has not been published yet." />
             ) : (
               <div className="space-y-2">
-                {matches.map((m) => {
-                  const a = side(m.team_a_id, m.placeholder_a);
-                  const b = side(m.team_b_id, m.placeholder_b);
-                  return (
-                    <div key={m.id} className="surface-card flex flex-wrap items-center gap-3 p-3">
-                      <span className="w-24 shrink-0 text-xs text-muted-foreground">{m.round_name}</span>
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="flex-1" />
-                        <span className="font-display text-sm font-bold tabular-nums">{m.score_a ?? "–"} : {m.score_b ?? "–"}</span>
-                        <TeamChip name={b.name} logoUrl={b.logo_url} color={b.jersey_color} className="flex-1 justify-end text-right" />
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{formatDateTime(m.scheduled_at)}</span>
-                        <StatusPill status={m.status} />
-                      </div>
-                    </div>
-                  );
-                })}
+                {upcoming.map((m) => <MatchRow key={m.id} m={m} />)}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="results">
+            {results.length === 0 ? (
+              <EmptyState title="No results yet" description="Completed matches will appear here with final scores." />
+            ) : (
+              <div className="space-y-2">
+                {results.map((m) => <MatchRow key={m.id} m={m} />)}
               </div>
             )}
           </TabsContent>
