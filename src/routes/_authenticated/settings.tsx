@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/app-shell";
 import { Field } from "@/components/data-bits";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useOrganization, useUpsert } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -39,7 +40,8 @@ type Draft = {
 };
 
 function SettingsPage() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: org } = useOrganization();
   const save = useUpsert("organizations", [["organization"]]);
   const [draft, setDraft] = useState<Draft>({
@@ -90,7 +92,7 @@ function SettingsPage() {
           <p className="text-sm font-medium">Signed in as</p>
           <p className="text-sm text-muted-foreground">{user?.email}</p>
         </div>
-        <Button variant="outline" onClick={() => signOut()}>Sign out</Button>
+        <Button variant="outline" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}>Sign out</Button>
       </div>
     </div>
   );
