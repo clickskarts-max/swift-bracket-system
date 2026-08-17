@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Field, EmptyState, TeamChip } from "@/components/data-bits";
+import { ImageUpload } from "@/components/image-upload";
 import { useTeams, usePlayers, useUpsert, useRemove, type Team } from "@/lib/queries";
 
 const schema = z.object({
@@ -100,7 +101,9 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
               <Field label="Jersey color">
                 <Input type="color" value={draft.jersey_color} onChange={(e) => set("jersey_color", e.target.value)} className="h-10 p-1" />
               </Field>
-              <Field label="Logo URL"><Input value={draft.logo_url ?? ""} onChange={(e) => set("logo_url", e.target.value || null)} /></Field>
+              <Field label="Team logo" hint="PNG or JPG, up to 5 MB">
+                <ImageUpload value={draft.logo_url} onChange={(url) => set("logo_url", url)} folder="team-logos" rounded="rounded-full" />
+              </Field>
               <Field label="Coach"><Input value={draft.coach_name ?? ""} onChange={(e) => set("coach_name", e.target.value || null)} /></Field>
               <Field label="Manager"><Input value={draft.manager_name ?? ""} onChange={(e) => set("manager_name", e.target.value || null)} /></Field>
               <Field label="Contact"><Input value={draft.contact ?? ""} onChange={(e) => set("contact", e.target.value || null)} /></Field>
