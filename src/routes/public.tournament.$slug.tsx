@@ -11,7 +11,12 @@ import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
-import { useMatches, useSponsors, useTeams, useTournamentBySlug } from "@/lib/queries";
+import {
+  useMatches,
+  usePublicSponsors,
+  usePublicTeams,
+  useTournamentBySlug,
+} from "@/lib/queries";
 
 export const Route = createFileRoute("/public/tournament/$slug")({
   head: ({ params }) => {
@@ -39,9 +44,9 @@ const dayKeyFromIso = (iso: string) => {
 function PublicTournament() {
   const { slug } = Route.useParams();
   const { data: tournament, isLoading } = useTournamentBySlug(slug);
-  const { data: teams = [] } = useTeams(tournament?.id ?? "");
+  const { data: teams = [] } = usePublicTeams(tournament?.id ?? "");
   const { data: matches = [] } = useMatches(tournament?.id ?? "");
-  const { data: sponsors = [] } = useSponsors(tournament?.id ?? "");
+  const { data: sponsors = [] } = usePublicSponsors(tournament?.id ?? "");
 
   const matchdayByDate = useMemo(() => {
     const keys = [
@@ -117,7 +122,13 @@ function PublicTournament() {
           {m.round_name}
         </p>
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
-          <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="min-w-0" />
+          <TeamChip
+            name={a.name}
+            logoUrl={a.logo_url}
+            color={a.jersey_color}
+            size="lg"
+            className="min-w-0"
+          />
           <div className="flex flex-col items-center gap-1.5">
             <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
             <span className="text-center text-xs text-muted-foreground">
@@ -133,6 +144,7 @@ function PublicTournament() {
             name={b.name}
             logoUrl={b.logo_url}
             color={b.jersey_color}
+            size="lg"
             className="min-w-0 flex-row-reverse justify-start text-right"
           />
         </div>
@@ -281,10 +293,9 @@ function PublicTournament() {
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {teams.map((t) => (
                   <div key={t.id} className="surface-card p-4">
-                    <TeamChip name={t.name} logoUrl={t.logo_url} color={t.jersey_color} />
+                    <TeamChip name={t.name} logoUrl={t.logo_url} color={t.jersey_color} size="lg" />
                     <div className="mt-2 space-y-0.5 text-xs text-muted-foreground">
                       {t.group_label && <p>Group {t.group_label}</p>}
-                      {t.coach_name && <p>Coach: {t.coach_name}</p>}
                     </div>
                   </div>
                 ))}

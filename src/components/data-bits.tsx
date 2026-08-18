@@ -73,29 +73,36 @@ export function TeamChip({
   logoUrl,
   color,
   className,
+  size = "md",
 }: {
   name: string;
   logoUrl?: string | null;
   color?: string | null;
   className?: string;
+  size?: "md" | "lg";
 }) {
+  const box = size === "lg" ? "h-12 w-12" : "h-8 w-8";
+  const text = size === "lg" ? "text-base sm:text-lg" : "text-sm";
   return (
-    <span className={cn("flex min-w-0 items-center gap-2", className)}>
+    <span className={cn("flex min-w-0 items-center gap-3 px-1 sm:px-2", className)}>
       {logoUrl ? (
         <img
           src={logoUrl}
           alt=""
-          className="h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-border"
+          className={cn("shrink-0 rounded-full object-cover ring-1 ring-border", box)}
         />
       ) : (
         <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-background"
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full text-xs font-bold text-background",
+            box,
+          )}
           style={{ backgroundColor: color || "var(--primary)" }}
         >
           {name.slice(0, 2).toUpperCase()}
         </span>
       )}
-      <span className="truncate text-sm font-medium">{name}</span>
+      <span className={cn("truncate font-semibold", text)}>{name}</span>
     </span>
   );
 }
