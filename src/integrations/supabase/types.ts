@@ -95,21 +95,7 @@ export type Database = {
             foreignKeyName: "matches_team_a_id_fkey"
             columns: ["team_a_id"]
             isOneToOne: false
-            referencedRelation: "public_teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_team_a_id_fkey"
-            columns: ["team_a_id"]
-            isOneToOne: false
             referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_team_b_id_fkey"
-            columns: ["team_b_id"]
-            isOneToOne: false
-            referencedRelation: "public_teams"
             referencedColumns: ["id"]
           },
           {
@@ -220,13 +206,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "players_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "public_teams"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "players_team_id_fkey"
             columns: ["team_id"]
@@ -435,84 +414,7 @@ export type Database = {
       }
     }
     Views: {
-      public_players: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          jersey_number: number | null
-          name: string | null
-          photo_url: string | null
-          position: string | null
-          stats: Json | null
-          team_id: string | null
-          tournament_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "players_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "public_teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "players_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "players_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      public_sponsors: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          logo_url: string | null
-          name: string | null
-          placement: string | null
-          tier: string | null
-          tournament_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sponsors_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      public_teams: {
-        Row: {
-          created_at: string | null
-          group_label: string | null
-          id: string | null
-          jersey_color: string | null
-          logo_url: string | null
-          name: string | null
-          seed: number | null
-          short_name: string | null
-          tournament_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "teams_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
