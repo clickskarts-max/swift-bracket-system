@@ -84,6 +84,7 @@ export type Database = {
           match_no: number | null
           notes: string | null
           owner_id: string
+          periods: Json
           placeholder_a: string | null
           placeholder_b: string | null
           referee: string | null
@@ -109,6 +110,7 @@ export type Database = {
           match_no?: number | null
           notes?: string | null
           owner_id: string
+          periods?: Json
           placeholder_a?: string | null
           placeholder_b?: string | null
           referee?: string | null
@@ -134,6 +136,7 @@ export type Database = {
           match_no?: number | null
           notes?: string | null
           owner_id?: string
+          periods?: Json
           placeholder_a?: string | null
           placeholder_b?: string | null
           referee?: string | null
