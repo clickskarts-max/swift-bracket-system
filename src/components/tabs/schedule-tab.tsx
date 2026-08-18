@@ -71,6 +71,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const qc = useQueryClient();
   const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
   const [editing, setEditing] = useState<Match | null>(null);
+  const [mode, setMode] = useState<"game" | "score">("game");
   const [busy, setBusy] = useState(false);
 
   const teamById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
@@ -350,9 +351,22 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                           size="icon"
                           variant="ghost"
                           aria-label="Edit match"
-                          onClick={() => setEditing(m)}
+                          onClick={() => {
+                            setMode("game");
+                            setEditing(m);
+                          }}
                         >
                           <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setMode("score");
+                            setEditing(m);
+                          }}
+                        >
+                          Score
                         </Button>
                       </div>
                     </div>
@@ -366,6 +380,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
       <MatchDialog
         match={editing}
+        mode={mode}
         teams={teams.map((t) => ({ id: t.id, name: t.name }))}
         players={players.map((p) => ({
           id: p.id,
@@ -391,6 +406,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
 function MatchDialog({
   match,
+  mode,
   teams,
   players,
   onClose,
@@ -398,6 +414,7 @@ function MatchDialog({
   pending,
 }: {
   match: Match | null;
+  mode: "game" | "score";
   teams: { id: string; name: string }[];
   players: { id: string; name: string; team_id: string | null; jersey_number: number | null }[];
   onClose: () => void;
