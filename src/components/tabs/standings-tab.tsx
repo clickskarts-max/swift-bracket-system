@@ -4,7 +4,9 @@ import { EmptyState, TeamChip } from "@/components/data-bits";
 import { computeStandings } from "@/lib/standings";
 import type { Match, Team } from "@/lib/queries";
 
-export function StandingsTable({ teams, matches, groupLabel }: { teams: Team[]; matches: Match[]; groupLabel?: string | null }) {
+type TeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color" | "group_label">;
+
+export function StandingsTable({ teams, matches, groupLabel }: { teams: TeamLike[]; matches: Match[]; groupLabel?: string | null }) {
   const rows = useMemo(
     () =>
       computeStandings(
@@ -58,7 +60,7 @@ export function StandingsTable({ teams, matches, groupLabel }: { teams: Team[]; 
   );
 }
 
-export function StandingsTab({ teams, matches }: { teams: Team[]; matches: Match[] }) {
+export function StandingsTab({ teams, matches }: { teams: TeamLike[]; matches: Match[] }) {
   const groups = [...new Set(teams.map((t) => t.group_label).filter(Boolean))] as string[];
   if (groups.length > 1) {
     return (

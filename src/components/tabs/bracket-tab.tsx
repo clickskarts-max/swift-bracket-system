@@ -4,7 +4,7 @@ import type { Match, Team } from "@/lib/queries";
 
 const KNOCKOUT_STAGES = new Set(["knockout", "playoff", "final", "losers", "winners"]);
 
-export function BracketTab({ teams, matches }: { teams: Team[]; matches: Match[] }) {
+export function BracketTab({ teams, matches }: { teams: Pick<Team, "id" | "name">[]; matches: Match[] }) {
   const rounds = useMemo(() => {
     const ko = matches.filter((m) => KNOCKOUT_STAGES.has(m.stage));
     const map = new Map<number, Match[]>();

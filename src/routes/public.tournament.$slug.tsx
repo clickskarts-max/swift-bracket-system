@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +10,7 @@ import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { formatDate, formatDateTime } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
-import { useMatches, useSponsors, useTeams, useTournamentBySlug } from "@/lib/queries";
+import { getPublicTournamentData } from "@/lib/public-data.functions";
 
 export const Route = createFileRoute("/public/tournament/$slug")({
   head: ({ params }) => {
@@ -28,10 +30,15 @@ export const Route = createFileRoute("/public/tournament/$slug")({
 
 function PublicTournament() {
   const { slug } = Route.useParams();
-  const { data: tournament, isLoading } = useTournamentBySlug(slug);
-  const { data: teams = [] } = useTeams(tournament?.id ?? "");
-  const { data: matches = [] } = useMatches(tournament?.id ?? "");
-  const { data: sponsors = [] } = useSponsors(tournament?.id ?? "");
+  const fetchPublic = useServerFn(getPublicTournamentData);
+  const { data, isLoading } = useQuery({
+    queryKey: ["public-tournament", slug],
+    queryFn: () => fetchPublic({ data: { slug } }),
+  });
+  const tournament = data?.tournament ?? null;
+  const teams = data?.teams ?? [];
+  const matches = data?.matches ?? [];
+  const sponsors = data?.sponsors ?? [];
 
   if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading tournament…</p>;
   if (!tournament || !tournament.is_public)
@@ -148,7 +155,6 @@ function PublicTournament() {
                     <TeamChip name={t.name} logoUrl={t.logo_url} color={t.jersey_color} />
                     <div className="mt-2 space-y-0.5 text-xs text-muted-foreground">
                       {t.group_label && <p>Group {t.group_label}</p>}
-                      {t.coach_name && <p>Coach: {t.coach_name}</p>}
                     </div>
                   </div>
                 ))}
