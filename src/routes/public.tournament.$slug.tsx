@@ -42,6 +42,11 @@ function PublicTournament() {
   const { data: matches = [] } = useMatches(tournament?.id ?? "");
   const { data: sponsors = [] } = useSponsors(tournament?.id ?? "");
 
+  const matchdayByDate = useMemo(() => {
+    const keys = [...new Set(matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)))].sort();
+    return new Map(keys.map((k, i) => [k, i + 1]));
+  }, [matches]);
+
   if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading tournament…</p>;
   if (!tournament || !tournament.is_public)
     return (
@@ -57,11 +62,6 @@ function PublicTournament() {
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = matches.filter((m) => m.status !== "completed");
   const results = matches.filter((m) => m.status === "completed");
-
-  const matchdayByDate = useMemo(() => {
-    const keys = [...new Set(matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)))].sort();
-    return new Map(keys.map((k, i) => [k, i + 1]));
-  }, [matches]);
 
   const matchdayLabel = (m: (typeof matches)[number]) => {
     if (!m.scheduled_at) return "Unscheduled";
