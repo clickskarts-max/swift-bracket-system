@@ -386,10 +386,34 @@ function MatchDialog({
   pending: boolean;
 }) {
   const [draft, setDraft] = useState<Match | null>(match);
-  if (match && draft?.id !== match.id) setDraft(match);
+  const [periods, setPeriods] = useState<PeriodScores>(() =>
+    parsePeriods((match as { periods?: unknown } | null)?.periods),
+  );
+  if (match && draft?.id !== match.id) {
+    setDraft(match);
+    setPeriods(parsePeriods((match as { periods?: unknown }).periods));
+  }
   if (!draft) return null;
   const set = <K extends keyof Match>(k: K, v: Match[K]) =>
     setDraft((d) => (d ? { ...d, [k]: v } : d));
+
+  const usePeriods = hasPeriodScores(periods);
+  const totalA = periodTotal(periods.a);
+  const totalB = periodTotal(periods.b);
+  const scoreA = usePeriods ? totalA : draft.score_a;
+  const scoreB = usePeriods ? totalB : draft.score_b;
+  const setCell = (side: "a" | "b", index: number, raw: string) =>
+    setPeriods((p) => {
+      const next = { a: [...p.a], b: [...p.b] };
+      next[side][index] = raw === "" ? null : Number(raw);
+      return next;
+    });
+  const addOvertime = () =>
+    setPeriods((p) => ({ a: [...p.a, null], b: [...p.b, null] }));
+  const removeOvertime = () =>
+    setPeriods((p) =>
+      p.a.length > QUARTERS ? { a: p.a.slice(0, -1), b: p.b.slice(0, -1) } : p,
+    );
 
   return (
     <Dialog open={!!match} onOpenChange={(o) => !o && onClose()}>
