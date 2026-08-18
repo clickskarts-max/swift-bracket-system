@@ -1,0 +1,1 @@
+ALTER TABLE public.matches ADD COLUMN IF NOT EXISTS periods jsonb NOT NULL DEFAULT '{}'::jsonb;
