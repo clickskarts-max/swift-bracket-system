@@ -442,6 +442,22 @@ function MatchDialog({
       p.a.length > QUARTERS ? { a: p.a.slice(0, -1), b: p.b.slice(0, -1) } : p,
     );
 
+  const rosterFor = (teamId: string | null) =>
+    teamId ? players.filter((p) => p.team_id === teamId) : [];
+  const matchRoster = [...rosterFor(draft.team_a_id), ...rosterFor(draft.team_b_id)];
+  const statFor = (playerId: string) =>
+    stats.find((s) => s.player_id === playerId) ?? emptyStatLine(playerId);
+  const setStat = (playerId: string, key: keyof PlayerStatLine, raw: string) => {
+    const value = raw === "" ? 0 : Number(raw);
+    setStats((list) => {
+      const exists = list.some((s) => s.player_id === playerId);
+      const next = exists
+        ? list.map((s) => (s.player_id === playerId ? { ...s, [key]: value } : s))
+        : [...list, { ...emptyStatLine(playerId), [key]: value }];
+      return next;
+    });
+  };
+
   return (
     <Dialog open={!!match} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
