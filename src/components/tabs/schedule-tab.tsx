@@ -32,13 +32,23 @@ import { generateSchedule } from "@/lib/formats";
 import {
   QUARTERS,
   emptyPeriods,
+  emptyStatLine,
   hasPeriodScores,
   parsePeriods,
+  parsePlayerStats,
   periodLabel,
   periodTotal,
   type PeriodScores,
+  type PlayerStatLine,
 } from "@/lib/periods";
-import { useMatches, useTeams, useUpsert, type Match, type Tournament } from "@/lib/queries";
+import {
+  useMatches,
+  usePlayers,
+  useTeams,
+  useUpsert,
+  type Match,
+  type Tournament,
+} from "@/lib/queries";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const dayKeyFromIso = (iso: string) => {
@@ -56,6 +66,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const tournamentId = tournament.id;
   const { data: matches = [] } = useMatches(tournamentId);
   const { data: teams = [] } = useTeams(tournamentId);
+  const { data: players = [] } = usePlayers(tournamentId);
   const save = useUpsert("matches", [["matches", tournamentId]]);
   const qc = useQueryClient();
   const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
@@ -356,6 +367,12 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       <MatchDialog
         match={editing}
         teams={teams.map((t) => ({ id: t.id, name: t.name }))}
+        players={players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          team_id: p.team_id,
+          jersey_number: p.jersey_number,
+        }))}
         onClose={() => setEditing(null)}
         pending={save.isPending}
         onSave={(values) =>
