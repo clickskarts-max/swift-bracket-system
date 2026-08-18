@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, ChevronDown, ChevronUp, List, Pencil, RefreshCw } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, ChevronUp, List, Pencil, Plus, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,15 @@ import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components
 import { TipoffCountdown } from "@/components/tipoff-countdown";
 import { formatDate, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
+import {
+  QUARTERS,
+  emptyPeriods,
+  hasPeriodScores,
+  parsePeriods,
+  periodLabel,
+  periodTotal,
+  type PeriodScores,
+} from "@/lib/periods";
 import { useMatches, useTeams, useUpsert, type Match, type Tournament } from "@/lib/queries";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
