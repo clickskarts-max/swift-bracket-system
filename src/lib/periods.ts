@@ -31,3 +31,35 @@ export const periodTotal = (cells: (number | null)[]) =>
 
 export const periodLabel = (index: number) =>
   index < QUARTERS ? `Q${index + 1}` : `OT${index - QUARTERS + 1}`;
+
+export type PlayerStatLine = {
+  player_id: string;
+  points: number;
+  rebounds: number;
+  assists: number;
+  fouls: number;
+};
+
+export const emptyStatLine = (playerId: string): PlayerStatLine => ({
+  player_id: playerId,
+  points: 0,
+  rebounds: 0,
+  assists: 0,
+  fouls: 0,
+});
+
+const toNum = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+export function parsePlayerStats(raw: unknown): PlayerStatLine[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
+    .filter((r) => typeof r['player_id'] === "string")
+    .map((r) => ({
+      player_id: r['player_id'] as string,
+      points: toNum(r['points']),
+      rebounds: toNum(r['rebounds']),
+      assists: toNum(r['assists']),
+      fouls: toNum(r['fouls']),
+    }));
+}

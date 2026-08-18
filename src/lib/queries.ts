@@ -181,3 +181,24 @@ export function useRemove(table: TableName, invalidate: unknown[][]) {
     onSuccess: () => invalidate.forEach((key) => qc.invalidateQueries({ queryKey: key })),
   });
 }
+
+const PUBLIC_PLAYER_COLS = "id,tournament_id,team_id,name,photo_url,jersey_number,position,stats";
+
+export type PublicPlayer = Pick<
+  Player,
+  "id" | "tournament_id" | "team_id" | "name" | "photo_url" | "jersey_number" | "position"
+>;
+
+export const usePublicPlayers = (tournamentId: string) =>
+  useQuery({
+    queryKey: ["public-players", tournamentId],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("players")
+          .select(PUBLIC_PLAYER_COLS)
+          .eq("tournament_id", tournamentId)
+          .order("name"),
+      ) as unknown as PublicPlayer[],
+    enabled: !!tournamentId,
+  });
