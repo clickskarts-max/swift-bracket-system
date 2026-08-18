@@ -561,13 +561,80 @@ function MatchDialog({
             />
           </Field>
         </div>
+
+        <div className="mt-4 rounded-xl border border-border/60 p-3">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Score by quarter
+            </p>
+            <div className="flex items-center gap-1.5">
+              {periods.a.length > QUARTERS && (
+                <Button type="button" variant="ghost" size="sm" onClick={removeOvertime}>
+                  <X className="mr-1 h-3.5 w-3.5" /> Remove OT
+                </Button>
+              )}
+              <Button type="button" variant="outline" size="sm" onClick={addOvertime}>
+                <Plus className="mr-1 h-3.5 w-3.5" /> Add OT
+              </Button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[420px] text-sm">
+              <thead>
+                <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <th className="p-1 text-left font-medium">Team</th>
+                  {periods.a.map((_, i) => (
+                    <th key={i} className="p-1 text-center font-medium">
+                      {periodLabel(i)}
+                    </th>
+                  ))}
+                  <th className="p-1 text-center font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(["a", "b"] as const).map((side) => (
+                  <tr key={side}>
+                    <td className="max-w-[9rem] truncate p-1 text-xs">
+                      {side === "a"
+                        ? (teams.find((t) => t.id === draft.team_a_id)?.name ??
+                          draft.placeholder_a ??
+                          "Home")
+                        : (teams.find((t) => t.id === draft.team_b_id)?.name ??
+                          draft.placeholder_b ??
+                          "Away")}
+                    </td>
+                    {periods[side].map((v, i) => (
+                      <td key={i} className="p-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          className="h-9 w-16 text-center"
+                          value={v ?? ""}
+                          onChange={(e) => setCell(side, i, e.target.value)}
+                        />
+                      </td>
+                    ))}
+                    <td className="p-1 text-center font-display font-bold">
+                      {side === "a" ? totalA : totalB}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Entering quarter scores auto-updates the total score. Leave blank to enter totals
+            manually.
+          </p>
+        </div>
+
         <Button
           disabled={pending}
           onClick={() =>
             onSave({
               id: draft.id,
               status:
-                draft.score_a != null && draft.score_b != null && draft.status === "scheduled"
+                scoreA != null && scoreB != null && draft.status === "scheduled"
                   ? "completed"
                   : draft.status,
               match_no: draft.match_no,
@@ -575,8 +642,9 @@ function MatchDialog({
               placeholder_b: draft.placeholder_b,
               team_a_id: draft.team_a_id,
               team_b_id: draft.team_b_id,
-              score_a: draft.score_a,
-              score_b: draft.score_b,
+              score_a: scoreA,
+              score_b: scoreB,
+              periods: usePeriods ? periods : emptyPeriods(),
               scheduled_at: draft.scheduled_at,
               venue: draft.venue,
               court: draft.court,
