@@ -1,6 +1,6 @@
 import NepaliDatePkg from "nepali-date-converter";
 
-export const slugify = (value: string) =>
+const slugify = (value: string) =>
   value
     .toLowerCase()
     .normalize("NFKD")
@@ -10,7 +10,8 @@ export const slugify = (value: string) =>
     .replace(/-+/g, "-")
     .slice(0, 48);
 
-export const uniqueSlug = (value: string) => `${slugify(value) || "tournament"}-${Math.random().toString(36).slice(2, 6)}`;
+export const uniqueSlug = (value: string) =>
+  `${slugify(value) || "tournament"}-${Math.random().toString(36).slice(2, 6)}`;
 
 export const STATUSES = [
   { value: "draft", label: "Draft" },
@@ -35,7 +36,10 @@ export const SPONSOR_TIERS = ["title", "platinum", "gold", "silver", "bronze", "
 export const mapsUrl = (venue?: string | null) =>
   venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}` : null;
 
-const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ?? NepaliDatePkg) as any;
+type NepaliDateLike = { getYear(): number; getMonth(): number; getDate(): number };
+type NepaliDateCtor = { fromAD(date: Date): NepaliDateLike };
+const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ??
+  NepaliDatePkg) as NepaliDateCtor;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const bsFromAd = (d: Date) => {
   const bs = NepaliDate.fromAD(d);
@@ -48,16 +52,6 @@ export const formatDate = (value?: string | null) => {
   const bs = bsFromAd(d);
   return `${bs}`;
 };
-
-export const formatDateTime = (value?: string | null) => {
-  if (!value) return "TBD";
-  const d = new Date(value);
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  const bs = bsFromAd(d);
-  return `${bs}\n\t${time}`;
-};
-
-export const formatDateRange = (start?: string | null, end?: string | null) => `${formatDate(start)}\n—\n${formatDate(end)}`;
 
 export const formatDateRangeInline = (start?: string | null, end?: string | null) =>
   `${formatDate(start)} – ${formatDate(end)}`;
@@ -74,13 +68,6 @@ export const formatCountdownMs = (ms: number) => {
   if (days > 0) return `in ${days}d ${hours}h ${mins}m ${secs}s`;
   if (hours > 0) return `in ${hours}h ${mins}m ${secs}s`;
   return `in ${mins}m ${secs}s`;
-};
-
-export const formatTipoffCountdown = (value?: string | null) => {
-  if (!value) return "TBD";
-  const d = new Date(value);
-  const bs = bsFromAd(d);
-  return `${bs} · ${formatCountdownMs(d.getTime() - Date.now())}`;
 };
 
 export const toLocalInput = (value?: string | null) => {

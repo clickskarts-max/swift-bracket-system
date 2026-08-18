@@ -11,7 +11,12 @@ export type MatchDraft = {
   placeholder_b: string | null;
 };
 
-export type TeamRef = { id: string; name: string; group_label?: string | null; seed?: number | null };
+export type TeamRef = {
+  id: string;
+  name: string;
+  group_label?: string | null;
+  seed?: number | null;
+};
 
 export const TOURNAMENT_FORMATS = [
   { value: "single_elimination", label: "Single elimination" },
@@ -52,7 +57,12 @@ const mk = (
 });
 
 /** Circle-method round robin. legs >= 1; even legs mirror home/away. */
-export function roundRobin(teams: TeamRef[], legs = 1, startNo = 1, groupLabel: string | null = null): MatchDraft[] {
+export function roundRobin(
+  teams: TeamRef[],
+  legs = 1,
+  startNo = 1,
+  groupLabel: string | null = null,
+): MatchDraft[] {
   const list = [...teams];
   if (list.length < 2) return [];
   const bye = list.length % 2 === 1;
@@ -74,7 +84,9 @@ export function roundRobin(teams: TeamRef[], legs = 1, startNo = 1, groupLabel: 
           mk(
             no++,
             groupLabel ? "group" : "league",
-            groupLabel ? `Group ${groupLabel} · Round ${leg} · Matchday ${r + 1}` : `Round ${leg} · Matchday ${r + 1}`,
+            groupLabel
+              ? `Group ${groupLabel} · Round ${leg} · Matchday ${r + 1}`
+              : `Round ${leg} · Matchday ${r + 1}`,
             roundIndex,
             swap ? away : home,
             swap ? home : away,
@@ -158,7 +170,9 @@ export function doubleElimination(teams: TeamRef[], startNo = 1): MatchDraft[] {
   }
   const grandFinalOpponent = carry[0] ?? "Losers Bracket Winner";
   const wbFinal = winners[winners.length - 1]!;
-  out.push(mk(no++, "final", "Grand Final", 200, `Winner M${wbFinal.match_no}`, grandFinalOpponent));
+  out.push(
+    mk(no++, "final", "Grand Final", 200, `Winner M${wbFinal.match_no}`, grandFinalOpponent),
+  );
   return out;
 }
 
@@ -286,7 +300,12 @@ export type GenerateOptions = {
   teams: TeamRef[];
 };
 
-export function generateSchedule({ format, legs, playoffFormat, teams }: GenerateOptions): MatchDraft[] {
+export function generateSchedule({
+  format,
+  legs,
+  playoffFormat,
+  teams,
+}: GenerateOptions): MatchDraft[] {
   if (format === "single_elimination") return singleElimination(teams);
   if (format === "double_elimination") return doubleElimination(teams);
   if (format === "group_knockout") {

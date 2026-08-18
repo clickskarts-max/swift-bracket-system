@@ -88,7 +88,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Ecluid Basketball — Tournament Management" },
       {
         property: "og:description",
-        content: "Fixtures, standings, brackets and public tournament pages for basketball organizers.",
+        content:
+          "Fixtures, standings, brackets and public tournament pages for basketball organizers.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

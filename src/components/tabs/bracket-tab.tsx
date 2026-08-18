@@ -12,10 +12,16 @@ export function BracketTab({ teams, matches }: { teams: Team[]; matches: Match[]
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
   }, [matches]);
 
-  const name = (id: string | null, fallback: string | null) => teams.find((t) => t.id === id)?.name ?? fallback ?? "TBD";
+  const name = (id: string | null, fallback: string | null) =>
+    teams.find((t) => t.id === id)?.name ?? fallback ?? "TBD";
 
   if (rounds.length === 0)
-    return <EmptyState title="No bracket yet" description="Generate a schedule with a knockout or playoff stage to see the bracket." />;
+    return (
+      <EmptyState
+        title="No bracket yet"
+        description="Generate a schedule with a knockout or playoff stage to see the bracket."
+      />
+    );
 
   return (
     <div className="overflow-x-auto pb-2">
@@ -30,11 +36,15 @@ export function BracketTab({ teams, matches }: { teams: Team[]; matches: Match[]
               const bWin = m.score_a != null && m.score_b != null && m.score_b > m.score_a;
               return (
                 <div key={m.id} className="surface-card animate-rise divide-y divide-border p-0">
-                  <div className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}>
+                  <div
+                    className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}
+                  >
                     <span className="truncate">{name(m.team_a_id, m.placeholder_a)}</span>
                     <span className="tabular-nums">{m.score_a ?? "–"}</span>
                   </div>
-                  <div className={`flex items-center justify-between px-3 py-2 text-sm ${bWin ? "font-semibold text-primary" : ""}`}>
+                  <div
+                    className={`flex items-center justify-between px-3 py-2 text-sm ${bWin ? "font-semibold text-primary" : ""}`}
+                  >
                     <span className="truncate">{name(m.team_b_id, m.placeholder_b)}</span>
                     <span className="tabular-nums">{m.score_b ?? "–"}</span>
                   </div>

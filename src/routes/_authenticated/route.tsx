@@ -5,9 +5,9 @@ import { ActivationGate } from "@/components/activation-gate";
 import { getAppAccess, hasAccess, OWNER_EMAIL, type AppAccess } from "@/lib/activation";
 
 const emptyProfile: AppAccess = {
-  email: '',
-  role: 'user',
-  status: 'suspended',
+  email: "",
+  role: "user",
+  status: "suspended",
   activated_until: null,
 };
 
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated")({
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) throw redirect({ to: "/auth" });
 
-      const email = data.user.email?.toLowerCase() ?? '';
+      const email = data.user.email?.toLowerCase() ?? "";
       const profile = await getAppAccess(data.user.id);
 
       // Keep the configured owner usable even before the app_users row exists.
@@ -27,8 +27,8 @@ export const Route = createFileRoute("/_authenticated")({
           user: data.user,
           profile: {
             email: data.user.email ?? OWNER_EMAIL,
-            role: 'owner' as const,
-            status: 'active' as const,
+            role: "owner" as const,
+            status: "active" as const,
             activated_until: null,
           },
         };
@@ -38,8 +38,8 @@ export const Route = createFileRoute("/_authenticated")({
     } catch (error) {
       // Preserve router redirects, but prevent missing local database setup
       // from rendering the framework's generic error page.
-      if (error && typeof error === 'object' && 'isRedirect' in error) throw error;
-      console.warn('[Auth] Unable to load access profile:', error);
+      if (error && typeof error === "object" && "isRedirect" in error) throw error;
+      console.warn("[Auth] Unable to load access profile:", error);
       throw redirect({ to: "/auth" });
     }
   },
@@ -60,5 +60,9 @@ function AuthenticatedLayout() {
     );
   }
 
-  return <AppShell><Outlet /></AppShell>;
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  );
 }

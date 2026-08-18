@@ -5,16 +5,43 @@ import { z } from "zod";
 import NepaliDatePkg from "nepali-date-converter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import { Field, EmptyState } from "@/components/data-bits";
 import { ImageUpload } from "@/components/image-upload";
 import { POSITIONS } from "@/lib/app";
 import { usePlayers, useTeams, useUpsert, useRemove, type Player } from "@/lib/queries";
 
-const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ?? NepaliDatePkg) as any;
+type NepaliDateLike = {
+  getYear(): number;
+  getMonth(): number;
+  getDate(): number;
+  toJsDate(): Date;
+};
+type NepaliDateCtor = { new (value: string): NepaliDateLike; fromAD(date: Date): NepaliDateLike };
+const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ??
+  NepaliDatePkg) as NepaliDateCtor;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const toBs = (ad: Date) => {
   const bs = NepaliDate.fromAD(ad);
@@ -25,7 +52,8 @@ const calcAge = (dob: Date) => {
   const now = new Date();
   let years = now.getFullYear() - dob.getFullYear();
   const beforeBirthday =
-    now.getMonth() < dob.getMonth() || (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate());
+    now.getMonth() < dob.getMonth() ||
+    (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate());
   if (beforeBirthday) years -= 1;
   return Math.max(0, years);
 };
@@ -33,13 +61,7 @@ const calcAge = (dob: Date) => {
 const schema = z.object({ name: z.string().trim().min(1, "Player name is required").max(80) });
 
 type SocialPlatform =
-  | "instagram"
-  | "facebook"
-  | "tiktok"
-  | "youtube"
-  | "x"
-  | "website"
-  | "whatsapp";
+  "instagram" | "facebook" | "tiktok" | "youtube" | "x" | "website" | "whatsapp";
 
 type SocialLink = { platform: SocialPlatform; value: string };
 
@@ -91,17 +113,22 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
   const teamName = (id: string | null) => teams.find((t) => t.id === id)?.name ?? "Unassigned";
   const rows = players.filter((p) => filter === "all" || p.team_id === filter);
 
-  const addSocial = () => setDraft((d) => ({ ...d, socials: [...d.socials, { platform: "instagram", value: "" }] }));
+  const addSocial = () =>
+    setDraft((d) => ({ ...d, socials: [...d.socials, { platform: "instagram", value: "" }] }));
   const updateSocial = (idx: number, next: Partial<SocialLink>) =>
     setDraft((d) => ({
       ...d,
       socials: d.socials.map((s, i) => (i === idx ? { ...s, ...next } : s)),
     }));
-  const removeSocial = (idx: number) => setDraft((d) => ({ ...d, socials: d.socials.filter((_, i) => i !== idx) }));
+  const removeSocial = (idx: number) =>
+    setDraft((d) => ({ ...d, socials: d.socials.filter((_, i) => i !== idx) }));
 
   const submit = () => {
     const parsed = schema.safeParse(draft);
-    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Check the form");
+      return;
+    }
     save.mutate(
       {
         ...(draft.id ? { id: draft.id } : {}),
@@ -124,7 +151,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
         },
       },
       {
-        onSuccess: () => { toast.success(draft.id ? "Player updated" : "Player added"); setOpen(false); setDraft(blank()); },
+        onSuccess: () => {
+          toast.success(draft.id ? "Player updated" : "Player added");
+          setOpen(false);
+          setDraft(blank());
+        },
         onError: (e) => toast.error(e.message),
       },
     );
@@ -140,7 +171,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
     const socials = Array.isArray(meta["socials"]) ? (meta["socials"] as SocialLink[]) : [];
 
     setDraft({
-      id: p.id, name: p.name, team_id: p.team_id, jersey_number: p.jersey_number, position: p.position,
+      id: p.id,
+      name: p.name,
+      team_id: p.team_id,
+      jersey_number: p.jersey_number,
+      position: p.position,
       age: p.age,
       height_cm: p.height_cm,
       height_unit,
@@ -159,45 +194,96 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-52"><SelectValue placeholder="All teams" /></SelectTrigger>
+          <SelectTrigger className="w-52">
+            <SelectValue placeholder="All teams" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All teams</SelectItem>
-            {teams.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+            {teams.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setDraft(blank()); }}>
+        <Dialog
+          open={open}
+          onOpenChange={(o) => {
+            setOpen(o);
+            if (!o) setDraft(blank());
+          }}
+        >
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="mr-1.5 h-4 w-4" /> Add player</Button>
+            <Button size="sm">
+              <Plus className="mr-1.5 h-4 w-4" /> Add player
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[85vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{draft.id ? "Edit player" : "Add player"}</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>{draft.id ? "Edit player" : "Add player"}</DialogTitle>
+            </DialogHeader>
 
             <div className="mb-6 flex flex-col items-center justify-center text-center">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Player photo</Label>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Player photo
+              </Label>
               <div className="mt-2">
-                <ImageUpload value={draft.photo_url} onChange={(url) => set("photo_url", url)} folder="player-photos" rounded="rounded-full" />
+                <ImageUpload
+                  value={draft.photo_url}
+                  onChange={(url) => set("photo_url", url)}
+                  folder="player-photos"
+                  rounded="rounded-full"
+                />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">PNG or JPG, up to 5 MB</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Full name"><Input value={draft.name} onChange={(e) => set("name", e.target.value)} /></Field>
+              <Field label="Full name">
+                <Input value={draft.name} onChange={(e) => set("name", e.target.value)} />
+              </Field>
               <Field label="Team">
-                <Select value={draft.team_id ?? "none"} onValueChange={(v) => set("team_id", v === "none" ? null : v)}>
-                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                <Select
+                  value={draft.team_id ?? "none"}
+                  onValueChange={(v) => set("team_id", v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unassigned" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Unassigned</SelectItem>
-                    {teams.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Jersey #"><Input type="number" value={draft.jersey_number ?? ""} onChange={(e) => set("jersey_number", e.target.value ? Number(e.target.value) : null)} /></Field>
+              <Field label="Jersey #">
+                <Input
+                  type="number"
+                  value={draft.jersey_number ?? ""}
+                  onChange={(e) =>
+                    set("jersey_number", e.target.value ? Number(e.target.value) : null)
+                  }
+                />
+              </Field>
               <Field label="Position">
-                <Select value={draft.position ?? "none"} onValueChange={(v) => set("position", v === "none" ? null : v)}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <Select
+                  value={draft.position ?? "none"}
+                  onValueChange={(v) => set("position", v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">—</SelectItem>
-                    {POSITIONS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    {POSITIONS.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
@@ -208,7 +294,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                   onChange={(e) => {
                     const v = e.target.value || null;
                     set("dob_ad", v);
-                    if (!v) { set("dob_bs", null); set("age", null); return; }
+                    if (!v) {
+                      set("dob_bs", null);
+                      set("age", null);
+                      return;
+                    }
                     const dob = new Date(`${v}T00:00:00`);
                     set("dob_bs", toBs(dob));
                     set("age", calcAge(dob));
@@ -222,7 +312,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                   onChange={(e) => {
                     const v = e.target.value || null;
                     set("dob_bs", v);
-                    if (!v) { set("dob_ad", null); set("age", null); return; }
+                    if (!v) {
+                      set("dob_ad", null);
+                      set("age", null);
+                      return;
+                    }
                     try {
                       const dob = toAd(v);
                       const adStr = dob.toISOString().slice(0, 10);
@@ -240,8 +334,13 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
               </Field>
               <Field label="Height">
                 <div className="flex gap-2">
-                  <Select value={draft.height_unit} onValueChange={(v) => set("height_unit", v as "cm" | "ft")}>
-                    <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                  <Select
+                    value={draft.height_unit}
+                    onValueChange={(v) => set("height_unit", v as "cm" | "ft")}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="cm">cm</SelectItem>
                       <SelectItem value="ft">ft</SelectItem>
@@ -255,7 +354,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                       onChange={(e) => {
                         const cm = e.target.value ? Number(e.target.value) : null;
                         set("height_cm", cm);
-                        if (cm == null) { set("height_ft", null); set("height_in", null); return; }
+                        if (cm == null) {
+                          set("height_ft", null);
+                          set("height_in", null);
+                          return;
+                        }
                         const totalIn = cm / 2.54;
                         const ft = Math.floor(totalIn / 12);
                         const inch = Math.round(totalIn - ft * 12);
@@ -273,8 +376,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                           const ft = e.target.value ? Number(e.target.value) : null;
                           set("height_ft", ft);
                           const inch = draft.height_in ?? 0;
-                          if (ft == null) { set("height_cm", null); return; }
-                          set("height_cm", Math.round(((ft * 12 + inch) * 2.54)));
+                          if (ft == null) {
+                            set("height_cm", null);
+                            return;
+                          }
+                          set("height_cm", Math.round((ft * 12 + inch) * 2.54));
                         }}
                       />
                       <Input
@@ -285,8 +391,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                           const inch = e.target.value ? Number(e.target.value) : null;
                           set("height_in", inch);
                           const ft = draft.height_ft ?? 0;
-                          if (inch == null) { set("height_cm", null); return; }
-                          set("height_cm", Math.round(((ft * 12 + inch) * 2.54)));
+                          if (inch == null) {
+                            set("height_cm", null);
+                            return;
+                          }
+                          set("height_cm", Math.round((ft * 12 + inch) * 2.54));
                         }}
                       />
                     </div>
@@ -297,7 +406,9 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
 
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Social media</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Social media
+                </p>
                 <Button type="button" variant="outline" size="sm" onClick={addSocial}>
                   Add handle
                 </Button>
@@ -311,7 +422,9 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                       <select
                         className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                         value={s.platform}
-                        onChange={(e) => updateSocial(idx, { platform: e.target.value as SocialPlatform })}
+                        onChange={(e) =>
+                          updateSocial(idx, { platform: e.target.value as SocialPlatform })
+                        }
                       >
                         <option value="instagram">Instagram</option>
                         <option value="facebook">Facebook</option>
@@ -327,7 +440,12 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                         placeholder="@handle or link"
                         onChange={(e) => updateSocial(idx, { value: e.target.value })}
                       />
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeSocial(idx)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSocial(idx)}
+                      >
                         Remove
                       </Button>
                     </div>
@@ -336,13 +454,18 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
               )}
             </div>
 
-            <Button onClick={submit} disabled={save.isPending}>{draft.id ? "Save player" : "Add player"}</Button>
+            <Button onClick={submit} disabled={save.isPending}>
+              {draft.id ? "Save player" : "Add player"}
+            </Button>
           </DialogContent>
         </Dialog>
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState title="No players yet" description="Build rosters and track per-player statistics." />
+        <EmptyState
+          title="No players yet"
+          description="Build rosters and track per-player statistics."
+        />
       ) : (
         <div className="surface-card overflow-x-auto">
           <Table>
@@ -364,7 +487,11 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                     <TableCell className="font-medium">
                       <span className="flex items-center gap-2">
                         {p.photo_url ? (
-                          <img src={p.photo_url} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-border" />
+                          <img
+                            src={p.photo_url}
+                            alt=""
+                            className="h-7 w-7 rounded-full object-cover ring-1 ring-border"
+                          />
                         ) : (
                           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
                             {p.name.slice(0, 2).toUpperCase()}
@@ -379,11 +506,22 @@ export function PlayersTab({ tournamentId }: { tournamentId: string }) {
                     <TableCell>{p.age ?? "—"}</TableCell>
                     <TableCell>{p.height_cm ? `${p.height_cm} cm` : "—"}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="icon" variant="ghost" onClick={() => edit(p)} aria-label="Edit player"><Pencil className="h-3.5 w-3.5" /></Button>
                       <Button
-                        size="icon" variant="ghost" aria-label="Delete player"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => edit(p)}
+                        aria-label="Edit player"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Delete player"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => remove.mutate(p.id, { onSuccess: () => toast.success("Player removed") })}
+                        onClick={() =>
+                          remove.mutate(p.id, { onSuccess: () => toast.success("Player removed") })
+                        }
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

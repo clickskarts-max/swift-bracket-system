@@ -39,18 +39,22 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Icon className="h-4 w-4" />
         {label}
       </Link>
-    )).concat(isOwner ? [
-      <Link
-        key="/owner"
-        to="/owner"
-        onClick={onClick}
-        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        activeProps={{ className: "bg-secondary text-foreground" }}
-      >
-        <Settings className="h-4 w-4" />
-        Owner settings
-      </Link>,
-    ] : []);
+    )).concat(
+      isOwner
+        ? [
+            <Link
+              key="/owner"
+              to="/owner"
+              onClick={onClick}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              activeProps={{ className: "bg-secondary text-foreground" }}
+            >
+              <Settings className="h-4 w-4" />
+              Owner settings
+            </Link>,
+          ]
+        : [],
+    );
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,5 +1,12 @@
 import { useMemo } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { EmptyState, TeamChip } from "@/components/data-bits";
 import { computeStandings } from "@/lib/standings";
 import type { Match, Team, Tournament } from "@/lib/queries";
@@ -22,21 +29,48 @@ function StandingsLegend() {
   return (
     <div className="surface-card border border-border/70 p-4 text-xs text-muted-foreground">
       <div className="flex flex-wrap gap-x-6 gap-y-2">
-        <span><span className="font-semibold text-foreground">P</span> Played</span>
-        <span><span className="font-semibold text-foreground">W</span> Wins</span>
-        <span><span className="font-semibold text-foreground">L</span> Losses</span>
-        <span><span className="font-semibold text-foreground">PF</span> Points For</span>
-        <span><span className="font-semibold text-foreground">PA</span> Points Against</span>
-        <span><span className="font-semibold text-foreground">Diff</span> Point Differential</span>
-        <span><span className="font-semibold text-foreground">Pts</span> Points</span>
-        <span><span className="font-semibold text-foreground">WIN%</span> Win Percentage</span>
-        <span><span className="font-semibold text-foreground">OT</span> Overtime (placeholder)</span>
-        <span><span className="font-semibold text-foreground">LAST 3</span> Last 3 Games</span>
-        <span><span className="font-semibold text-foreground">STREAK</span> Current Streak</span>
+        <span>
+          <span className="font-semibold text-foreground">P</span> Played
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">W</span> Wins
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">L</span> Losses
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">PF</span> Points For
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">PA</span> Points Against
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">Diff</span> Point Differential
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">Pts</span> Points
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">WIN%</span> Win Percentage
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">OT</span> Overtime (placeholder)
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">LAST 3</span> Last 3 Games
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">STREAK</span> Current Streak
+        </span>
       </div>
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
-        <span><span className="font-semibold text-success">x</span> Clinched Playoff Berth</span>
-        <span><span className="font-semibold text-destructive">o</span> Eliminated from Playoffs Contention</span>
+        <span>
+          <span className="font-semibold text-success">x</span> Clinched Playoff Berth
+        </span>
+        <span>
+          <span className="font-semibold text-destructive">o</span> Eliminated from Playoffs
+          Contention
+        </span>
       </div>
     </div>
   );
@@ -52,14 +86,19 @@ function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
 
   return (
     <div className="surface-card border border-border/70 p-4 text-sm">
-      <h3 className="font-display text-base font-semibold">Play-In and Playoff Tie-Break Procedures</h3>
+      <h3 className="font-display text-base font-semibold">
+        Play-In and Playoff Tie-Break Procedures
+      </h3>
       <p className="mt-1 text-xs text-muted-foreground">
-        These rules apply when teams are level on points in the league table. Tie-breaks are resolved top-to-bottom until the tie is broken.
+        These rules apply when teams are level on points in the league table. Tie-breaks are
+        resolved top-to-bottom until the tie is broken.
       </p>
 
       {hasGroups ? (
         <div className="mt-3 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Group stage</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Group stage
+          </p>
           <ul className="list-inside list-decimal text-sm text-muted-foreground">
             <li>Head-to-head record (among tied teams)</li>
             <li>Head-to-head point differential (among tied teams)</li>
@@ -70,7 +109,9 @@ function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
         </div>
       ) : (
         <div className="mt-3 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">League table</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            League table
+          </p>
           <ul className="list-inside list-decimal text-sm text-muted-foreground">
             <li>Head-to-head record</li>
             <li>Head-to-head point differential</li>
@@ -83,14 +124,18 @@ function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
 
       {hasPlayoffs ? (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Playoff seeding</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Playoff seeding
+          </p>
           <ul className="list-inside list-decimal text-sm text-muted-foreground">
             <li>Higher seed is the team ranked higher after tie-breaks</li>
             <li>If seeding affects home court, higher seed gets home advantage</li>
           </ul>
         </div>
       ) : (
-        <p className="mt-4 text-xs text-muted-foreground">No playoffs are enabled for this tournament format.</p>
+        <p className="mt-4 text-xs text-muted-foreground">
+          No playoffs are enabled for this tournament format.
+        </p>
       )}
 
       {isQualifierEliminator && (
@@ -106,43 +151,50 @@ function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
             {playoff === "top4_ipl" ? (
               <>
                 <li>
-                  <span className="font-semibold text-foreground">Eliminator</span>: Seed 3 vs Seed 4.
-                  Loser is eliminated. Winner advances to Qualifier 2.
+                  <span className="font-semibold text-foreground">Eliminator</span>: Seed 3 vs Seed
+                  4. Loser is eliminated. Winner advances to Qualifier 2.
                 </li>
               </>
             ) : (
               <>
                 <li>
-                  <span className="font-semibold text-foreground">Wildcards</span>: Seed 3 vs Seed 6 (Wildcard 1) and Seed 4 vs Seed 5 (Wildcard 2).
-                  Losers are eliminated. Winners advance to the Eliminator.
+                  <span className="font-semibold text-foreground">Wildcards</span>: Seed 3 vs Seed 6
+                  (Wildcard 1) and Seed 4 vs Seed 5 (Wildcard 2). Losers are eliminated. Winners
+                  advance to the Eliminator.
                 </li>
                 <li>
-                  <span className="font-semibold text-foreground">Eliminator</span>: Winner Wildcard 1 vs Winner Wildcard 2.
-                  Loser is eliminated. Winner advances to Qualifier 2.
+                  <span className="font-semibold text-foreground">Eliminator</span>: Winner Wildcard
+                  1 vs Winner Wildcard 2. Loser is eliminated. Winner advances to Qualifier 2.
                 </li>
               </>
             )}
             <li>
-              <span className="font-semibold text-foreground">Qualifier 2</span>: Loser Qualifier 1 vs Winner Eliminator.
-              Loser is eliminated. Winner advances to the Final.
+              <span className="font-semibold text-foreground">Qualifier 2</span>: Loser Qualifier 1
+              vs Winner Eliminator. Loser is eliminated. Winner advances to the Final.
             </li>
             <li>
-              <span className="font-semibold text-foreground">Final</span>: Winner Qualifier 1 vs Winner Qualifier 2.
-              Winner is Champion.
+              <span className="font-semibold text-foreground">Final</span>: Winner Qualifier 1 vs
+              Winner Qualifier 2. Winner is Champion.
             </li>
           </ul>
           <p className="text-xs text-muted-foreground">
-            If a tie affects the last spot that qualifies for any of these games, the league tie-break procedure above decides who qualifies.
+            If a tie affects the last spot that qualifies for any of these games, the league
+            tie-break procedure above decides who qualifies.
           </p>
         </div>
       )}
 
       {hasPlayIn && (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Play-In (Top 6 format)</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Play-In (Top 6 format)
+          </p>
           <ul className="list-inside list-decimal text-sm text-muted-foreground">
             <li>Play-in spots are decided by league ranking after tie-breaks</li>
-            <li>If two teams are tied for the last play-in spot, apply the same league tie-breaks above</li>
+            <li>
+              If two teams are tied for the last play-in spot, apply the same league tie-breaks
+              above
+            </li>
           </ul>
         </div>
       )}
@@ -183,10 +235,21 @@ export function StandingsTable({
   const rows = useMemo(
     () =>
       computeStandings(
-        teams.map((t) => ({ id: t.id, name: t.name, logo_url: t.logo_url, jersey_color: t.jersey_color, group_label: t.group_label })),
+        teams.map((t) => ({
+          id: t.id,
+          name: t.name,
+          logo_url: t.logo_url,
+          jersey_color: t.jersey_color,
+          group_label: t.group_label,
+        })),
         matches.map((m) => ({
-          team_a_id: m.team_a_id, team_b_id: m.team_b_id, score_a: m.score_a, score_b: m.score_b,
-          status: m.status, stage: m.stage, group_label: m.group_label,
+          team_a_id: m.team_a_id,
+          team_b_id: m.team_b_id,
+          score_a: m.score_a,
+          score_b: m.score_b,
+          status: m.status,
+          stage: m.stage,
+          group_label: m.group_label,
           scheduled_at: m.scheduled_at,
           match_no: m.match_no,
         })),
@@ -195,11 +258,19 @@ export function StandingsTable({
     [teams, matches, groupLabel],
   );
 
-  if (rows.length === 0) return <EmptyState title="No standings yet" description="Add teams and record match results to build the table." />;
+  if (rows.length === 0)
+    return (
+      <EmptyState
+        title="No standings yet"
+        description="Add teams and record match results to build the table."
+      />
+    );
 
   const slots = playoffSlots(tournament?.playoff_format ?? null);
   const winPoints = 2;
-  const showMarkers = matches.some((m) => m.status === "completed" && m.score_a != null && m.score_b != null);
+  const showMarkers = matches.some(
+    (m) => m.status === "completed" && m.score_a != null && m.score_b != null,
+  );
 
   return (
     <div className="surface-card overflow-x-auto">
@@ -227,7 +298,11 @@ export function StandingsTable({
               <TableCell className="font-display font-bold text-primary">{r.rank}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <TeamChip name={r.team.name} logoUrl={r.team.logo_url ?? null} color={r.team.jersey_color ?? null} />
+                  <TeamChip
+                    name={r.team.name}
+                    logoUrl={r.team.logo_url ?? null}
+                    color={r.team.jersey_color ?? null}
+                  />
                   {(() => {
                     const mark = statusMarker(r, rows, slots, winPoints, showMarkers);
                     if (!mark) return null;
@@ -246,7 +321,9 @@ export function StandingsTable({
               <TableCell className="text-center tabular-nums">{r.ot}</TableCell>
               <TableCell className="text-center tabular-nums">{r.pointsFor}</TableCell>
               <TableCell className="text-center tabular-nums">{r.pointsAgainst}</TableCell>
-              <TableCell className="text-center tabular-nums">{r.diff > 0 ? `+${r.diff}` : r.diff}</TableCell>
+              <TableCell className="text-center tabular-nums">
+                {r.diff > 0 ? `+${r.diff}` : r.diff}
+              </TableCell>
               <TableCell className="text-center font-semibold tabular-nums">{r.points}</TableCell>
               <TableCell className="text-center tabular-nums">{r.last3}</TableCell>
               <TableCell className="text-center tabular-nums">{r.streak}</TableCell>
@@ -258,15 +335,30 @@ export function StandingsTable({
   );
 }
 
-export function StandingsTab({ teams, matches, tournament }: { teams: Team[]; matches: Match[]; tournament: Tournament | null }) {
+export function StandingsTab({
+  teams,
+  matches,
+  tournament,
+}: {
+  teams: Team[];
+  matches: Match[];
+  tournament: Tournament | null;
+}) {
   const groups = [...new Set(teams.map((t) => t.group_label).filter(Boolean))] as string[];
   if (groups.length > 1) {
     return (
       <div className="space-y-6">
         {groups.sort().map((g) => (
           <div key={g}>
-            <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">Group {g}</h3>
-            <StandingsTable teams={teams} matches={matches} groupLabel={g} tournament={tournament} />
+            <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+              Group {g}
+            </h3>
+            <StandingsTable
+              teams={teams}
+              matches={matches}
+              groupLabel={g}
+              tournament={tournament}
+            />
             <StandingsLegend />
           </div>
         ))}

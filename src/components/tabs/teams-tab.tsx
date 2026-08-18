@@ -4,7 +4,13 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Field, EmptyState, TeamChip } from "@/components/data-bits";
 import { ImageUpload } from "@/components/image-upload";
@@ -16,13 +22,7 @@ const schema = z.object({
 });
 
 type SocialPlatform =
-  | "instagram"
-  | "facebook"
-  | "tiktok"
-  | "youtube"
-  | "x"
-  | "website"
-  | "whatsapp";
+  "instagram" | "facebook" | "tiktok" | "youtube" | "x" | "website" | "whatsapp";
 
 type SocialLink = { platform: SocialPlatform; value: string };
 
@@ -68,7 +68,11 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
   const { data: teams = [] } = useTeams(tournamentId);
   const { data: players = [] } = usePlayers(tournamentId);
   const save = useUpsert("teams", [["teams", tournamentId]]);
-  const remove = useRemove("teams", [["teams", tournamentId], ["players", tournamentId], ["matches", tournamentId]]);
+  const remove = useRemove("teams", [
+    ["teams", tournamentId],
+    ["players", tournamentId],
+    ["matches", tournamentId],
+  ]);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(blank());
 
@@ -76,7 +80,10 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
 
   const submit = () => {
     const parsed = schema.safeParse(draft);
-    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Check the form"); return; }
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Check the form");
+      return;
+    }
 
     const socials: TeamSocials = {
       away_jersey_color: draft.away_jersey_color,
@@ -129,55 +136,126 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
     setOpen(true);
   };
 
-  const addSocial = () => setDraft((d) => ({ ...d, socials: [...d.socials, { platform: "instagram", value: "" }] }));
+  const addSocial = () =>
+    setDraft((d) => ({ ...d, socials: [...d.socials, { platform: "instagram", value: "" }] }));
   const updateSocial = (idx: number, next: Partial<SocialLink>) =>
     setDraft((d) => ({
       ...d,
       socials: d.socials.map((s, i) => (i === idx ? { ...s, ...next } : s)),
     }));
-  const removeSocial = (idx: number) => setDraft((d) => ({ ...d, socials: d.socials.filter((_, i) => i !== idx) }));
+  const removeSocial = (idx: number) =>
+    setDraft((d) => ({ ...d, socials: d.socials.filter((_, i) => i !== idx) }));
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setDraft(blank()); }}>
+        <Dialog
+          open={open}
+          onOpenChange={(o) => {
+            setOpen(o);
+            if (!o) setDraft(blank());
+          }}
+        >
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="mr-1.5 h-4 w-4" /> Add team</Button>
+            <Button size="sm">
+              <Plus className="mr-1.5 h-4 w-4" /> Add team
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[85vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{draft.id ? "Edit team" : "Add team"}</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>{draft.id ? "Edit team" : "Add team"}</DialogTitle>
+            </DialogHeader>
 
             <div className="mb-6 flex flex-col items-center justify-center text-center">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Team logo</Label>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Team logo
+              </Label>
               <div className="mt-2">
-                <ImageUpload value={draft.logo_url} onChange={(url) => set("logo_url", url)} folder="team-logos" rounded="rounded-full" />
+                <ImageUpload
+                  value={draft.logo_url}
+                  onChange={(url) => set("logo_url", url)}
+                  folder="team-logos"
+                  rounded="rounded-full"
+                />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">PNG or JPG, up to 5 MB</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Team name"><Input value={draft.name} onChange={(e) => set("name", e.target.value)} /></Field>
-              <Field label="Short code"><Input maxLength={10} value={draft.short_name ?? ""} onChange={(e) => set("short_name", e.target.value || null)} /></Field>
+              <Field label="Team name">
+                <Input value={draft.name} onChange={(e) => set("name", e.target.value)} />
+              </Field>
+              <Field label="Short code">
+                <Input
+                  maxLength={10}
+                  value={draft.short_name ?? ""}
+                  onChange={(e) => set("short_name", e.target.value || null)}
+                />
+              </Field>
 
               <Field label="Home jersey color">
-                <Input type="color" value={draft.jersey_color} onChange={(e) => set("jersey_color", e.target.value)} className="h-10 p-1" />
+                <Input
+                  type="color"
+                  value={draft.jersey_color}
+                  onChange={(e) => set("jersey_color", e.target.value)}
+                  className="h-10 p-1"
+                />
               </Field>
               <Field label="Away jersey color">
-                <Input type="color" value={draft.away_jersey_color} onChange={(e) => set("away_jersey_color", e.target.value)} className="h-10 p-1" />
+                <Input
+                  type="color"
+                  value={draft.away_jersey_color}
+                  onChange={(e) => set("away_jersey_color", e.target.value)}
+                  className="h-10 p-1"
+                />
               </Field>
 
-              <Field label="Coach name"><Input value={draft.coach_name ?? ""} onChange={(e) => set("coach_name", e.target.value || null)} /></Field>
-              <Field label="Coach phone"><Input value={draft.coach_phone ?? ""} onChange={(e) => set("coach_phone", e.target.value || null)} /></Field>
-              <Field label="Coach email"><Input type="email" value={draft.coach_email ?? ""} onChange={(e) => set("coach_email", e.target.value || null)} /></Field>
+              <Field label="Coach name">
+                <Input
+                  value={draft.coach_name ?? ""}
+                  onChange={(e) => set("coach_name", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Coach phone">
+                <Input
+                  value={draft.coach_phone ?? ""}
+                  onChange={(e) => set("coach_phone", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Coach email">
+                <Input
+                  type="email"
+                  value={draft.coach_email ?? ""}
+                  onChange={(e) => set("coach_email", e.target.value || null)}
+                />
+              </Field>
 
-              <Field label="Manager name"><Input value={draft.manager_name ?? ""} onChange={(e) => set("manager_name", e.target.value || null)} /></Field>
-              <Field label="Manager phone"><Input value={draft.manager_phone ?? ""} onChange={(e) => set("manager_phone", e.target.value || null)} /></Field>
-              <Field label="Manager email"><Input type="email" value={draft.manager_email ?? ""} onChange={(e) => set("manager_email", e.target.value || null)} /></Field>
+              <Field label="Manager name">
+                <Input
+                  value={draft.manager_name ?? ""}
+                  onChange={(e) => set("manager_name", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Manager phone">
+                <Input
+                  value={draft.manager_phone ?? ""}
+                  onChange={(e) => set("manager_phone", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Manager email">
+                <Input
+                  type="email"
+                  value={draft.manager_email ?? ""}
+                  onChange={(e) => set("manager_email", e.target.value || null)}
+                />
+              </Field>
             </div>
 
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Social media</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Social media
+                </p>
                 <Button type="button" variant="outline" size="sm" onClick={addSocial}>
                   Add handle
                 </Button>
@@ -191,7 +269,9 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
                       <select
                         className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                         value={s.platform}
-                        onChange={(e) => updateSocial(idx, { platform: e.target.value as SocialPlatform })}
+                        onChange={(e) =>
+                          updateSocial(idx, { platform: e.target.value as SocialPlatform })
+                        }
                       >
                         <option value="instagram">Instagram</option>
                         <option value="facebook">Facebook</option>
@@ -207,7 +287,12 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
                         placeholder="@handle or link"
                         onChange={(e) => updateSocial(idx, { value: e.target.value })}
                       />
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removeSocial(idx)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSocial(idx)}
+                      >
                         Remove
                       </Button>
                     </div>
@@ -216,7 +301,9 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
               )}
             </div>
 
-            <Button onClick={submit} disabled={save.isPending}>{draft.id ? "Save team" : "Add team"}</Button>
+            <Button onClick={submit} disabled={save.isPending}>
+              {draft.id ? "Save team" : "Add team"}
+            </Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -230,13 +317,22 @@ export function TeamsTab({ tournamentId }: { tournamentId: string }) {
               <div className="flex items-start justify-between gap-2">
                 <TeamChip name={t.name} logoUrl={t.logo_url} color={t.jersey_color} />
                 <div className="flex shrink-0">
-                  <Button size="icon" variant="ghost" onClick={() => edit(t)} aria-label="Edit team"><Pencil className="h-3.5 w-3.5" /></Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => edit(t)}
+                    aria-label="Edit team"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
                   <Button
                     size="icon"
                     variant="ghost"
                     aria-label="Delete team"
                     className="text-destructive hover:text-destructive"
-                    onClick={() => remove.mutate(t.id, { onSuccess: () => toast.success("Team removed") })}
+                    onClick={() =>
+                      remove.mutate(t.id, { onSuccess: () => toast.success("Team removed") })
+                    }
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

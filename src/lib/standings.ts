@@ -45,7 +45,9 @@ export function computeStandings(
 ): StandingRow[] {
   const winPoints = opts.winPoints ?? 2;
   const lossPoints = opts.lossPoints ?? 0;
-  const pool = teams.filter((t) => (opts.groupLabel ? (t.group_label ?? "") === opts.groupLabel : true));
+  const pool = teams.filter((t) =>
+    opts.groupLabel ? (t.group_label ?? "") === opts.groupLabel : true,
+  );
   const base = new Map<string, StandingRow>(
     pool.map((t) => [
       t.id,
@@ -136,7 +138,11 @@ export function computeStandings(
 
   rows.sort(
     (x, y) =>
-      y.points - x.points || y.winPct - x.winPct || y.diff - x.diff || y.pointsFor - x.pointsFor || x.team.name.localeCompare(y.team.name),
+      y.points - x.points ||
+      y.winPct - x.winPct ||
+      y.diff - x.diff ||
+      y.pointsFor - x.pointsFor ||
+      x.team.name.localeCompare(y.team.name),
   );
   rows.forEach((r, i) => (r.rank = i + 1));
   return rows;

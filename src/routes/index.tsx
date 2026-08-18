@@ -24,12 +24,36 @@ export const Route = createFileRoute("/")({
 });
 
 const FEATURES = [
-  { icon: Trophy, title: "Every format", body: "Single & double elimination, multi-leg round robin, league and group stage + knockout." },
-  { icon: Upload, title: "Import fixtures", body: "Drop in a PDF or XML schedule — teams, rounds and match days are auto-detected." },
-  { icon: CalendarDays, title: "Match day control", body: "Calendar or list scheduling with venues, courts, referees, live scores and home/away swap." },
-  { icon: ListOrdered, title: "Instant standings", body: "Played, W-L, points for/against, difference and ranking recalculated as scores land." },
-  { icon: Users, title: "Teams & rosters", body: "Team profiles, jersey colors, staff contacts, socials and full player statistics." },
-  { icon: Share2, title: "Public pages", body: "Share /public/tournament/your-slug with fixtures, results, brackets, teams and sponsors." },
+  {
+    icon: Trophy,
+    title: "Every format",
+    body: "Single & double elimination, multi-leg round robin, league and group stage + knockout.",
+  },
+  {
+    icon: Upload,
+    title: "Import fixtures",
+    body: "Drop in a PDF or XML schedule — teams, rounds and match days are auto-detected.",
+  },
+  {
+    icon: CalendarDays,
+    title: "Match day control",
+    body: "Calendar or list scheduling with venues, courts, referees, live scores and home/away swap.",
+  },
+  {
+    icon: ListOrdered,
+    title: "Instant standings",
+    body: "Played, W-L, points for/against, difference and ranking recalculated as scores land.",
+  },
+  {
+    icon: Users,
+    title: "Teams & rosters",
+    body: "Team profiles, jersey colors, staff contacts, socials and full player statistics.",
+  },
+  {
+    icon: Share2,
+    title: "Public pages",
+    body: "Share /public/tournament/your-slug with fixtures, results, brackets, teams and sponsors.",
+  },
 ];
 
 function Landing() {
@@ -39,7 +63,9 @@ function Landing() {
         <BrandWordmark />
         <div className="flex items-center gap-2">
           <Link to="/auth">
-            <Button variant="ghost" size="sm">Sign in</Button>
+            <Button variant="ghost" size="sm">
+              Sign in
+            </Button>
           </Link>
           <Link to="/auth">
             <Button size="sm">Get started</Button>
@@ -57,15 +83,19 @@ function Landing() {
               Run your basketball season <span className="text-gradient">like a pro league</span>
             </h1>
             <p className="mt-5 max-w-lg text-base text-muted-foreground">
-              Ecluid Basketball turns fixtures, rosters, scores and sponsors into one live operating system — and publishes
-              a beautiful public page for the fans.
+              Ecluid Basketball turns fixtures, rosters, scores and sponsors into one live operating
+              system — and publishes a beautiful public page for the fans.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/auth">
-                <Button size="lg" className="animate-pulse-ring">Start a tournament</Button>
+                <Button size="lg" className="animate-pulse-ring">
+                  Start a tournament
+                </Button>
               </Link>
               <a href="#features">
-                <Button size="lg" variant="outline">See what's inside</Button>
+                <Button size="lg" variant="outline">
+                  See what's inside
+                </Button>
               </a>
             </div>
           </div>
@@ -82,13 +112,19 @@ function Landing() {
       </section>
 
       <section id="features" className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="font-display text-2xl font-bold sm:text-3xl">Built for the whole competition</h2>
+        <h2 className="font-display text-2xl font-bold sm:text-3xl">
+          Built for the whole competition
+        </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          From the draw to the trophy lift — schedule generation, live scoring, standings, brackets and sponsor placement.
+          From the draw to the trophy lift — schedule generation, live scoring, standings, brackets
+          and sponsor placement.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="surface-card animate-rise p-5 transition-transform hover:-translate-y-1">
+            <div
+              key={title}
+              className="surface-card animate-rise p-5 transition-transform hover:-translate-y-1"
+            >
               <Icon className="h-6 w-6 text-primary" />
               <h3 className="mt-3 font-display text-lg font-semibold">{title}</h3>
               <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>

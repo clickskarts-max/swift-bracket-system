@@ -14,7 +14,10 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Ecluid Basketball" },
-      { name: "description", content: "Sign in to manage your basketball tournaments, teams, fixtures and standings." },
+      {
+        name: "description",
+        content: "Sign in to manage your basketball tournaments, teams, fixtures and standings.",
+      },
       { property: "og:title", content: "Sign in — Ecluid Basketball" },
       { property: "og:description", content: "Access your basketball tournament control room." },
     ],
@@ -117,7 +120,9 @@ function AuthPage() {
   };
 
   const google = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
     if (result.error) {
       toast.error("Google sign-in failed");
       return;
@@ -168,47 +173,47 @@ function AuthPage() {
             </Button>
           </div>
         ) : (
-        <Tabs defaultValue="signin">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign in</TabsTrigger>
-            <TabsTrigger value="signup">Create account</TabsTrigger>
-          </TabsList>
-          {(["signin", "signup"] as const).map((mode) => (
-            <TabsContent key={mode} value={mode} className="mt-5 space-y-4">
-              <Field label="Email">
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="coach@club.com"
-                  autoComplete="email"
-                />
-              </Field>
-              <Field label="Password">
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                />
-              </Field>
-              {mode === "signin" && (
-                <button
-                  type="button"
-                  className="text-left text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                  disabled={loading}
-                  onClick={sendReset}
-                >
-                  Forgot password?
-                </button>
-              )}
-              <Button className="w-full" disabled={loading} onClick={() => submit(mode)}>
-                {mode === "signin" ? "Sign in" : "Create account"}
-              </Button>
-            </TabsContent>
-          ))}
-        </Tabs>
+          <Tabs defaultValue="signin">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="signup">Create account</TabsTrigger>
+            </TabsList>
+            {(["signin", "signup"] as const).map((mode) => (
+              <TabsContent key={mode} value={mode} className="mt-5 space-y-4">
+                <Field label="Email">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="coach@club.com"
+                    autoComplete="email"
+                  />
+                </Field>
+                <Field label="Password">
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                  />
+                </Field>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    className="text-left text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                    disabled={loading}
+                    onClick={sendReset}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+                <Button className="w-full" disabled={loading} onClick={() => submit(mode)}>
+                  {mode === "signin" ? "Sign in" : "Create account"}
+                </Button>
+              </TabsContent>
+            ))}
+          </Tabs>
         )}
         <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
           <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />

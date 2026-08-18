@@ -8,9 +8,16 @@ export const Route = createFileRoute("/_authenticated/tournaments/new")({
   head: () => ({
     meta: [
       { title: "New tournament — Ecluid Basketball" },
-      { name: "description", content: "Set up a new basketball tournament: format, legs, playoffs, dates, venue and branding." },
+      {
+        name: "description",
+        content:
+          "Set up a new basketball tournament: format, legs, playoffs, dates, venue and branding.",
+      },
       { property: "og:title", content: "New tournament — Ecluid Basketball" },
-      { property: "og:description", content: "Configure format, schedule and branding for your competition." },
+      {
+        property: "og:description",
+        content: "Configure format, schedule and branding for your competition.",
+      },
     ],
   }),
   component: NewTournament,
@@ -22,7 +29,10 @@ function NewTournament() {
 
   return (
     <div>
-      <PageHeader title="Create tournament" description="Choose a format now — you can regenerate the schedule anytime." />
+      <PageHeader
+        title="Create tournament"
+        description="Choose a format now — you can regenerate the schedule anytime."
+      />
       <TournamentForm
         submitLabel="Create tournament"
         pending={create.isPending}

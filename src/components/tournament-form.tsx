@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Field } from "@/components/data-bits";
 import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS } from "@/lib/formats";
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
@@ -107,7 +113,10 @@ export function TournamentForm({
     onSubmit(next);
   };
 
-  const isRoundRobin = values.format === "round_robin" || values.format === "league" || values.format === "group_knockout";
+  const isRoundRobin =
+    values.format === "round_robin" ||
+    values.format === "league" ||
+    values.format === "group_knockout";
 
   return (
     <div className="space-y-6">
@@ -125,30 +134,45 @@ export function TournamentForm({
             />
           </Field>
           <Field label="Public URL slug" hint={`/public/tournament/${values.slug || "your-slug"}`}>
-            <Input value={values.slug} onChange={(e) => set("slug", e.target.value)} placeholder="summer-classic" />
+            <Input
+              value={values.slug}
+              onChange={(e) => set("slug", e.target.value)}
+              placeholder="summer-classic"
+            />
           </Field>
           <Field label="Format">
             <Select value={values.format} onValueChange={(v) => set("format", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {TOURNAMENT_FORMATS.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Status">
             <Select value={values.status} onValueChange={(v) => set("status", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {STATUSES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           {isRoundRobin && (
-            <Field label="Legs (times each pair meets)" hint="1 = single round robin, 2 = double, 3+ supported">
+            <Field
+              label="Legs (times each pair meets)"
+              hint="1 = single round robin, 2 = double, 3+ supported"
+            >
               <Input
                 type="number"
                 min={1}
@@ -161,17 +185,24 @@ export function TournamentForm({
           {(values.format === "round_robin" || values.format === "league") && (
             <Field label="Playoff after league">
               <Select value={values.playoff_format} onValueChange={(v) => set("playoff_format", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {PLAYOFF_FORMATS.map((p) => (
-                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
           )}
           {values.format === "group_knockout" && (
-            <Field label="Number of groups / pools" hint="2, 4 or 8 groups follow the reference knockout mapping">
+            <Field
+              label="Number of groups / pools"
+              hint="2, 4 or 8 groups follow the reference knockout mapping"
+            >
               <Input
                 type="number"
                 min={0}
@@ -196,10 +227,18 @@ export function TournamentForm({
         <h2 className="font-display text-lg font-semibold">Schedule & venue</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Start date">
-            <Input type="date" value={values.start_date ?? ""} onChange={(e) => set("start_date", e.target.value || null)} />
+            <Input
+              type="date"
+              value={values.start_date ?? ""}
+              onChange={(e) => set("start_date", e.target.value || null)}
+            />
           </Field>
           <Field label="End date">
-            <Input type="date" value={values.end_date ?? ""} onChange={(e) => set("end_date", e.target.value || null)} />
+            <Input
+              type="date"
+              value={values.end_date ?? ""}
+              onChange={(e) => set("end_date", e.target.value || null)}
+            />
           </Field>
           <Field label="Venue">
             <Input
@@ -220,7 +259,12 @@ export function TournamentForm({
               />
               {values.venue_map_url && (
                 <Button variant="outline" size="icon" asChild>
-                  <a href={values.venue_map_url} target="_blank" rel="noreferrer" aria-label="Open map">
+                  <a
+                    href={values.venue_map_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Open map"
+                  >
                     <MapPin className="h-4 w-4" />
                   </a>
                 </Button>
@@ -234,10 +278,18 @@ export function TournamentForm({
         <h2 className="font-display text-lg font-semibold">Branding</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Logo image URL">
-            <Input value={values.logo_url ?? ""} onChange={(e) => set("logo_url", e.target.value || null)} placeholder="https://..." />
+            <Input
+              value={values.logo_url ?? ""}
+              onChange={(e) => set("logo_url", e.target.value || null)}
+              placeholder="https://..."
+            />
           </Field>
           <Field label="Banner image URL">
-            <Input value={values.banner_url ?? ""} onChange={(e) => set("banner_url", e.target.value || null)} placeholder="https://..." />
+            <Input
+              value={values.banner_url ?? ""}
+              onChange={(e) => set("banner_url", e.target.value || null)}
+              placeholder="https://..."
+            />
           </Field>
         </div>
         <Field label="Description">
@@ -251,7 +303,9 @@ export function TournamentForm({
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
             <p className="text-sm font-medium">Public tournament page</p>
-            <p className="text-xs text-muted-foreground">Anyone with the link can view fixtures, standings and brackets.</p>
+            <p className="text-xs text-muted-foreground">
+              Anyone with the link can view fixtures, standings and brackets.
+            </p>
           </div>
           <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
         </div>
