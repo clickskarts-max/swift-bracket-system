@@ -392,12 +392,14 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 function MatchDialog({
   match,
   teams,
+  players,
   onClose,
   onSave,
   pending,
 }: {
   match: Match | null;
   teams: { id: string; name: string }[];
+  players: { id: string; name: string; team_id: string | null; jersey_number: number | null }[];
   onClose: () => void;
   onSave: (values: Record<string, unknown> & { id: string }) => void;
   pending: boolean;
@@ -406,9 +408,17 @@ function MatchDialog({
   const [periods, setPeriods] = useState<PeriodScores>(() =>
     parsePeriods((match as { periods?: unknown } | null)?.periods),
   );
+  const [stats, setStats] = useState<PlayerStatLine[]>(() =>
+    parsePlayerStats((match as { player_stats?: unknown } | null)?.player_stats),
+  );
+  const [potm, setPotm] = useState<string | null>(
+    (match as { player_of_match_id?: string | null } | null)?.player_of_match_id ?? null,
+  );
   if (match && draft?.id !== match.id) {
     setDraft(match);
     setPeriods(parsePeriods((match as { periods?: unknown }).periods));
+    setStats(parsePlayerStats((match as { player_stats?: unknown }).player_stats));
+    setPotm((match as { player_of_match_id?: string | null }).player_of_match_id ?? null);
   }
   if (!draft) return null;
   const set = <K extends keyof Match>(k: K, v: Match[K]) =>
