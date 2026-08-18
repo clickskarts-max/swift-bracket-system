@@ -557,6 +557,10 @@ function MatchDialog({
               </SelectContent>
             </Select>
           </Field>
+          </>
+          )}
+          {mode === "score" && (
+          <>
           <Field label="Home score">
             <Input
               type="number"
@@ -575,6 +579,10 @@ function MatchDialog({
               onChange={(e) => set("score_b", e.target.value ? Number(e.target.value) : null)}
             />
           </Field>
+          </>
+          )}
+          {mode === "game" && (
+          <>
           <Field label="Tip-off">
             <Input
               type="datetime-local"
@@ -622,8 +630,11 @@ function MatchDialog({
               onChange={(e) => set("notes", e.target.value || null)}
             />
           </Field>
+          </>
+          )}
         </div>
 
+        {mode === "score" && (
         <div className="mt-4 rounded-xl border border-border/60 p-3">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
