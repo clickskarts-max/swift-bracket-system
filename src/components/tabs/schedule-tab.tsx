@@ -480,10 +480,12 @@ function MatchDialog({
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Match {draft.match_no ?? ""} · {draft.round_name}
+            {mode === "score" ? "Score data" : "Game data"} · Match {draft.match_no ?? ""}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
+          {mode === "game" && (
+          <>
           <Field label="Match number">
             <Input
               type="number"
