@@ -28,6 +28,11 @@ export function hasAccess(profile: AppAccess | null) {
  */
 export async function getAppAccess(userId: string): Promise<AppAccess | null> {
   try {
+    const ensured = await supabase.rpc('ensure_app_user');
+    if (!ensured.error && ensured.data) {
+      const row = ensured.data as unknown as AppAccess;
+      return { email: row.email, role: row.role, status: row.status, activated_until: row.activated_until };
+    }
     const { data, error } = await supabase
       .from('app_users')
       .select('email, role, status, activated_until')

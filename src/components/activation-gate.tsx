@@ -17,7 +17,7 @@ export function ActivationGate({ profile, onActivated }: { profile: AppAccess; o
     setBusy(true);
     const { error } = await supabase.rpc('redeem_activation_key', { input_key: key.trim() });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success('App activated successfully');
     onActivated();
   };
@@ -35,8 +35,8 @@ export function OwnerPanel() {
   const [users, setUsers] = useState<AppAccess[]>([]);
   const loadUsers = async () => { const { data } = await supabase.from('app_users').select('email, role, status, activated_until').order('created_at', { ascending: false }); setUsers((data ?? []) as AppAccess[]); };
   useEffect(() => { void loadUsers(); }, []);
-  const createKey = async () => { const { data, error } = await supabase.rpc('owner_create_activation_key', { input_plan: plan }); if (error) return toast.error(error.message); setGenerated(data ?? ''); toast.success('Activation key generated'); };
-  const setStatus = async (email: string, status: 'active' | 'suspended') => { const { data: auth } = await supabase.auth.admin; void auth; toast.info(`To change ${email}, use the user id from the owner table.`); };
+  const createKey = async () => { const { data, error } = await supabase.rpc('owner_create_activation_key', { input_plan: plan }); if (error) { toast.error(error.message); return; } setGenerated(data ?? ''); toast.success('Activation key generated'); };
+  const setStatus = async (email: string, status: 'active' | 'suspended') => { const { error } = await supabase.rpc('owner_set_user_status', { input_email: email, input_status: status }); if (error) { toast.error(error.message); return; } toast.success(`${email} is now ${status}`); await loadUsers(); };
   return <section className="space-y-6">
     <div className="flex items-center gap-3"><ShieldCheck className="h-6 w-6 text-primary" /><div><h2 className="font-display text-2xl font-semibold">Owner controls</h2><p className="text-sm text-muted-foreground">Generate keys and manage app access.</p></div></div>
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5" />Generate activation key</CardTitle><CardDescription>Each key can be redeemed once.</CardDescription></CardHeader><CardContent className="flex flex-col gap-3 sm:flex-row"><Select value={plan} onValueChange={setPlan}><SelectTrigger className="sm:w-48"><SelectValue /></SelectTrigger><SelectContent>{ACTIVATION_PLANS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent></Select><Button onClick={createKey}>Generate key</Button>{generated && <Button variant="outline" className="font-mono" onClick={() => { void navigator.clipboard.writeText(generated); toast.success('Copied'); }}><Copy className="mr-2 h-4 w-4" />{generated}</Button>}</CardContent></Card>

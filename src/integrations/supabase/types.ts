@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          plan: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          plan: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          plan?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_users: {
+        Row: {
+          activated_until: string | null
+          created_at: string
+          email: string
+          id: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_until?: string | null
+          created_at?: string
+          email: string
+          id: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_until?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           court: string | null
@@ -417,7 +477,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      ensure_app_user: {
+        Args: never
+        Returns: {
+          activated_until: string | null
+          created_at: string
+          email: string
+          id: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "app_users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      is_app_owner: { Args: never; Returns: boolean }
+      owner_create_activation_key: {
+        Args: { input_plan: string }
+        Returns: string
+      }
+      owner_set_user_status: {
+        Args: { input_email: string; input_status: string }
+        Returns: undefined
+      }
+      redeem_activation_key: { Args: { input_key: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
