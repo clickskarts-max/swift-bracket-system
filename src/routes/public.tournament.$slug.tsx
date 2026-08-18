@@ -9,10 +9,12 @@ import { TipoffCountdown } from "@/components/tipoff-countdown";
 import { EmptyState, ScoreLine, StatusPill, TeamChip } from "@/components/data-bits";
 import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
+import { MatchBreakdown } from "@/components/match-breakdown";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import {
   useMatches,
+  usePublicPlayers,
   usePublicSponsors,
   usePublicTeams,
   useTournamentBySlug,
@@ -47,6 +49,7 @@ function PublicTournament() {
   const { data: teams = [] } = usePublicTeams(tournament?.id ?? "");
   const { data: matches = [] } = useMatches(tournament?.id ?? "");
   const { data: sponsors = [] } = usePublicSponsors(tournament?.id ?? "");
+  const { data: players = [] } = usePublicPlayers(tournament?.id ?? "");
 
   const matchdayByDate = useMemo(() => {
     const keys = [
@@ -148,6 +151,16 @@ function PublicTournament() {
             className="min-w-0 flex-row-reverse justify-start text-right"
           />
         </div>
+        <MatchBreakdown
+          periods={(m as { periods?: unknown }).periods}
+          playerStats={(m as { player_stats?: unknown }).player_stats}
+          playerOfMatchId={(m as { player_of_match_id?: string | null }).player_of_match_id ?? null}
+          teamAId={m.team_a_id}
+          teamBId={m.team_b_id}
+          teamAName={a.name}
+          teamBName={b.name}
+          players={players}
+        />
       </div>
     );
   };

@@ -32,13 +32,23 @@ import { generateSchedule } from "@/lib/formats";
 import {
   QUARTERS,
   emptyPeriods,
+  emptyStatLine,
   hasPeriodScores,
   parsePeriods,
+  parsePlayerStats,
   periodLabel,
   periodTotal,
   type PeriodScores,
+  type PlayerStatLine,
 } from "@/lib/periods";
-import { useMatches, useTeams, useUpsert, type Match, type Tournament } from "@/lib/queries";
+import {
+  useMatches,
+  usePlayers,
+  useTeams,
+  useUpsert,
+  type Match,
+  type Tournament,
+} from "@/lib/queries";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const dayKeyFromIso = (iso: string) => {
@@ -56,6 +66,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const tournamentId = tournament.id;
   const { data: matches = [] } = useMatches(tournamentId);
   const { data: teams = [] } = useTeams(tournamentId);
+  const { data: players = [] } = usePlayers(tournamentId);
   const save = useUpsert("matches", [["matches", tournamentId]]);
   const qc = useQueryClient();
   const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
@@ -356,6 +367,12 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       <MatchDialog
         match={editing}
         teams={teams.map((t) => ({ id: t.id, name: t.name }))}
+        players={players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          team_id: p.team_id,
+          jersey_number: p.jersey_number,
+        }))}
         onClose={() => setEditing(null)}
         pending={save.isPending}
         onSave={(values) =>
@@ -375,12 +392,14 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 function MatchDialog({
   match,
   teams,
+  players,
   onClose,
   onSave,
   pending,
 }: {
   match: Match | null;
   teams: { id: string; name: string }[];
+  players: { id: string; name: string; team_id: string | null; jersey_number: number | null }[];
   onClose: () => void;
   onSave: (values: Record<string, unknown> & { id: string }) => void;
   pending: boolean;
@@ -389,9 +408,17 @@ function MatchDialog({
   const [periods, setPeriods] = useState<PeriodScores>(() =>
     parsePeriods((match as { periods?: unknown } | null)?.periods),
   );
+  const [stats, setStats] = useState<PlayerStatLine[]>(() =>
+    parsePlayerStats((match as { player_stats?: unknown } | null)?.player_stats),
+  );
+  const [potm, setPotm] = useState<string | null>(
+    (match as { player_of_match_id?: string | null } | null)?.player_of_match_id ?? null,
+  );
   if (match && draft?.id !== match.id) {
     setDraft(match);
     setPeriods(parsePeriods((match as { periods?: unknown }).periods));
+    setStats(parsePlayerStats((match as { player_stats?: unknown }).player_stats));
+    setPotm((match as { player_of_match_id?: string | null }).player_of_match_id ?? null);
   }
   if (!draft) return null;
   const set = <K extends keyof Match>(k: K, v: Match[K]) =>
@@ -414,6 +441,22 @@ function MatchDialog({
     setPeriods((p) =>
       p.a.length > QUARTERS ? { a: p.a.slice(0, -1), b: p.b.slice(0, -1) } : p,
     );
+
+  const rosterFor = (teamId: string | null) =>
+    teamId ? players.filter((p) => p.team_id === teamId) : [];
+  const matchRoster = [...rosterFor(draft.team_a_id), ...rosterFor(draft.team_b_id)];
+  const statFor = (playerId: string) =>
+    stats.find((s) => s.player_id === playerId) ?? emptyStatLine(playerId);
+  const setStat = (playerId: string, key: keyof PlayerStatLine, raw: string) => {
+    const value = raw === "" ? 0 : Number(raw);
+    setStats((list) => {
+      const exists = list.some((s) => s.player_id === playerId);
+      const next = exists
+        ? list.map((s) => (s.player_id === playerId ? { ...s, [key]: value } : s))
+        : [...list, { ...emptyStatLine(playerId), [key]: value }];
+      return next;
+    });
+  };
 
   return (
     <Dialog open={!!match} onOpenChange={(o) => !o && onClose()}>
@@ -628,6 +671,73 @@ function MatchDialog({
           </p>
         </div>
 
+        <div className="mt-4 rounded-xl border border-border/60 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Player of the match
+          </p>
+          <Select
+            value={potm ?? "none"}
+            onValueChange={(v) => setPotm(v === "none" ? null : v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select player…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No award</SelectItem>
+              {matchRoster.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Player stats
+          </p>
+          {matchRoster.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Add players to both teams to record game stats.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[420px] text-sm">
+                <thead>
+                  <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <th className="p-1 text-left font-medium">Player</th>
+                    <th className="p-1 text-center font-medium">PTS</th>
+                    <th className="p-1 text-center font-medium">REB</th>
+                    <th className="p-1 text-center font-medium">AST</th>
+                    <th className="p-1 text-center font-medium">PF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matchRoster.map((p) => {
+                    const s = statFor(p.id);
+                    return (
+                      <tr key={p.id}>
+                        <td className="max-w-[10rem] truncate p-1 text-xs">{p.name}</td>
+                        {(["points", "rebounds", "assists", "fouls"] as const).map((k) => (
+                          <td key={k} className="p-1">
+                            <Input
+                              type="number"
+                              min={0}
+                              className="h-9 w-16 text-center"
+                              value={s[k]}
+                              onChange={(e) => setStat(p.id, k, e.target.value)}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
         <Button
           disabled={pending}
           onClick={() =>
@@ -645,6 +755,10 @@ function MatchDialog({
               score_a: scoreA,
               score_b: scoreB,
               periods: usePeriods ? periods : emptyPeriods(),
+              player_of_match_id: potm,
+              player_stats: stats.filter(
+                (s) => s.points || s.rebounds || s.assists || s.fouls,
+              ),
               scheduled_at: draft.scheduled_at,
               venue: draft.venue,
               court: draft.court,
