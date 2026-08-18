@@ -42,6 +42,19 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
+  // A stale/updated deployment can leave the browser pointing at a chunk that
+  // no longer exists. Recover automatically (once) instead of showing a blank screen.
+  useEffect(() => {
+    const isStaleChunk = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+      error?.message ?? "",
+    );
+    if (!isStaleChunk || typeof window === "undefined") return;
+    const KEY = "app-chunk-reloaded";
+    if (window.sessionStorage.getItem(KEY)) return;
+    window.sessionStorage.setItem(KEY, "1");
+    window.location.reload();
+  }, [error]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
