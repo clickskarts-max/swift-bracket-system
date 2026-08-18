@@ -87,6 +87,8 @@ export type Database = {
           periods: Json
           placeholder_a: string | null
           placeholder_b: string | null
+          player_of_match_id: string | null
+          player_stats: Json
           referee: string | null
           round_index: number
           round_name: string | null
@@ -113,6 +115,8 @@ export type Database = {
           periods?: Json
           placeholder_a?: string | null
           placeholder_b?: string | null
+          player_of_match_id?: string | null
+          player_stats?: Json
           referee?: string | null
           round_index?: number
           round_name?: string | null
@@ -139,6 +143,8 @@ export type Database = {
           periods?: Json
           placeholder_a?: string | null
           placeholder_b?: string | null
+          player_of_match_id?: string | null
+          player_stats?: Json
           referee?: string | null
           round_index?: number
           round_name?: string | null
@@ -154,6 +160,13 @@ export type Database = {
           venue?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "matches_player_of_match_id_fkey"
+            columns: ["player_of_match_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "matches_team_a_id_fkey"
             columns: ["team_a_id"]
