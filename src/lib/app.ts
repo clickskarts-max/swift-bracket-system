@@ -1,6 +1,6 @@
 import NepaliDatePkg from "nepali-date-converter";
 
-export const slugify = (value: string) =>
+const slugify = (value: string) =>
   value
     .toLowerCase()
     .normalize("NFKD")
@@ -49,15 +49,7 @@ export const formatDate = (value?: string | null) => {
   return `${bs}`;
 };
 
-export const formatDateTime = (value?: string | null) => {
-  if (!value) return "TBD";
-  const d = new Date(value);
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  const bs = bsFromAd(d);
-  return `${bs}\n\t${time}`;
-};
 
-export const formatDateRange = (start?: string | null, end?: string | null) => `${formatDate(start)}\n—\n${formatDate(end)}`;
 
 export const formatDateRangeInline = (start?: string | null, end?: string | null) =>
   `${formatDate(start)} – ${formatDate(end)}`;
@@ -76,12 +68,6 @@ export const formatCountdownMs = (ms: number) => {
   return `in ${mins}m ${secs}s`;
 };
 
-export const formatTipoffCountdown = (value?: string | null) => {
-  if (!value) return "TBD";
-  const d = new Date(value);
-  const bs = bsFromAd(d);
-  return `${bs} · ${formatCountdownMs(d.getTime() - Date.now())}`;
-};
 
 export const toLocalInput = (value?: string | null) => {
   if (!value) return "";
