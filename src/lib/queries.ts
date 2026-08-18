@@ -100,6 +100,57 @@ export const useOrganization = () =>
       unwrap(await supabase.from("organizations").select("*").maybeSingle()) as Organization | null,
   });
 
+/* Public (anon) reads: only columns granted to the anon role. */
+const PUBLIC_TEAM_COLS =
+  "id,tournament_id,name,short_name,logo_url,jersey_color,group_label,seed,socials,created_at,updated_at";
+const PUBLIC_SPONSOR_COLS =
+  "id,tournament_id,name,logo_url,tier,placement,created_at,updated_at";
+
+export type PublicTeam = Pick<
+  Team,
+  | "id"
+  | "tournament_id"
+  | "name"
+  | "short_name"
+  | "logo_url"
+  | "jersey_color"
+  | "group_label"
+  | "seed"
+>;
+export type PublicSponsor = Pick<
+  Sponsor,
+  "id" | "tournament_id" | "name" | "logo_url" | "tier" | "placement"
+>;
+
+export const usePublicTeams = (tournamentId: string) =>
+  useQuery({
+    queryKey: ["public-teams", tournamentId],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("teams")
+          .select(PUBLIC_TEAM_COLS)
+          .eq("tournament_id", tournamentId)
+          .order("group_label")
+          .order("name"),
+      ) as unknown as PublicTeam[],
+    enabled: !!tournamentId,
+  });
+
+export const usePublicSponsors = (tournamentId: string) =>
+  useQuery({
+    queryKey: ["public-sponsors", tournamentId],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("sponsors")
+          .select(PUBLIC_SPONSOR_COLS)
+          .eq("tournament_id", tournamentId)
+          .order("name"),
+      ) as unknown as PublicSponsor[],
+    enabled: !!tournamentId,
+  });
+
 type TableName = "tournaments" | "teams" | "players" | "matches" | "sponsors" | "organizations";
 
 export function useUpsert(table: TableName, invalidate: unknown[][]) {
