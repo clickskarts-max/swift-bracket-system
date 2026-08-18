@@ -16,7 +16,8 @@ import { useMatches, useSponsors, useTeams, useTournamentBySlug } from "@/lib/qu
 export const Route = createFileRoute("/public/tournament/$slug")({
   head: ({ params }) => {
     const title = `${params.slug.replace(/-/g, " ")} — Ecluid Basketball`;
-    const description = "Live fixtures, results, standings, brackets and teams for this basketball tournament.";
+    const description =
+      "Live fixtures, results, standings, brackets and teams for this basketball tournament.";
     return {
       meta: [
         { title },
@@ -43,7 +44,11 @@ function PublicTournament() {
   const { data: sponsors = [] } = useSponsors(tournament?.id ?? "");
 
   const matchdayByDate = useMemo(() => {
-    const keys = [...new Set(matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)))].sort();
+    const keys = [
+      ...new Set(
+        matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)),
+      ),
+    ].sort();
     return new Map(keys.map((k, i) => [k, i + 1]));
   }, [matches]);
 
@@ -51,13 +56,20 @@ function PublicTournament() {
   if (!tournament || !tournament.is_public)
     return (
       <div className="p-8">
-        <EmptyState title="Tournament unavailable" description="This tournament is private or no longer exists." />
+        <EmptyState
+          title="Tournament unavailable"
+          description="This tournament is private or no longer exists."
+        />
       </div>
     );
 
   const teamById = new Map(teams.map((t) => [t.id, t]));
   const side = (id: string | null, fallback: string | null) =>
-    (id ? teamById.get(id) : undefined) ?? { name: fallback ?? "TBD", logo_url: null, jersey_color: null };
+    (id ? teamById.get(id) : undefined) ?? {
+      name: fallback ?? "TBD",
+      logo_url: null,
+      jersey_color: null,
+    };
   const header = sponsors.filter((s) => s.placement === "public_header");
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = matches.filter((m) => m.status !== "completed");
@@ -78,12 +90,21 @@ function PublicTournament() {
     const compareMatch = (a: (typeof matches)[number], b: (typeof matches)[number]) => {
       const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
       const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
-      return ta - tb || (a.match_no ?? Number.POSITIVE_INFINITY) - (b.match_no ?? Number.POSITIVE_INFINITY);
+      return (
+        ta - tb ||
+        (a.match_no ?? Number.POSITIVE_INFINITY) - (b.match_no ?? Number.POSITIVE_INFINITY)
+      );
     };
 
-    const entries = [...map.entries()].map(([k, items]) => [k, [...items].sort(compareMatch)] as [string, (typeof matches)[number][]]);
+    const entries = [...map.entries()].map(
+      ([k, items]) => [k, [...items].sort(compareMatch)] as [string, (typeof matches)[number][]],
+    );
     const groupTime = (items: (typeof matches)[number][]) =>
-      Math.min(...items.map((m) => (m.scheduled_at ? new Date(m.scheduled_at).getTime() : Number.POSITIVE_INFINITY)));
+      Math.min(
+        ...items.map((m) =>
+          m.scheduled_at ? new Date(m.scheduled_at).getTime() : Number.POSITIVE_INFINITY,
+        ),
+      );
     return entries.sort(([, a], [, b]) => groupTime(a) - groupTime(b));
   };
 
@@ -92,13 +113,19 @@ function PublicTournament() {
     const b = side(m.team_b_id, m.placeholder_b);
     return (
       <div className="surface-card p-4">
-        <p className="mb-2 text-center text-[11px] uppercase tracking-widest text-muted-foreground sm:text-left">{m.round_name}</p>
+        <p className="mb-2 text-center text-[11px] uppercase tracking-widest text-muted-foreground sm:text-left">
+          {m.round_name}
+        </p>
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
           <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="min-w-0" />
           <div className="flex flex-col items-center gap-1.5">
             <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
             <span className="text-center text-xs text-muted-foreground">
-              {m.status === "completed" ? formatDate(m.scheduled_at) : <TipoffCountdown scheduledAt={m.scheduled_at} />}
+              {m.status === "completed" ? (
+                formatDate(m.scheduled_at)
+              ) : (
+                <TipoffCountdown scheduledAt={m.scheduled_at} />
+              )}
             </span>
             <StatusPill status={m.status} />
           </div>
@@ -117,19 +144,39 @@ function PublicTournament() {
     <div className="min-h-screen">
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <Link to="/"><BrandWordmark /></Link>
+          <Link to="/">
+            <BrandWordmark />
+          </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            {header.map((s) => (s.logo_url ? <img key={s.id} src={s.logo_url} alt={s.name} loading="lazy" className="h-7 object-contain" /> : <Badge key={s.id} variant="outline">{s.name}</Badge>))}
+            {header.map((s) =>
+              s.logo_url ? (
+                <img
+                  key={s.id}
+                  src={s.logo_url}
+                  alt={s.name}
+                  loading="lazy"
+                  className="h-7 object-contain"
+                />
+              ) : (
+                <Badge key={s.id} variant="outline">
+                  {s.name}
+                </Badge>
+              ),
+            )}
           </div>
         </div>
       </header>
 
       <section className="hero-surface court-texture border-b border-border/60">
-        {tournament.banner_url && <img src={tournament.banner_url} alt="" className="h-44 w-full object-cover sm:h-60" />}
+        {tournament.banner_url && (
+          <img src={tournament.banner_url} alt="" className="h-44 w-full object-cover sm:h-60" />
+        )}
         <div className="mx-auto max-w-5xl px-4 py-8">
           <div className="flex flex-wrap items-center gap-4">
-            {tournament.logo_url && <img src={tournament.logo_url} alt="" className="h-14 w-14 rounded-xl object-cover" />}
+            {tournament.logo_url && (
+              <img src={tournament.logo_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
+            )}
             <div>
               <h1 className="font-display text-3xl font-bold sm:text-4xl">{tournament.name}</h1>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -138,15 +185,23 @@ function PublicTournament() {
             </div>
             <StatusPill status={tournament.status} />
           </div>
-          {tournament.description && <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{tournament.description}</p>}
+          {tournament.description && (
+            <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{tournament.description}</p>
+          )}
           <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <CalendarDays className="mt-0.5 h-3.5 w-3.5" />
               {formatDateRangeInline(tournament.start_date, tournament.end_date)}
             </span>
             {tournament.venue && (
-              <a className="flex items-center gap-1 hover:text-primary" href={tournament.venue_map_url ?? "#"} target="_blank" rel="noreferrer">
-                <MapPin className="h-3.5 w-3.5" />{tournament.venue}
+              <a
+                className="flex items-center gap-1 hover:text-primary"
+                href={tournament.venue_map_url ?? "#"}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <MapPin className="h-3.5 w-3.5" />
+                {tournament.venue}
               </a>
             )}
           </div>
@@ -167,14 +222,21 @@ function PublicTournament() {
 
           <TabsContent value="fixtures">
             {upcoming.length === 0 ? (
-              <EmptyState title="Fixtures coming soon" description="The schedule has not been published yet." />
+              <EmptyState
+                title="Fixtures coming soon"
+                description="The schedule has not been published yet."
+              />
             ) : (
               <div className="space-y-6">
                 {groupByMatchday(upcoming).map(([label, list]) => (
                   <div key={label}>
-                    <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">{label}</h3>
+                    <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                      {label}
+                    </h3>
                     <div className="space-y-2">
-                      {list.map((m) => <MatchRow key={m.id} m={m} />)}
+                      {list.map((m) => (
+                        <MatchRow key={m.id} m={m} />
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -184,14 +246,21 @@ function PublicTournament() {
 
           <TabsContent value="results">
             {results.length === 0 ? (
-              <EmptyState title="No results yet" description="Completed matches will appear here with final scores." />
+              <EmptyState
+                title="No results yet"
+                description="Completed matches will appear here with final scores."
+              />
             ) : (
               <div className="space-y-6">
                 {groupByMatchday(results).map(([label, list]) => (
                   <div key={label}>
-                    <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">{label}</h3>
+                    <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                      {label}
+                    </h3>
                     <div className="space-y-2">
-                      {list.map((m) => <MatchRow key={m.id} m={m} />)}
+                      {list.map((m) => (
+                        <MatchRow key={m.id} m={m} />
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -199,8 +268,12 @@ function PublicTournament() {
             )}
           </TabsContent>
 
-          <TabsContent value="standings"><StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} /></TabsContent>
-          <TabsContent value="bracket"><BracketTab teams={teams} matches={matches} /></TabsContent>
+          <TabsContent value="standings">
+            <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
+          </TabsContent>
+          <TabsContent value="bracket">
+            <BracketTab teams={teams} matches={matches} />
+          </TabsContent>
           <TabsContent value="teams">
             {teams.length === 0 ? (
               <EmptyState title="No teams announced" />
@@ -224,13 +297,23 @@ function PublicTournament() {
       {footer.length > 0 && (
         <section className="border-t border-border/60 py-8">
           <div className="mx-auto max-w-5xl px-4">
-            <p className="mb-4 text-center text-xs uppercase tracking-widest text-muted-foreground">Our partners</p>
+            <p className="mb-4 text-center text-xs uppercase tracking-widest text-muted-foreground">
+              Our partners
+            </p>
             <div className="flex flex-wrap items-center justify-center gap-6">
               {footer.map((s) =>
                 s.logo_url ? (
-                  <img key={s.id} src={s.logo_url} alt={s.name} loading="lazy" className="h-10 object-contain" />
+                  <img
+                    key={s.id}
+                    src={s.logo_url}
+                    alt={s.name}
+                    loading="lazy"
+                    className="h-10 object-contain"
+                  />
                 ) : (
-                  <Badge key={s.id} variant="outline" className="capitalize">{s.name} · {s.tier}</Badge>
+                  <Badge key={s.id} variant="outline" className="capitalize">
+                    {s.name} · {s.tier}
+                  </Badge>
                 ),
               )}
             </div>

@@ -9,7 +9,7 @@ export type Match = Tables<"matches">;
 export type Sponsor = Tables<"sponsors">;
 export type Organization = Tables<"organizations">;
 
-const unwrap = <T,>({ data, error }: { data: T; error: { message: string } | null }) => {
+const unwrap = <T>({ data, error }: { data: T; error: { message: string } | null }) => {
   if (error) throw new Error(error.message);
   return data;
 };
@@ -18,13 +18,18 @@ export const useTournaments = () =>
   useQuery({
     queryKey: ["tournaments"],
     queryFn: async () =>
-      unwrap(await supabase.from("tournaments").select("*").order("created_at", { ascending: false })) as Tournament[],
+      unwrap(
+        await supabase.from("tournaments").select("*").order("created_at", { ascending: false }),
+      ) as Tournament[],
   });
 
 export const useTournament = (id: string) =>
   useQuery({
     queryKey: ["tournament", id],
-    queryFn: async () => unwrap(await supabase.from("tournaments").select("*").eq("id", id).maybeSingle()) as Tournament | null,
+    queryFn: async () =>
+      unwrap(
+        await supabase.from("tournaments").select("*").eq("id", id).maybeSingle(),
+      ) as Tournament | null,
     enabled: !!id,
   });
 
@@ -32,7 +37,9 @@ export const useTournamentBySlug = (slug: string) =>
   useQuery({
     queryKey: ["tournament-slug", slug],
     queryFn: async () =>
-      unwrap(await supabase.from("tournaments").select("*").eq("slug", slug).maybeSingle()) as Tournament | null,
+      unwrap(
+        await supabase.from("tournaments").select("*").eq("slug", slug).maybeSingle(),
+      ) as Tournament | null,
     enabled: !!slug,
   });
 
@@ -41,7 +48,12 @@ export const useTeams = (tournamentId: string) =>
     queryKey: ["teams", tournamentId],
     queryFn: async () =>
       unwrap(
-        await supabase.from("teams").select("*").eq("tournament_id", tournamentId).order("group_label").order("name"),
+        await supabase
+          .from("teams")
+          .select("*")
+          .eq("tournament_id", tournamentId)
+          .order("group_label")
+          .order("name"),
       ) as Team[],
     enabled: !!tournamentId,
   });
@@ -50,7 +62,9 @@ export const usePlayers = (tournamentId: string) =>
   useQuery({
     queryKey: ["players", tournamentId],
     queryFn: async () =>
-      unwrap(await supabase.from("players").select("*").eq("tournament_id", tournamentId).order("name")) as Player[],
+      unwrap(
+        await supabase.from("players").select("*").eq("tournament_id", tournamentId).order("name"),
+      ) as Player[],
     enabled: !!tournamentId,
   });
 
@@ -73,14 +87,17 @@ export const useSponsors = (tournamentId: string) =>
   useQuery({
     queryKey: ["sponsors", tournamentId],
     queryFn: async () =>
-      unwrap(await supabase.from("sponsors").select("*").eq("tournament_id", tournamentId).order("name")) as Sponsor[],
+      unwrap(
+        await supabase.from("sponsors").select("*").eq("tournament_id", tournamentId).order("name"),
+      ) as Sponsor[],
     enabled: !!tournamentId,
   });
 
 export const useOrganization = () =>
   useQuery({
     queryKey: ["organization"],
-    queryFn: async () => unwrap(await supabase.from("organizations").select("*").maybeSingle()) as Organization | null,
+    queryFn: async () =>
+      unwrap(await supabase.from("organizations").select("*").maybeSingle()) as Organization | null,
   });
 
 type TableName = "tournaments" | "teams" | "players" | "matches" | "sponsors" | "organizations";

@@ -25,8 +25,14 @@ export function ImageUpload({
   const [busy, setBusy] = useState(false);
 
   const pick = async (file: File) => {
-    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
-    if (file.size > MAX_BYTES) { toast.error("Image must be smaller than 5 MB"); return; }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      toast.error("Image must be smaller than 5 MB");
+      return;
+    }
     setBusy(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -34,10 +40,13 @@ export function ImageUpload({
       if (!uid) throw new Error("Sign in required");
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `${uid}/${folder}/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage.from("media").upload(path, file, { contentType: file.type, upsert: false });
+      const up = await supabase.storage
+        .from("media")
+        .upload(path, file, { contentType: file.type, upsert: false });
       if (up.error) throw new Error(up.error.message);
       const signed = await supabase.storage.from("media").createSignedUrl(path, TEN_YEARS);
-      if (signed.error || !signed.data) throw new Error(signed.error?.message ?? "Could not create link");
+      if (signed.error || !signed.data)
+        throw new Error(signed.error?.message ?? "Could not create link");
       onChange(signed.data.signedUrl);
       toast.success("Image uploaded");
     } catch (e) {
@@ -50,7 +59,12 @@ export function ImageUpload({
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40", rounded)}>
+      <div
+        className={cn(
+          "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40",
+          rounded,
+        )}
+      >
         {value ? (
           <img src={value} alt="" className="h-full w-full object-cover" />
         ) : (
@@ -58,8 +72,18 @@ export function ImageUpload({
         )}
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="mr-1.5 h-3.5 w-3.5" />}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+        >
+          {busy ? (
+            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <ImagePlus className="mr-1.5 h-3.5 w-3.5" />
+          )}
           {value ? "Replace" : "Upload"}
         </Button>
         {value && (
@@ -68,7 +92,16 @@ export function ImageUpload({
           </Button>
         )}
       </div>
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void pick(f); }} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void pick(f);
+        }}
+      />
     </div>
   );
 }

@@ -20,7 +20,11 @@ export const Route = createFileRoute("/_authenticated/tournaments/$id")({
   head: () => ({
     meta: [
       { title: "Tournament control room — Ecluid Basketball" },
-      { name: "description", content: "Teams, rosters, fixtures, live scores, standings, brackets and sponsors for your tournament." },
+      {
+        name: "description",
+        content:
+          "Teams, rosters, fixtures, live scores, standings, brackets and sponsors for your tournament.",
+      },
       { property: "og:title", content: "Tournament control room — Ecluid Basketball" },
       { property: "og:description", content: "Manage teams, fixtures, results and standings." },
     ],
@@ -42,7 +46,11 @@ function TournamentDetail() {
       <EmptyState
         title="Tournament not found"
         description="It may have been deleted."
-        action={<Link to="/dashboard"><Button className="mt-2">Back to dashboard</Button></Link>}
+        action={
+          <Link to="/dashboard">
+            <Button className="mt-2">Back to dashboard</Button>
+          </Link>
+        }
       />
     );
 
@@ -57,8 +65,14 @@ function TournamentDetail() {
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={tournament.status} />
             {tournament.is_public && (
-              <Link to="/public/tournament/$slug" params={{ slug: tournament.slug }} target="_blank">
-                <Button variant="outline" size="sm"><ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Public page</Button>
+              <Link
+                to="/public/tournament/$slug"
+                params={{ slug: tournament.slug }}
+                target="_blank"
+              >
+                <Button variant="outline" size="sm">
+                  <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Public page
+                </Button>
               </Link>
             )}
           </div>
@@ -71,11 +85,20 @@ function TournamentDetail() {
           {formatDateRangeInline(tournament.start_date, tournament.end_date)}
         </span>
         {tournament.venue && (
-          <a className="flex items-center gap-1 hover:text-primary" href={tournament.venue_map_url ?? "#"} target="_blank" rel="noreferrer">
-            <MapPin className="h-3.5 w-3.5" />{tournament.venue}
+          <a
+            className="flex items-center gap-1 hover:text-primary"
+            href={tournament.venue_map_url ?? "#"}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            {tournament.venue}
           </a>
         )}
-        <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{teams.length} teams · {players.length} players</span>
+        <span className="flex items-center gap-1">
+          <Users className="h-3.5 w-3.5" />
+          {teams.length} teams · {players.length} players
+        </span>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -97,19 +120,37 @@ function TournamentDetail() {
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="schedule"><ScheduleTab tournament={tournament} /></TabsContent>
-        <TabsContent value="standings"><StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} /></TabsContent>
-        <TabsContent value="bracket"><BracketTab teams={teams} matches={matches} /></TabsContent>
-        <TabsContent value="teams"><TeamsTab tournamentId={id} /></TabsContent>
-        <TabsContent value="players"><PlayersTab tournamentId={id} /></TabsContent>
-        <TabsContent value="sponsors"><SponsorsTab tournamentId={id} /></TabsContent>
+        <TabsContent value="schedule">
+          <ScheduleTab tournament={tournament} />
+        </TabsContent>
+        <TabsContent value="standings">
+          <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
+        </TabsContent>
+        <TabsContent value="bracket">
+          <BracketTab teams={teams} matches={matches} />
+        </TabsContent>
+        <TabsContent value="teams">
+          <TeamsTab tournamentId={id} />
+        </TabsContent>
+        <TabsContent value="players">
+          <PlayersTab tournamentId={id} />
+        </TabsContent>
+        <TabsContent value="sponsors">
+          <SponsorsTab tournamentId={id} />
+        </TabsContent>
         <TabsContent value="settings">
           <TournamentForm
             initial={tournament}
             submitLabel="Save changes"
             pending={update.isPending}
             onSubmit={(values) =>
-              update.mutate({ ...values, id }, { onSuccess: () => toast.success("Tournament updated"), onError: (e) => toast.error(e.message) })
+              update.mutate(
+                { ...values, id },
+                {
+                  onSuccess: () => toast.success("Tournament updated"),
+                  onError: (e) => toast.error(e.message),
+                },
+              )
             }
           />
         </TabsContent>

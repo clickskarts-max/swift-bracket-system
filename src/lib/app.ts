@@ -10,7 +10,8 @@ const slugify = (value: string) =>
     .replace(/-+/g, "-")
     .slice(0, 48);
 
-export const uniqueSlug = (value: string) => `${slugify(value) || "tournament"}-${Math.random().toString(36).slice(2, 6)}`;
+export const uniqueSlug = (value: string) =>
+  `${slugify(value) || "tournament"}-${Math.random().toString(36).slice(2, 6)}`;
 
 export const STATUSES = [
   { value: "draft", label: "Draft" },
@@ -35,7 +36,8 @@ export const SPONSOR_TIERS = ["title", "platinum", "gold", "silver", "bronze", "
 export const mapsUrl = (venue?: string | null) =>
   venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}` : null;
 
-const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ?? NepaliDatePkg) as any;
+const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ??
+  NepaliDatePkg) as any;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const bsFromAd = (d: Date) => {
   const bs = NepaliDate.fromAD(d);
@@ -48,8 +50,6 @@ export const formatDate = (value?: string | null) => {
   const bs = bsFromAd(d);
   return `${bs}`;
 };
-
-
 
 export const formatDateRangeInline = (start?: string | null, end?: string | null) =>
   `${formatDate(start)} – ${formatDate(end)}`;
@@ -67,7 +67,6 @@ export const formatCountdownMs = (ms: number) => {
   if (hours > 0) return `in ${hours}h ${mins}m ${secs}s`;
   return `in ${mins}m ${secs}s`;
 };
-
 
 export const toLocalInput = (value?: string | null) => {
   if (!value) return "";
