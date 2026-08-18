@@ -71,6 +71,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const qc = useQueryClient();
   const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
   const [editing, setEditing] = useState<Match | null>(null);
+  const [mode, setMode] = useState<"game" | "score">("game");
   const [busy, setBusy] = useState(false);
 
   const teamById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
@@ -350,9 +351,22 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                           size="icon"
                           variant="ghost"
                           aria-label="Edit match"
-                          onClick={() => setEditing(m)}
+                          onClick={() => {
+                            setMode("game");
+                            setEditing(m);
+                          }}
                         >
                           <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setMode("score");
+                            setEditing(m);
+                          }}
+                        >
+                          Score
                         </Button>
                       </div>
                     </div>
@@ -366,6 +380,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
       <MatchDialog
         match={editing}
+        mode={mode}
         teams={teams.map((t) => ({ id: t.id, name: t.name }))}
         players={players.map((p) => ({
           id: p.id,
@@ -391,6 +406,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
 function MatchDialog({
   match,
+  mode,
   teams,
   players,
   onClose,
@@ -398,6 +414,7 @@ function MatchDialog({
   pending,
 }: {
   match: Match | null;
+  mode: "game" | "score";
   teams: { id: string; name: string }[];
   players: { id: string; name: string; team_id: string | null; jersey_number: number | null }[];
   onClose: () => void;
@@ -463,10 +480,12 @@ function MatchDialog({
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Match {draft.match_no ?? ""} · {draft.round_name}
+            {mode === "score" ? "Score data" : "Game data"} · Match {draft.match_no ?? ""}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
+          {mode === "game" && (
+          <>
           <Field label="Match number">
             <Input
               type="number"
@@ -538,6 +557,10 @@ function MatchDialog({
               </SelectContent>
             </Select>
           </Field>
+          </>
+          )}
+          {mode === "score" && (
+          <>
           <Field label="Home score">
             <Input
               type="number"
@@ -556,6 +579,10 @@ function MatchDialog({
               onChange={(e) => set("score_b", e.target.value ? Number(e.target.value) : null)}
             />
           </Field>
+          </>
+          )}
+          {mode === "game" && (
+          <>
           <Field label="Tip-off">
             <Input
               type="datetime-local"
@@ -603,8 +630,11 @@ function MatchDialog({
               onChange={(e) => set("notes", e.target.value || null)}
             />
           </Field>
+          </>
+          )}
         </div>
 
+        {mode === "score" && (
         <div className="mt-4 rounded-xl border border-border/60 p-3">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -670,7 +700,9 @@ function MatchDialog({
             manually.
           </p>
         </div>
+        )}
 
+        {mode === "score" && (
         <div className="mt-4 rounded-xl border border-border/60 p-3">
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Player of the match
@@ -701,7 +733,21 @@ function MatchDialog({
               Add players to both teams to record game stats.
             </p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="space-y-4">
+              {([
+                ["a", draft.team_a_id] as const,
+                ["b", draft.team_b_id] as const,
+              ]).map(([side, teamId]) => {
+                const roster = rosterFor(teamId);
+                if (roster.length === 0) return null;
+                const teamName =
+                  teams.find((t) => t.id === teamId)?.name ??
+                  (side === "a" ? (draft.placeholder_a ?? "Home") : (draft.placeholder_b ?? "Away"));
+                return (
+                  <div key={side} className="overflow-x-auto">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
+                      {teamName}
+                    </p>
               <table className="w-full min-w-[420px] text-sm">
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -713,11 +759,14 @@ function MatchDialog({
                   </tr>
                 </thead>
                 <tbody>
-                  {matchRoster.map((p) => {
+                  {roster.map((p) => {
                     const s = statFor(p.id);
                     return (
                       <tr key={p.id}>
-                        <td className="max-w-[10rem] truncate p-1 text-xs">{p.name}</td>
+                        <td className="max-w-[10rem] truncate p-1 text-xs">
+                          {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
+                          {p.name}
+                        </td>
                         {(["points", "rebounds", "assists", "fouls"] as const).map((k) => (
                           <td key={k} className="p-1">
                             <Input
@@ -734,9 +783,13 @@ function MatchDialog({
                   })}
                 </tbody>
               </table>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
+        )}
 
         <Button
           disabled={pending}
@@ -770,7 +823,7 @@ function MatchDialog({
             })
           }
         >
-          Save match
+          {mode === "score" ? "Save score" : "Save match"}
         </Button>
       </DialogContent>
     </Dialog>
