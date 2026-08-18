@@ -33,8 +33,15 @@ import { ImageUpload } from "@/components/image-upload";
 import { POSITIONS } from "@/lib/app";
 import { usePlayers, useTeams, useUpsert, useRemove, type Player } from "@/lib/queries";
 
+type NepaliDateLike = {
+  getYear(): number;
+  getMonth(): number;
+  getDate(): number;
+  toJsDate(): Date;
+};
+type NepaliDateCtor = { new (value: string): NepaliDateLike; fromAD(date: Date): NepaliDateLike };
 const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ??
-  NepaliDatePkg) as any;
+  NepaliDatePkg) as NepaliDateCtor;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const toBs = (ad: Date) => {
   const bs = NepaliDate.fromAD(ad);
