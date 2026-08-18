@@ -11,6 +11,11 @@ import { EmptyState, TeamChip } from "@/components/data-bits";
 import { computeStandings } from "@/lib/standings";
 import type { Match, Team, Tournament } from "@/lib/queries";
 
+type StandingsTeamLike = Pick<
+  Team,
+  "id" | "name" | "logo_url" | "jersey_color" | "group_label"
+>;
+
 const playoffSlots = (playoffFormat?: string | null) => {
   if (!playoffFormat || playoffFormat === "none") return 0;
   if (playoffFormat.startsWith("top2")) return 2;
@@ -227,7 +232,7 @@ export function StandingsTable({
   groupLabel,
   tournament,
 }: {
-  teams: Team[];
+  teams: StandingsTeamLike[];
   matches: Match[];
   groupLabel?: string | null;
   tournament: Tournament | null;
@@ -340,7 +345,7 @@ export function StandingsTab({
   matches,
   tournament,
 }: {
-  teams: Team[];
+  teams: StandingsTeamLike[];
   matches: Match[];
   tournament: Tournament | null;
 }) {
