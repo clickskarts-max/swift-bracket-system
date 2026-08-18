@@ -671,6 +671,73 @@ function MatchDialog({
           </p>
         </div>
 
+        <div className="mt-4 rounded-xl border border-border/60 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Player of the match
+          </p>
+          <Select
+            value={potm ?? "none"}
+            onValueChange={(v) => setPotm(v === "none" ? null : v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select player…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No award</SelectItem>
+              {matchRoster.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Player stats
+          </p>
+          {matchRoster.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Add players to both teams to record game stats.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[420px] text-sm">
+                <thead>
+                  <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <th className="p-1 text-left font-medium">Player</th>
+                    <th className="p-1 text-center font-medium">PTS</th>
+                    <th className="p-1 text-center font-medium">REB</th>
+                    <th className="p-1 text-center font-medium">AST</th>
+                    <th className="p-1 text-center font-medium">PF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matchRoster.map((p) => {
+                    const s = statFor(p.id);
+                    return (
+                      <tr key={p.id}>
+                        <td className="max-w-[10rem] truncate p-1 text-xs">{p.name}</td>
+                        {(["points", "rebounds", "assists", "fouls"] as const).map((k) => (
+                          <td key={k} className="p-1">
+                            <Input
+                              type="number"
+                              min={0}
+                              className="h-9 w-16 text-center"
+                              value={s[k]}
+                              onChange={(e) => setStat(p.id, k, e.target.value)}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
         <Button
           disabled={pending}
           onClick={() =>
@@ -688,6 +755,10 @@ function MatchDialog({
               score_a: scoreA,
               score_b: scoreB,
               periods: usePeriods ? periods : emptyPeriods(),
+              player_of_match_id: potm,
+              player_stats: stats.filter(
+                (s) => s.points || s.rebounds || s.assists || s.fouls,
+              ),
               scheduled_at: draft.scheduled_at,
               venue: draft.venue,
               court: draft.court,
