@@ -700,7 +700,9 @@ function MatchDialog({
             manually.
           </p>
         </div>
+        )}
 
+        {mode === "score" && (
         <div className="mt-4 rounded-xl border border-border/60 p-3">
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Player of the match
@@ -731,7 +733,21 @@ function MatchDialog({
               Add players to both teams to record game stats.
             </p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="space-y-4">
+              {([
+                ["a", draft.team_a_id] as const,
+                ["b", draft.team_b_id] as const,
+              ]).map(([side, teamId]) => {
+                const roster = rosterFor(teamId);
+                if (roster.length === 0) return null;
+                const teamName =
+                  teams.find((t) => t.id === teamId)?.name ??
+                  (side === "a" ? (draft.placeholder_a ?? "Home") : (draft.placeholder_b ?? "Away"));
+                return (
+                  <div key={side} className="overflow-x-auto">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
+                      {teamName}
+                    </p>
               <table className="w-full min-w-[420px] text-sm">
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -743,11 +759,14 @@ function MatchDialog({
                   </tr>
                 </thead>
                 <tbody>
-                  {matchRoster.map((p) => {
+                  {roster.map((p) => {
                     const s = statFor(p.id);
                     return (
                       <tr key={p.id}>
-                        <td className="max-w-[10rem] truncate p-1 text-xs">{p.name}</td>
+                        <td className="max-w-[10rem] truncate p-1 text-xs">
+                          {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
+                          {p.name}
+                        </td>
                         {(["points", "rebounds", "assists", "fouls"] as const).map((k) => (
                           <td key={k} className="p-1">
                             <Input
@@ -764,9 +783,13 @@ function MatchDialog({
                   })}
                 </tbody>
               </table>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
+        )}
 
         <Button
           disabled={pending}
@@ -800,7 +823,7 @@ function MatchDialog({
             })
           }
         >
-          Save match
+          {mode === "score" ? "Save score" : "Save match"}
         </Button>
       </DialogContent>
     </Dialog>
