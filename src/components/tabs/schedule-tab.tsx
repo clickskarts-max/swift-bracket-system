@@ -230,20 +230,27 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                   const a = label(m, "a");
                   const b = label(m, "b");
                   return (
-                    <div key={m.id} className="surface-card flex flex-wrap items-center gap-3 p-3 sm:flex-nowrap">
-                      <span className="w-10 shrink-0 text-xs text-muted-foreground">M{m.match_no ?? "—"}</span>
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <div className="flex items-center gap-3">
-                          <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="flex-1" />
-                          <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
-                          <TeamChip name={b.name} logoUrl={b.logo_url} color={b.jersey_color} className="flex-1 justify-end text-right" />
-                        </div>
-                        <span className="hidden text-center text-xs text-muted-foreground sm:block">
-                          {m.status === "completed" ? formatDate(m.scheduled_at) : <TipoffCountdown scheduledAt={m.scheduled_at} />}
-                        </span>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
+                    <div key={m.id} className="surface-card p-4">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">M{m.match_no ?? "—"}</span>
                         <StatusPill status={m.status} />
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
+                        <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="min-w-0" />
+                        <div className="flex flex-col items-center gap-1.5">
+                          <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
+                          <span className="text-center text-xs text-muted-foreground">
+                            {m.status === "completed" ? formatDate(m.scheduled_at) : <TipoffCountdown scheduledAt={m.scheduled_at} />}
+                          </span>
+                        </div>
+                        <TeamChip
+                          name={b.name}
+                          logoUrl={b.logo_url}
+                          color={b.jersey_color}
+                          className="min-w-0 flex-row-reverse justify-start text-right"
+                        />
+                      </div>
+                      <div className="mt-2 flex items-center justify-end gap-1">
                         <Button size="icon" variant="ghost" aria-label="Switch home and away" onClick={() => swapSides(m)}>
                           <ArrowLeftRight className="h-3.5 w-3.5" />
                         </Button>
