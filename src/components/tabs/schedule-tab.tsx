@@ -438,6 +438,8 @@ function MatchDialog({
               variant="outline"
               className="w-full"
               onClick={() =>
+                {
+                setPeriods((p) => ({ a: p.b, b: p.a }));
                 setDraft((d) =>
                   d
                     ? {
@@ -450,7 +452,8 @@ function MatchDialog({
                         score_b: d.score_a,
                       }
                     : d,
-                )
+                );
+                }
               }
             >
               <ArrowLeftRight className="mr-1.5 h-3.5 w-3.5" /> Switch sides
@@ -496,7 +499,8 @@ function MatchDialog({
             <Input
               type="number"
               min={0}
-              value={draft.score_a ?? ""}
+              disabled={usePeriods}
+              value={usePeriods ? totalA : (draft.score_a ?? "")}
               onChange={(e) => set("score_a", e.target.value ? Number(e.target.value) : null)}
             />
           </Field>
@@ -504,7 +508,8 @@ function MatchDialog({
             <Input
               type="number"
               min={0}
-              value={draft.score_b ?? ""}
+              disabled={usePeriods}
+              value={usePeriods ? totalB : (draft.score_b ?? "")}
               onChange={(e) => set("score_b", e.target.value ? Number(e.target.value) : null)}
             />
           </Field>
