@@ -36,8 +36,10 @@ export const SPONSOR_TIERS = ["title", "platinum", "gold", "silver", "bronze", "
 export const mapsUrl = (venue?: string | null) =>
   venue ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}` : null;
 
+type NepaliDateLike = { getYear(): number; getMonth(): number; getDate(): number };
+type NepaliDateCtor = { fromAD(date: Date): NepaliDateLike };
 const NepaliDate = ((NepaliDatePkg as unknown as { default?: unknown }).default ??
-  NepaliDatePkg) as any;
+  NepaliDatePkg) as NepaliDateCtor;
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const bsFromAd = (d: Date) => {
   const bs = NepaliDate.fromAD(d);
