@@ -42,6 +42,11 @@ function PublicTournament() {
   const { data: matches = [] } = useMatches(tournament?.id ?? "");
   const { data: sponsors = [] } = useSponsors(tournament?.id ?? "");
 
+  const matchdayByDate = useMemo(() => {
+    const keys = [...new Set(matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)))].sort();
+    return new Map(keys.map((k, i) => [k, i + 1]));
+  }, [matches]);
+
   if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading tournament…</p>;
   if (!tournament || !tournament.is_public)
     return (
@@ -57,11 +62,6 @@ function PublicTournament() {
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = matches.filter((m) => m.status !== "completed");
   const results = matches.filter((m) => m.status === "completed");
-
-  const matchdayByDate = useMemo(() => {
-    const keys = [...new Set(matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)))].sort();
-    return new Map(keys.map((k, i) => [k, i + 1]));
-  }, [matches]);
 
   const matchdayLabel = (m: (typeof matches)[number]) => {
     if (!m.scheduled_at) return "Unscheduled";
@@ -91,20 +91,23 @@ function PublicTournament() {
     const a = side(m.team_a_id, m.placeholder_a);
     const b = side(m.team_b_id, m.placeholder_b);
     return (
-      <div className="surface-card flex flex-wrap items-center gap-3 p-3">
-        <span className="w-24 shrink-0 text-xs text-muted-foreground">{m.round_name}</span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="flex-1" />
+      <div className="surface-card p-4">
+        <p className="mb-2 text-center text-[11px] uppercase tracking-widest text-muted-foreground sm:text-left">{m.round_name}</p>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
+          <TeamChip name={a.name} logoUrl={a.logo_url} color={a.jersey_color} className="min-w-0" />
+          <div className="flex flex-col items-center gap-1.5">
             <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
-            <TeamChip name={b.name} logoUrl={b.logo_url} color={b.jersey_color} className="flex-1 justify-end text-right" />
-          </div>
-          <div className="flex items-center justify-center gap-2">
             <span className="text-center text-xs text-muted-foreground">
               {m.status === "completed" ? formatDate(m.scheduled_at) : <TipoffCountdown scheduledAt={m.scheduled_at} />}
             </span>
             <StatusPill status={m.status} />
           </div>
+          <TeamChip
+            name={b.name}
+            logoUrl={b.logo_url}
+            color={b.jersey_color}
+            className="min-w-0 flex-row-reverse justify-start text-right"
+          />
         </div>
       </div>
     );
