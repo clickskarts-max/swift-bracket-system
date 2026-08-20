@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Field } from "@/components/data-bits";
+import { ImageUpload } from "@/components/image-upload";
 import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS } from "@/lib/formats";
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
+
+export type TeamValue = {
+  id?: string;
+  name: string;
+  logo_url: string | null;
+  group_label: string | null;
+};
 
 export type TournamentValues = {
   name: string;
@@ -36,6 +44,7 @@ export type TournamentValues = {
   banner_url: string | null;
   description: string | null;
   is_public: boolean;
+  teams?: TeamValue[];
 };
 
 const schema = z.object({
@@ -67,6 +76,7 @@ const empty = (): TournamentValues => ({
   banner_url: null,
   description: null,
   is_public: true,
+  teams: [],
 });
 
 export function TournamentForm({
@@ -80,6 +90,7 @@ export function TournamentForm({
   onSubmit: (values: TournamentValues) => void;
   pending?: boolean;
 }) {
+  const [step, setStep] = useState(1);
   const [values, setValues] = useState<TournamentValues>(
     initial
       ? {
@@ -100,36 +111,130 @@ export function TournamentForm({
           banner_url: initial.banner_url,
           description: initial.description,
           is_public: initial.is_public,
+          teams: [], // Handled separately if needed, but usually creation only
         }
       : empty(),
   );
 
+  // Initialize teams when team_count changes in Step 1
+  useEffect(() => {
+    if (!initial && values.team_count > 0 && (!values.teams || values.teams.length === 0)) {
+      const initialTeams = Array.from({ length: values.team_count }, (_, i) => ({
+        name: `Team ${i + 1}`,
+        logo_url: null,
+        group_label: null,
+      }));
+      setValues((v) => ({ ...v, teams: initialTeams }));
+    } else if (!initial && values.teams && values.teams.length !== values.team_count) {
+      // Adjust teams array length if team_count changes
+      setValues((v) => {
+        const nextTeams = [...(v.teams || [])];
+        if (nextTeams.length < values.team_count) {
+          for (let i = nextTeams.length; i < values.team_count; i++) {
+            nextTeams.push({ name: `Team ${i + 1}`, logo_url: null, group_label: null });
+          }
+        } else if (nextTeams.length > values.team_count) {
+          nextTeams.splice(values.team_count);
+        }
+        return { ...v, teams: nextTeams };
+      });
+    }
+  }, [values.team_count, initial]);
+
   const set = <K extends keyof TournamentValues>(key: K, value: TournamentValues[K]) =>
     setValues((v) => ({ ...v, [key]: value }));
 
+  const setTeam = (index: number, team: Partial<TeamValue>) => {
+    setValues((v) => {
+      const nextTeams = [...(v.teams || [])];
+      nextTeams[index] = { ...nextTeams[index], ...team };
+      return { ...v, teams: nextTeams };
+    });
+  };
+
+  const validateStep = (currentStep: number) => {
+    if (currentStep === 1) {
+      if (!values.name.trim()) {
+        toast.error("Tournament name is required");
+        return false;
+      }
+      if (values.team_count < 2) {
+        toast.error("At least 2 teams are required");
+        return false;
+      }
+      const isGroupKnockout = values.format === "group_knockout";
+      if (isGroupKnockout) {
+        const knockoutTeams = values.group_count * values.qualifiers_per_group;
+        const isValidKnockoutSize = (size: number) => size > 0 && (size & (size - 1)) === 0;
+        if (!isValidKnockoutSize(knockoutTeams)) {
+          toast.error(`Invalid knockout size (${knockoutTeams}). Must be 2, 4, 8, or 16.`);
+          return false;
+        }
+      }
+    }
+
+    if (currentStep === 2) {
+      const teams = values.teams || [];
+      const names = new Set();
+      for (let i = 0; i < teams.length; i++) {
+        const name = teams[i].name.trim();
+        if (!name) {
+          toast.error(`Team ${i + 1} name cannot be blank`);
+          return false;
+        }
+        if (names.has(name)) {
+          toast.error(`A team with name "${name}" already exists`);
+          return false;
+        }
+        names.add(name);
+      }
+
+      // Group capacity validation
+      if (values.format === "group_knockout" && values.group_count > 0) {
+        const teamsPerGroup = Math.ceil(values.team_count / values.group_count);
+        const groupCounts: Record<string, number> = {};
+        for (const team of teams) {
+          if (team.group_label) {
+            groupCounts[team.group_label] = (groupCounts[team.group_label] || 0) + 1;
+            if (groupCounts[team.group_label] > teamsPerGroup) {
+              toast.error(`Group ${team.group_label} already has the maximum of ${teamsPerGroup} teams.`);
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const next = () => {
+    if (validateStep(step)) {
+      setStep((s) => s + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const back = () => {
+    setStep((s) => s - 1);
+    window.scrollTo(0, 0);
+  };
+
   const submit = () => {
-    const next = { ...values, slug: values.slug || uniqueSlug(values.name) };
-    const parsed = schema.safeParse(next);
+    const nextVal = { ...values, slug: values.slug || uniqueSlug(values.name) };
+    const parsed = schema.safeParse(nextVal);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check the form");
       return;
     }
-    onSubmit(next);
+    onSubmit(nextVal);
   };
 
   const isLeague = values.format === "league";
   const isGroupKnockout = values.format === "group_knockout";
-
-  const teamsPerGroup =
-    isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
+  const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
   const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
   const knockoutTeams = isGroupKnockout ? values.group_count * values.qualifiers_per_group : 0;
-
-  const isValidKnockoutSize = (size: number) => {
-    if (size <= 0) return false;
-    // Check if it's a power of 2
-    return (size & (size - 1)) === 0;
-  };
 
   const knockoutRoundLabel = (size: number) => {
     if (size === 2) return "Final";
@@ -139,10 +244,10 @@ export function TournamentForm({
     return `${size}-team bracket`;
   };
 
-  return (
+  const renderStep1 = () => (
     <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold">Basics</h2>
+        <h2 className="font-display text-lg font-semibold text-primary">Step 1: Basics & Format</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Tournament name">
             <Input
@@ -163,38 +268,18 @@ export function TournamentForm({
           </Field>
           <div className="col-span-full">
             <Field label="Format">
-              {isGroupKnockout ? (
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2 font-display text-lg font-bold text-primary">
-                    <span>Group Stage</span>
-                    <span className="text-muted-foreground">→</span>
-                    <span>Knockout</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Teams compete in groups, then top teams advance to knockout rounds.
-                  </p>
-                  <Button
-                    variant="link"
-                    className="h-auto w-fit p-0 text-xs text-muted-foreground underline"
-                    onClick={() => set("format", "league")}
-                  >
-                    Change Format
-                  </Button>
-                </div>
-              ) : (
-                <Select value={values.format} onValueChange={(v) => set("format", v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TOURNAMENT_FORMATS.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
-                        {f.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              <Select value={values.format} onValueChange={(v) => set("format", v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TOURNAMENT_FORMATS.map((f) => (
+                    <SelectItem key={f.value} value={f.value}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
           </div>
           <Field label="Status">
@@ -214,11 +299,7 @@ export function TournamentForm({
           {(isLeague || isGroupKnockout) && (
             <Field
               label={isGroupKnockout ? "Group Stage Legs" : "Legs (times each pair meets)"}
-              hint={
-                isGroupKnockout
-                  ? "How many times each pair of teams plays during the group stage."
-                  : "1 = single round robin, 2 = double, 3+ supported"
-              }
+              hint={isGroupKnockout ? "Group stage pairings." : "1 = single round robin, 2 = double"}
             >
               <Input
                 type="number"
@@ -268,8 +349,7 @@ export function TournamentForm({
                 />
                 {isUnevenGroups && (
                   <p className="mt-1 text-xs text-destructive">
-                    Warning: Teams cannot be evenly distributed ({teamsPerGroup.toFixed(1)} per
-                    group).
+                    Warning: Teams cannot be evenly distributed.
                   </p>
                 )}
               </Field>
@@ -285,8 +365,8 @@ export function TournamentForm({
               </Field>
 
               <Field
-                label="Teams Qualifying from Each Group"
-                hint="Top teams from each group advance to the knockout stage."
+                label="Qualifiers from Each Group"
+                hint="Top teams advancing to knockout."
               >
                 <Input
                   type="number"
@@ -295,11 +375,6 @@ export function TournamentForm({
                   value={values.qualifiers_per_group}
                   onChange={(e) => set("qualifiers_per_group", Number(e.target.value) || 1)}
                 />
-                {values.qualifiers_per_group > teamsPerGroup && teamsPerGroup > 0 && (
-                  <p className="mt-1 text-xs text-destructive">
-                    Qualifiers cannot exceed teams per group.
-                  </p>
-                )}
               </Field>
 
               <div className="col-span-full space-y-3 rounded-lg bg-muted/50 p-4">
@@ -314,33 +389,20 @@ export function TournamentForm({
                   <div>
                     <p className="text-muted-foreground">Groups</p>
                     <p className="font-medium">
-                      {values.group_count} ({teamsPerGroup.toFixed(0)} teams each)
+                      {values.group_count} ({Math.floor(teamsPerGroup)} teams each)
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Legs</p>
-                    <p className="font-medium">{values.legs} (Group Stage)</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Knockout Stage</p>
-                    <p
-                      className={`font-medium ${!isValidKnockoutSize(knockoutTeams) ? "text-destructive" : ""}`}
-                    >
+                    <p className={`font-medium ${!(knockoutTeams > 0 && (knockoutTeams & (knockoutTeams - 1)) === 0) ? "text-destructive" : ""}`}>
                       {knockoutTeams} Teams
                     </p>
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-full">
                     <p className="text-muted-foreground">Rounds</p>
                     <p className="font-medium">{knockoutRoundLabel(knockoutTeams)}</p>
                   </div>
                 </div>
-                {!isValidKnockoutSize(knockoutTeams) && knockoutTeams > 0 && (
-                  <p className="text-xs text-destructive">
-                    This setup would produce {knockoutTeams} knockout teams. Please choose a
-                    qualifier count that creates a supported knockout bracket (2, 4, 8, or 16
-                    teams).
-                  </p>
-                )}
               </div>
             </>
           )}
@@ -349,7 +411,7 @@ export function TournamentForm({
             <Field label="Number of teams">
               <Input
                 type="number"
-                min={0}
+                min={2}
                 value={values.team_count}
                 onChange={(e) => set("team_count", Number(e.target.value) || 0)}
               />
@@ -357,9 +419,112 @@ export function TournamentForm({
           )}
         </div>
       </div>
+      <div className="flex justify-end">
+        <Button onClick={next} className="w-full sm:w-auto">
+          Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
 
+  const renderStep2 = () => {
+    const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
+    const teams = values.teams || [];
+
+    return (
+      <div className="space-y-6">
+        <div className="surface-card p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold text-primary">Step 2: Team Details</h2>
+            <div className="text-sm text-muted-foreground">
+              {teams.length} teams total
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="hidden grid-cols-[80px_1fr_150px] gap-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:grid">
+              <div>Logo</div>
+              <div>Team Name</div>
+              <div>{values.format === "group_knockout" ? "Group" : ""}</div>
+            </div>
+
+            <div className="space-y-3">
+              {teams.map((team, idx) => (
+                <div key={idx} className="flex flex-col gap-4 rounded-lg border border-border p-3 sm:grid sm:grid-cols-[80px_1fr_150px] sm:items-center">
+                  <div className="flex justify-center sm:justify-start">
+                    <div className="relative group">
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-muted border border-border flex items-center justify-center">
+                        {team.logo_url ? (
+                          <img src={team.logo_url} alt="" className="h-full w-full object-contain" />
+                        ) : (
+                          <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
+                        <ImageUpload 
+                          value={team.logo_url}
+                          onChange={(url) => setTeam(idx, { logo_url: url })}
+                          folder="team-logos"
+                          className="!p-0"
+                          rounded="rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-1">
+                    <Label className="mb-1.5 block text-xs sm:hidden">Team Name</Label>
+                    <Input
+                      value={team.name}
+                      onChange={(e) => setTeam(idx, { name: e.target.value })}
+                      placeholder={`Team ${idx + 1}`}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {values.format === "group_knockout" && (
+                    <div>
+                      <Label className="mb-1.5 block text-xs sm:hidden">Group</Label>
+                      <Select
+                        value={team.group_label || "none"}
+                        onValueChange={(v) => setTeam(idx, { group_label: v === "none" ? null : v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="No group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No group</SelectItem>
+                          {groups.map((g) => (
+                            <SelectItem key={g} value={g}>
+                              Group {g}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <Button variant="outline" onClick={back}>
+            <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
+          </Button>
+          <Button onClick={next} className="w-full sm:w-auto">
+            Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderStep3 = () => (
+    <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold">Schedule & venue</h2>
+        <h2 className="font-display text-lg font-semibold text-primary">Step 3: Schedule & Venue</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Start date">
             <Input
@@ -385,7 +550,7 @@ export function TournamentForm({
               placeholder="National Sports Complex, Kathmandu"
             />
           </Field>
-          <Field label="Google Maps link" hint="Auto-filled from the venue, editable">
+          <Field label="Google Maps link">
             <div className="flex gap-2">
               <Input
                 value={values.venue_map_url ?? ""}
@@ -394,12 +559,7 @@ export function TournamentForm({
               />
               {values.venue_map_url && (
                 <Button variant="outline" size="icon" asChild>
-                  <a
-                    href={values.venue_map_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Open map"
-                  >
+                  <a href={values.venue_map_url} target="_blank" rel="noreferrer">
                     <MapPin className="h-4 w-4" />
                   </a>
                 </Button>
@@ -408,22 +568,34 @@ export function TournamentForm({
           </Field>
         </div>
       </div>
+      <div className="flex items-center justify-between gap-4">
+        <Button variant="outline" onClick={back}>
+          <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
+        </Button>
+        <Button onClick={next} className="w-full sm:w-auto">
+          Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
 
+  const renderStep4 = () => (
+    <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold">Branding</h2>
+        <h2 className="font-display text-lg font-semibold text-primary">Step 4: Branding & Details</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Logo image URL">
-            <Input
-              value={values.logo_url ?? ""}
-              onChange={(e) => set("logo_url", e.target.value || null)}
-              placeholder="https://..."
+             <ImageUpload 
+              value={values.logo_url}
+              onChange={(url) => set("logo_url", url)}
+              folder="tournament-logos"
             />
           </Field>
           <Field label="Banner image URL">
-            <Input
-              value={values.banner_url ?? ""}
-              onChange={(e) => set("banner_url", e.target.value || null)}
-              placeholder="https://..."
+             <ImageUpload 
+              value={values.banner_url}
+              onChange={(url) => set("banner_url", url)}
+              folder="tournament-banners"
             />
           </Field>
         </div>
@@ -438,17 +610,60 @@ export function TournamentForm({
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
             <p className="text-sm font-medium">Public tournament page</p>
-            <p className="text-xs text-muted-foreground">
-              Anyone with the link can view fixtures, standings and brackets.
-            </p>
+            <p className="text-xs text-muted-foreground">Anyone with the link can view.</p>
           </div>
           <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
         </div>
       </div>
-
-      <Button size="lg" onClick={submit} disabled={pending} className="w-full sm:w-auto">
-        {submitLabel}
-      </Button>
+      <div className="flex items-center justify-between gap-4">
+        <Button variant="outline" onClick={back}>
+          <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
+        </Button>
+        <Button size="lg" onClick={submit} disabled={pending} className="w-full sm:w-auto">
+          {submitLabel}
+        </Button>
+      </div>
     </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 mb-2 overflow-x-auto py-2">
+        {[1, 2, 3, 4].map((s) => (
+          <div key={s} className="flex items-center shrink-0">
+            <div 
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+                step >= s ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {s}
+            </div>
+            {s < 4 && (
+              <div className={`h-[2px] w-8 mx-2 ${step > s ? "bg-primary" : "bg-muted"}`} />
+            )}
+          </div>
+        ))}
+      </div>
+      
+      <div className="mb-4">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+          Step {step} of 4
+        </p>
+      </div>
+
+      {step === 1 && renderStep1()}
+      {step === 2 && renderStep2()}
+      {step === 3 && renderStep3()}
+      {step === 4 && renderStep4()}
+    </div>
+  );
+}
+
+// Add a Label helper if missing from UI components (it was imported from radix/react-label but let's be safe)
+function Label({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <label className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}>
+      {children}
+    </label>
   );
 }
