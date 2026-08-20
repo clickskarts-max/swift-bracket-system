@@ -8,6 +8,7 @@ export type Player = Tables<"players">;
 export type Match = Tables<"matches">;
 export type Sponsor = Tables<"sponsors">;
 export type Organization = Tables<"organizations">;
+export type Venue = Tables<"tournament_venues">;
 
 const unwrap = <T>({ data, error }: { data: T; error: { message: string } | null }) => {
   if (error) throw new Error(error.message);
@@ -93,6 +94,20 @@ export const useSponsors = (tournamentId: string) =>
     enabled: !!tournamentId,
   });
 
+export const useVenues = (tournamentId: string) =>
+  useQuery({
+    queryKey: ["venues", tournamentId],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("tournament_venues")
+          .select("*")
+          .eq("tournament_id", tournamentId)
+          .order("name"),
+      ) as Venue[],
+    enabled: !!tournamentId,
+  });
+
 export const useOrganization = () =>
   useQuery({
     queryKey: ["organization"],
@@ -151,7 +166,14 @@ export const usePublicSponsors = (tournamentId: string) =>
     enabled: !!tournamentId,
   });
 
-type TableName = "tournaments" | "teams" | "players" | "matches" | "sponsors" | "organizations";
+type TableName =
+  | "tournaments"
+  | "teams"
+  | "players"
+  | "matches"
+  | "sponsors"
+  | "organizations"
+  | "tournament_venues";
 
 export function useUpsert(table: TableName, invalidate: unknown[][]) {
   const qc = useQueryClient();

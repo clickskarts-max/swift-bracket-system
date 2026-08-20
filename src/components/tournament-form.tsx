@@ -26,6 +26,14 @@ export type TeamValue = {
   group_label: string | null;
 };
 
+export type VenueValue = {
+  id?: string;
+  name: string;
+  address: string | null;
+  google_maps_url: string | null;
+  notes?: string | null;
+};
+
 export type TournamentValues = {
   name: string;
   slug: string;
@@ -45,6 +53,7 @@ export type TournamentValues = {
   description: string | null;
   is_public: boolean;
   teams?: TeamValue[];
+  venues?: VenueValue[];
 };
 
 const schema = z.object({
@@ -77,6 +86,7 @@ const empty = (): TournamentValues => ({
   description: null,
   is_public: true,
   teams: [],
+  venues: [{ name: "", address: null, google_maps_url: null }],
 });
 
 export function TournamentForm({
@@ -154,6 +164,30 @@ export function TournamentForm({
     });
   };
 
+  const setVenue = (index: number, venue: Partial<VenueValue>) => {
+    setValues((v) => {
+      const nextVenues = [...(v.venues || [])];
+      if (nextVenues[index]) {
+        nextVenues[index] = { ...nextVenues[index], ...venue } as VenueValue;
+      }
+      return { ...v, venues: nextVenues };
+    });
+  };
+
+  const addVenue = () => {
+    setValues((v) => ({
+      ...v,
+      venues: [...(v.venues || []), { name: "", address: null, google_maps_url: null }],
+    }));
+  };
+
+  const removeVenue = (index: number) => {
+    setValues((v) => {
+      const nextVenues = (v.venues || []).filter((_, i) => i !== index);
+      return { ...v, venues: nextVenues };
+    });
+  };
+
   const validateStep = (currentStep: number) => {
     if (currentStep === 1) {
       if (!values.name.trim()) {
@@ -208,6 +242,30 @@ export function TournamentForm({
               return false;
             }
           }
+        }
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!values.start_date || !values.end_date) {
+        toast.error("Tournament dates are required");
+        return false;
+      }
+      const start = new Date(values.start_date);
+      const end = new Date(values.end_date);
+      if (end < start) {
+        toast.error("End date must be on or after the tournament start date.");
+        return false;
+      }
+      const venues = values.venues || [];
+      if (venues.length === 0) {
+        toast.error("Add at least one venue before continuing.");
+        return false;
+      }
+      for (let i = 0; i < venues.length; i++) {
+        if (!venues[i]?.name.trim()) {
+          toast.error(`Venue ${i + 1} name is required`);
+          return false;
         }
       }
     }
@@ -530,49 +588,124 @@ export function TournamentForm({
 
   const renderStep3 = () => (
     <div className="space-y-6">
-      <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold text-primary">Step 3: Schedule & Venue</h2>
+      <div className="surface-card space-y-6 p-5">
+        <div className="space-y-1">
+          <h2 className="font-display text-lg font-semibold text-primary">Schedule & Venues</h2>
+          <p className="text-sm text-muted-foreground">
+            Set the tournament dates and add the venues where matches will be played.
+          </p>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Start date">
+          <Field label="Start Date">
             <Input
               type="date"
               value={values.start_date ?? ""}
               onChange={(e) => set("start_date", e.target.value || null)}
             />
           </Field>
-          <Field label="End date">
+          <Field label="End Date">
             <Input
               type="date"
               value={values.end_date ?? ""}
               onChange={(e) => set("end_date", e.target.value || null)}
             />
           </Field>
-          <Field label="Venue">
-            <Input
-              value={values.venue ?? ""}
-              onChange={(e) => {
-                set("venue", e.target.value || null);
-                set("venue_map_url", mapsUrl(e.target.value));
-              }}
-              placeholder="National Sports Complex, Kathmandu"
-            />
-          </Field>
-          <Field label="Google Maps link">
-            <div className="flex gap-2">
-              <Input
-                value={values.venue_map_url ?? ""}
-                onChange={(e) => set("venue_map_url", e.target.value || null)}
-                placeholder="https://maps.google.com/..."
-              />
-              {values.venue_map_url && (
-                <Button variant="outline" size="icon" asChild>
-                  <a href={values.venue_map_url} target="_blank" rel="noreferrer">
-                    <MapPin className="h-4 w-4" />
-                  </a>
+        </div>
+
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Tournament Venues
+            </h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addVenue}
+              className="text-xs"
+            >
+              <ChevronRight className="mr-1 h-3 w-3 rotate-90" /> + Add Venue
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(values.venues || []).map((v, idx) => (
+              <div key={idx} className="group relative space-y-3 rounded-lg border border-border bg-muted/30 p-4 transition-colors hover:border-primary/50">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={() => {
+                    if (window.confirm(`Delete "${v.name || `Venue ${idx + 1}`}"?`)) {
+                      removeVenue(idx);
+                    }
+                  }}
+                >
+                  <X className="h-3 w-3" />
                 </Button>
-              )}
+                
+                <Field label="Venue Name">
+                  <Input
+                    value={v.name}
+                    onChange={(e) => setVenue(idx, { name: e.target.value })}
+                    placeholder="e.g. National Sports Complex"
+                    className="h-8 text-sm"
+                  />
+                </Field>
+
+                <Field label="Location / Address">
+                  <Input
+                    value={v.address ?? ""}
+                    onChange={(e) => setVenue(idx, { address: e.target.value || null })}
+                    placeholder="e.g. Tripureshwor, Kathmandu"
+                    className="h-8 text-sm"
+                  />
+                </Field>
+
+                <Field label="Google Maps Link">
+                  <div className="flex gap-1.5">
+                    <Input
+                      value={v.google_maps_url ?? ""}
+                      onChange={(e) => setVenue(idx, { google_maps_url: e.target.value || null })}
+                      placeholder="https://maps.google.com/..."
+                      className="h-8 text-sm"
+                    />
+                    {v.google_maps_url && (
+                      <Button variant="outline" size="icon" className="h-8 w-8 shrink-0" asChild>
+                        <a href={v.google_maps_url} target="_blank" rel="noreferrer">
+                          <MapPin className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </Field>
+
+                <Field label="Optional Notes">
+                  <Input
+                    value={v.notes ?? ""}
+                    onChange={(e) => setVenue(idx, { notes: e.target.value || null })}
+                    placeholder="e.g. Main basketball hall"
+                    className="h-8 text-sm"
+                  />
+                </Field>
+              </div>
+            ))}
+          </div>
+
+          {(values.venues || []).length === 0 && (
+            <div className="rounded-lg border border-dashed border-border p-8 text-center">
+              <p className="text-sm text-muted-foreground">No venues added yet.</p>
+              <Button
+                type="button"
+                variant="link"
+                onClick={addVenue}
+                className="mt-1 h-auto p-0 text-xs font-semibold text-primary"
+              >
+                + Add at least one venue
+              </Button>
             </div>
-          </Field>
+          )}
         </div>
       </div>
       <div className="flex items-center justify-between gap-4">

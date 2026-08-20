@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, ChevronDown, ChevronUp, List, Pencil, Plus, RefreshCw, X } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, ChevronUp, List, Pencil, Plus, RefreshCw, X, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -46,8 +46,10 @@ import {
   usePlayers,
   useTeams,
   useUpsert,
+  useVenues,
   type Match,
   type Tournament,
+  type Venue,
 } from "@/lib/queries";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -67,6 +69,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const { data: matches = [] } = useMatches(tournamentId);
   const { data: teams = [] } = useTeams(tournamentId);
   const { data: players = [] } = usePlayers(tournamentId);
+  const { data: venues = [] } = useVenues(tournamentId);
   const save = useUpsert("matches", [["matches", tournamentId]]);
   const qc = useQueryClient();
   const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
@@ -383,6 +386,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         match={editing}
         mode={mode}
         teams={teams.map((t) => ({ id: t.id, name: t.name }))}
+        venues={venues}
         players={players.map((p) => ({
           id: p.id,
           name: p.name,
@@ -409,6 +413,7 @@ function MatchDialog({
   match,
   mode,
   teams,
+  venues,
   players,
   onClose,
   onSave,
@@ -417,6 +422,7 @@ function MatchDialog({
   match: Match | null;
   mode: "game" | "score";
   teams: { id: string; name: string }[];
+  venues: Venue[];
   players: { id: string; name: string; team_id: string | null; jersey_number: number | null }[];
   onClose: () => void;
   onSave: (values: Record<string, unknown> & { id: string }) => void;
@@ -592,6 +598,24 @@ function MatchDialog({
                 set("scheduled_at", e.target.value ? new Date(e.target.value).toISOString() : null)
               }
             />
+          </Field>
+          <Field label="Venue">
+            <Select
+              value={(draft.venue_id as string) || "none"}
+              onValueChange={(v) => set("venue_id", v === "none" ? null : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select venue" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No venue</SelectItem>
+                {venues.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Status">
             <Select value={draft.status} onValueChange={(v) => set("status", v)}>

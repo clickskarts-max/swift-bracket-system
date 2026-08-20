@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, Navigation } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { BrandWordmark } from "@/components/brand";
@@ -18,6 +18,7 @@ import {
   usePublicSponsors,
   usePublicTeams,
   useTournamentBySlug,
+  useVenues,
 } from "@/lib/queries";
 
 export const Route = createFileRoute("/public/tournament/$slug")({
@@ -50,6 +51,9 @@ function PublicTournament() {
   const { data: matches = [] } = useMatches(tournament?.id ?? "");
   const { data: sponsors = [] } = usePublicSponsors(tournament?.id ?? "");
   const { data: players = [] } = usePublicPlayers(tournament?.id ?? "");
+  const { data: venues = [] } = useVenues(tournament?.id ?? "");
+
+  const venueById = useMemo(() => new Map(venues.map((v) => [v.id, v])), [venues]);
 
   const matchdayByDate = useMemo(() => {
     const keys = [
@@ -128,11 +132,31 @@ function PublicTournament() {
   const MatchRow = ({ m }: { m: (typeof matches)[number] }) => {
     const a = side(m.team_a_id, m.placeholder_a);
     const b = side(m.team_b_id, m.placeholder_b);
+    const venue = m.venue_id ? venueById.get(m.venue_id) : null;
     return (
       <div className="surface-card p-4">
-        <p className="mb-2 text-center text-[11px] uppercase tracking-widest text-muted-foreground sm:text-left">
-          {m.round_name}
-        </p>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {m.round_name || `M${m.match_no ?? "—"}`}
+          </span>
+          {venue && (
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+              <MapPin className="h-3 w-3 text-primary/70" />
+              {venue.google_maps_url ? (
+                <a
+                  href={venue.google_maps_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary hover:underline"
+                >
+                  {venue.name}
+                </a>
+              ) : (
+                <span>{venue.name}</span>
+              )}
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
           <TeamChip
             name={a.name}
@@ -222,21 +246,31 @@ function PublicTournament() {
           {tournament.description && (
             <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{tournament.description}</p>
           )}
-          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <CalendarDays className="mt-0.5 h-3.5 w-3.5" />
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2.5 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <CalendarDays className="h-4 w-4 text-primary" />
               {formatDateRangeInline(tournament.start_date, tournament.end_date)}
             </span>
-            {tournament.venue && (
-              <a
-                className="flex items-center gap-1 hover:text-primary"
-                href={tournament.venue_map_url ?? "#"}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <MapPin className="h-3.5 w-3.5" />
-                {tournament.venue}
-              </a>
+            {venues.length > 0 && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {venues.map((v) => (
+                  <div key={v.id} className="flex items-center gap-1.5">
+                    <Navigation className="h-4 w-4 text-primary" />
+                    {v.google_maps_url ? (
+                      <a
+                        href={v.google_maps_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hover:text-primary hover:underline"
+                      >
+                        {v.name}
+                      </a>
+                    ) : (
+                      <span>{v.name}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
