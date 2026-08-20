@@ -263,7 +263,7 @@ export function TournamentForm({
         return false;
       }
       for (let i = 0; i < venues.length; i++) {
-        if (!venues[i].name.trim()) {
+        if (!venues[i]?.name.trim()) {
           toast.error(`Venue ${i + 1} name is required`);
           return false;
         }
