@@ -89,7 +89,7 @@ function PublicTournament() {
     return `Matchday ${md}`;
   };
 
-  const groupByMatchday = (list: (typeof matches)[number][]) => {
+  const groupByMatchday = (list: (typeof matches)[number][], descending = false) => {
     const map = new Map<string, (typeof matches)[number][]>();
     for (const m of list) {
       const key = matchdayLabel(m);
@@ -98,22 +98,31 @@ function PublicTournament() {
     const compareMatch = (a: (typeof matches)[number], b: (typeof matches)[number]) => {
       const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
       const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
-      return (
-        ta - tb ||
-        (a.match_no ?? Number.POSITIVE_INFINITY) - (b.match_no ?? Number.POSITIVE_INFINITY)
-      );
+      const timeDiff = descending ? tb - ta : ta - tb;
+      if (timeDiff !== 0) return timeDiff;
+      
+      const numA = a.match_no ?? Number.POSITIVE_INFINITY;
+      const numB = b.match_no ?? Number.POSITIVE_INFINITY;
+      return descending ? numB - numA : numA - numB;
     };
 
     const entries = [...map.entries()].map(
       ([k, items]) => [k, [...items].sort(compareMatch)] as [string, (typeof matches)[number][]],
     );
-    const groupTime = (items: (typeof matches)[number][]) =>
-      Math.min(
-        ...items.map((m) =>
-          m.scheduled_at ? new Date(m.scheduled_at).getTime() : Number.POSITIVE_INFINITY,
-        ),
-      );
-    return entries.sort(([, a], [, b]) => groupTime(a) - groupTime(b));
+    
+    const groupTime = (items: (typeof matches)[number][]) => {
+      const times = items
+        .map((m) => (m.scheduled_at ? new Date(m.scheduled_at).getTime() : null))
+        .filter((t): t is number => t !== null);
+      if (times.length === 0) return Number.POSITIVE_INFINITY;
+      return descending ? Math.max(...times) : Math.min(...times);
+    };
+
+    return entries.sort(([, a], [, b]) => {
+      const valA = groupTime(a);
+      const valB = groupTime(b);
+      return descending ? valB - valA : valA - valB;
+    });
   };
 
   const MatchRow = ({ m }: { m: (typeof matches)[number] }) => {
