@@ -26,6 +26,14 @@ export type TeamValue = {
   group_label: string | null;
 };
 
+export type VenueValue = {
+  id?: string;
+  name: string;
+  address: string | null;
+  google_maps_url: string | null;
+  notes?: string | null;
+};
+
 export type TournamentValues = {
   name: string;
   slug: string;
