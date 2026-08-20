@@ -287,6 +287,8 @@ export function groupKnockout(
     name,
   }));
   return singleElimination(fakeTeams, startNo);
+}
+
 
 /** Playoff brackets driven by league standings seeds. */
 export function playoffMatches(kind: string, startNo = 1): MatchDraft[] {
