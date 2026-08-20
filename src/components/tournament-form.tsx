@@ -117,9 +117,27 @@ export function TournamentForm({
     onSubmit(next);
   };
 
-  const isRoundRobin =
-    values.format === "league" ||
-    values.format === "group_knockout";
+  const isLeague = values.format === "league";
+  const isGroupKnockout = values.format === "group_knockout";
+
+  const teamsPerGroup =
+    isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
+  const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
+  const knockoutTeams = isGroupKnockout ? values.group_count * values.qualifiers_per_group : 0;
+
+  const isValidKnockoutSize = (size: number) => {
+    if (size <= 0) return false;
+    // Check if it's a power of 2
+    return (size & (size - 1)) === 0;
+  };
+
+  const knockoutRoundLabel = (size: number) => {
+    if (size === 2) return "Final";
+    if (size === 4) return "Semi-finals → Final";
+    if (size === 8) return "Quarter-finals → Semi-finals → Final";
+    if (size === 16) return "Round of 16 → Quarter-finals → Semi-finals → Final";
+    return `${size}-team bracket`;
+  };
 
   return (
     <div className="space-y-6">
