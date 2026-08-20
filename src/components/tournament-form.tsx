@@ -50,7 +50,7 @@ const schema = z.object({
 const empty = (): TournamentValues => ({
   name: "",
   slug: "",
-  format: "round_robin",
+  format: "league",
   legs: 1,
   playoff_format: "none",
   group_count: 0,
