@@ -114,7 +114,6 @@ export function TournamentForm({
   };
 
   const isRoundRobin =
-    values.format === "round_robin" ||
     values.format === "league" ||
     values.format === "group_knockout";
 
