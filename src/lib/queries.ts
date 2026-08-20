@@ -94,6 +94,20 @@ export const useSponsors = (tournamentId: string) =>
     enabled: !!tournamentId,
   });
 
+export const useVenues = (tournamentId: string) =>
+  useQuery({
+    queryKey: ["venues", tournamentId],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("tournament_venues")
+          .select("*")
+          .eq("tournament_id", tournamentId)
+          .order("name"),
+      ) as Venue[],
+    enabled: !!tournamentId,
+  });
+
 export const useOrganization = () =>
   useQuery({
     queryKey: ["organization"],
