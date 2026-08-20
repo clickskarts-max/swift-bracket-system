@@ -8,6 +8,7 @@ export type Player = Tables<"players">;
 export type Match = Tables<"matches">;
 export type Sponsor = Tables<"sponsors">;
 export type Organization = Tables<"organizations">;
+export type Venue = Tables<"tournament_venues">;
 
 const unwrap = <T>({ data, error }: { data: T; error: { message: string } | null }) => {
   if (error) throw new Error(error.message);
