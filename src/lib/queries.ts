@@ -166,7 +166,14 @@ export const usePublicSponsors = (tournamentId: string) =>
     enabled: !!tournamentId,
   });
 
-type TableName = "tournaments" | "teams" | "players" | "matches" | "sponsors" | "organizations";
+type TableName =
+  | "tournaments"
+  | "teams"
+  | "players"
+  | "matches"
+  | "sponsors"
+  | "organizations"
+  | "tournament_venues";
 
 export function useUpsert(table: TableName, invalidate: unknown[][]) {
   const qc = useQueryClient();
