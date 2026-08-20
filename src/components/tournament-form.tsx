@@ -25,6 +25,7 @@ export type TournamentValues = {
   legs: number;
   playoff_format: string;
   group_count: number;
+  qualifiers_per_group: number;
   team_count: number;
   start_date: string | null;
   end_date: string | null;
