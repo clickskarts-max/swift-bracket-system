@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app-shell";
 import { TournamentForm } from "@/components/tournament-form";
-import { useUpsert } from "@/lib/queries";
+import { useUpsert, useTournament } from "@/lib/queries";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/tournaments/new")({
   head: () => ({
