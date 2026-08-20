@@ -246,6 +246,30 @@ export function TournamentForm({
       }
     }
 
+    if (currentStep === 3) {
+      if (!values.start_date || !values.end_date) {
+        toast.error("Tournament dates are required");
+        return false;
+      }
+      const start = new Date(values.start_date);
+      const end = new Date(values.end_date);
+      if (end < start) {
+        toast.error("End date must be on or after the tournament start date.");
+        return false;
+      }
+      const venues = values.venues || [];
+      if (venues.length === 0) {
+        toast.error("Add at least one venue before continuing.");
+        return false;
+      }
+      for (let i = 0; i < venues.length; i++) {
+        if (!venues[i].name.trim()) {
+          toast.error(`Venue ${i + 1} name is required`);
+          return false;
+        }
+      }
+    }
+
     return true;
   };
 
