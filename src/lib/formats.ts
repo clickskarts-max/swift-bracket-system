@@ -356,7 +356,7 @@ export function generateSchedule({
       no += rr.length;
       out = out.concat(rr);
     }
-    return out.concat(groupKnockout(labels, no));
+    return out.concat(groupKnockout(labels, no, legs));
   }
   // league / round robin
   const rr = roundRobin(teams, legs);
