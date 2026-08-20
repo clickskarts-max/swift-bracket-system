@@ -164,6 +164,30 @@ export function TournamentForm({
     });
   };
 
+  const setVenue = (index: number, venue: Partial<VenueValue>) => {
+    setValues((v) => {
+      const nextVenues = [...(v.venues || [])];
+      if (nextVenues[index]) {
+        nextVenues[index] = { ...nextVenues[index], ...venue } as VenueValue;
+      }
+      return { ...v, venues: nextVenues };
+    });
+  };
+
+  const addVenue = () => {
+    setValues((v) => ({
+      ...v,
+      venues: [...(v.venues || []), { name: "", address: null, google_maps_url: null }],
+    }));
+  };
+
+  const removeVenue = (index: number) => {
+    setValues((v) => {
+      const nextVenues = (v.venues || []).filter((_, i) => i !== index);
+      return { ...v, venues: nextVenues };
+    });
+  };
+
   const validateStep = (currentStep: number) => {
     if (currentStep === 1) {
       if (!values.name.trim()) {
