@@ -50,7 +50,7 @@ const schema = z.object({
 const empty = (): TournamentValues => ({
   name: "",
   slug: "",
-  format: "round_robin",
+  format: "league",
   legs: 1,
   playoff_format: "none",
   group_count: 0,
@@ -114,7 +114,6 @@ export function TournamentForm({
   };
 
   const isRoundRobin =
-    values.format === "round_robin" ||
     values.format === "league" ||
     values.format === "group_knockout";
 
@@ -182,7 +181,7 @@ export function TournamentForm({
               />
             </Field>
           )}
-          {(values.format === "round_robin" || values.format === "league") && (
+          {values.format === "league" && (
             <Field label="Playoff after league">
               <Select value={values.playoff_format} onValueChange={(v) => set("playoff_format", v)}>
                 <SelectTrigger>
