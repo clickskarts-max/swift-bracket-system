@@ -102,6 +102,7 @@ export type Database = {
           tournament_id: string
           updated_at: string
           venue: string | null
+          venue_id: string | null
         }
         Insert: {
           court?: string | null
@@ -130,6 +131,7 @@ export type Database = {
           tournament_id: string
           updated_at?: string
           venue?: string | null
+          venue_id?: string | null
         }
         Update: {
           court?: string | null
@@ -158,6 +160,7 @@ export type Database = {
           tournament_id?: string
           updated_at?: string
           venue?: string | null
+          venue_id?: string | null
         }
         Relationships: [
           {
@@ -186,6 +189,13 @@ export type Database = {
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_venues"
             referencedColumns: ["id"]
           },
         ]
@@ -406,6 +416,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "teams_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_venues: {
+        Row: {
+          address: string | null
+          created_at: string
+          google_maps_url: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner_id: string
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          google_maps_url?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner_id: string
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          google_maps_url?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_venues_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
