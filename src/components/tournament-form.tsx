@@ -179,7 +179,9 @@ export function TournamentForm({
       const teams = values.teams || [];
       const names = new Set();
       for (let i = 0; i < teams.length; i++) {
-        const name = teams[i].name.trim();
+        const team = teams[i];
+        if (!team) continue;
+        const name = team.name.trim();
         if (!name) {
           toast.error(`Team ${i + 1} name cannot be blank`);
           return false;
@@ -196,10 +198,12 @@ export function TournamentForm({
         const teamsPerGroup = Math.ceil(values.team_count / values.group_count);
         const groupCounts: Record<string, number> = {};
         for (const team of teams) {
-          if (team.group_label) {
+          if (team?.group_label) {
             groupCounts[team.group_label] = (groupCounts[team.group_label] || 0) + 1;
             if (groupCounts[team.group_label] > teamsPerGroup) {
-              toast.error(`Group ${team.group_label} already has the maximum of ${teamsPerGroup} teams.`);
+              toast.error(
+                `Group ${team.group_label} already has the maximum of ${teamsPerGroup} teams.`,
+              );
               return false;
             }
           }
