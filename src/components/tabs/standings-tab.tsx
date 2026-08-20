@@ -16,11 +16,14 @@ type StandingsTeamLike = Pick<
   "id" | "name" | "logo_url" | "jersey_color" | "group_label"
 >;
 
-const playoffSlots = (playoffFormat?: string | null) => {
-  if (!playoffFormat || playoffFormat === "none") return 0;
-  if (playoffFormat.startsWith("top2")) return 2;
-  if (playoffFormat.startsWith("top4")) return 4;
-  if (playoffFormat.startsWith("top6")) return 6;
+const playoffSlots = (tournament: Tournament | null) => {
+  if (!tournament) return 0;
+  const { format, playoff_format, qualifiers_per_group } = tournament;
+  if (format === "group_knockout") return qualifiers_per_group || 0;
+  if (!playoff_format || playoff_format === "none") return 0;
+  if (playoff_format.startsWith("top2")) return 2;
+  if (playoff_format.startsWith("top4")) return 4;
+  if (playoff_format.startsWith("top6")) return 6;
   return 0;
 };
 
@@ -271,7 +274,7 @@ export function StandingsTable({
       />
     );
 
-  const slots = playoffSlots(tournament?.playoff_format ?? null);
+  const slots = playoffSlots(tournament);
   const winPoints = 2;
   const showMarkers = matches.some(
     (m) => m.status === "completed" && m.score_a != null && m.score_b != null,

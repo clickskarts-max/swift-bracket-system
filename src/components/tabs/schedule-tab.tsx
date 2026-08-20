@@ -120,6 +120,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       const drafts = generateSchedule({
         format: tournament.format,
         legs: tournament.legs,
+        qualifiersPerGroup: tournament.qualifiers_per_group,
         playoffFormat: tournament.playoff_format,
         teams: teams.map((t) => ({
           id: t.id,

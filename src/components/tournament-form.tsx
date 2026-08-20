@@ -25,6 +25,7 @@ export type TournamentValues = {
   legs: number;
   playoff_format: string;
   group_count: number;
+  qualifiers_per_group: number;
   team_count: number;
   start_date: string | null;
   end_date: string | null;
@@ -41,8 +42,9 @@ const schema = z.object({
   name: z.string().trim().min(2, "Tournament name is required").max(120),
   slug: z.string().trim().min(2).max(64),
   legs: z.number().int().min(1).max(6),
-  team_count: z.number().int().min(0).max(256),
+  team_count: z.number().int().min(2, "Must be greater than 1").max(256),
   group_count: z.number().int().min(0).max(16),
+  qualifiers_per_group: z.number().int().min(1).max(256),
   description: z.string().max(2000).nullable(),
   venue: z.string().max(200).nullable(),
 });
@@ -54,6 +56,7 @@ const empty = (): TournamentValues => ({
   legs: 1,
   playoff_format: "none",
   group_count: 0,
+  qualifiers_per_group: 1,
   team_count: 0,
   start_date: null,
   end_date: null,
@@ -86,6 +89,7 @@ export function TournamentForm({
           legs: initial.legs,
           playoff_format: initial.playoff_format,
           group_count: initial.group_count,
+          qualifiers_per_group: initial.qualifiers_per_group ?? 1,
           team_count: initial.team_count,
           start_date: initial.start_date,
           end_date: initial.end_date,
@@ -113,9 +117,27 @@ export function TournamentForm({
     onSubmit(next);
   };
 
-  const isRoundRobin =
-    values.format === "league" ||
-    values.format === "group_knockout";
+  const isLeague = values.format === "league";
+  const isGroupKnockout = values.format === "group_knockout";
+
+  const teamsPerGroup =
+    isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
+  const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
+  const knockoutTeams = isGroupKnockout ? values.group_count * values.qualifiers_per_group : 0;
+
+  const isValidKnockoutSize = (size: number) => {
+    if (size <= 0) return false;
+    // Check if it's a power of 2
+    return (size & (size - 1)) === 0;
+  };
+
+  const knockoutRoundLabel = (size: number) => {
+    if (size === 2) return "Final";
+    if (size === 4) return "Semi-finals → Final";
+    if (size === 8) return "Quarter-finals → Semi-finals → Final";
+    if (size === 16) return "Round of 16 → Quarter-finals → Semi-finals → Final";
+    return `${size}-team bracket`;
+  };
 
   return (
     <div className="space-y-6">
@@ -139,20 +161,42 @@ export function TournamentForm({
               placeholder="summer-classic"
             />
           </Field>
-          <Field label="Format">
-            <Select value={values.format} onValueChange={(v) => set("format", v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TOURNAMENT_FORMATS.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
+          <div className="col-span-full">
+            <Field label="Format">
+              {isGroupKnockout ? (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 font-display text-lg font-bold text-primary">
+                    <span>Group Stage</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span>Knockout</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Teams compete in groups, then top teams advance to knockout rounds.
+                  </p>
+                  <Button
+                    variant="link"
+                    className="h-auto w-fit p-0 text-xs text-muted-foreground underline"
+                    onClick={() => set("format", "league")}
+                  >
+                    Change Format
+                  </Button>
+                </div>
+              ) : (
+                <Select value={values.format} onValueChange={(v) => set("format", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TOURNAMENT_FORMATS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </Field>
+          </div>
           <Field label="Status">
             <Select value={values.status} onValueChange={(v) => set("status", v)}>
               <SelectTrigger>
@@ -167,10 +211,14 @@ export function TournamentForm({
               </SelectContent>
             </Select>
           </Field>
-          {isRoundRobin && (
+          {(isLeague || isGroupKnockout) && (
             <Field
-              label="Legs (times each pair meets)"
-              hint="1 = single round robin, 2 = double, 3+ supported"
+              label={isGroupKnockout ? "Group Stage Legs" : "Legs (times each pair meets)"}
+              hint={
+                isGroupKnockout
+                  ? "How many times each pair of teams plays during the group stage."
+                  : "1 = single round robin, 2 = double, 3+ supported"
+              }
             >
               <Input
                 type="number"
@@ -181,7 +229,8 @@ export function TournamentForm({
               />
             </Field>
           )}
-          {values.format === "league" && (
+
+          {isLeague && (
             <Field label="Playoff after league">
               <Select value={values.playoff_format} onValueChange={(v) => set("playoff_format", v)}>
                 <SelectTrigger>
@@ -197,28 +246,115 @@ export function TournamentForm({
               </Select>
             </Field>
           )}
-          {values.format === "group_knockout" && (
-            <Field
-              label="Number of groups / pools"
-              hint="2, 4 or 8 groups follow the reference knockout mapping"
-            >
+
+          {isGroupKnockout && (
+            <>
+              <Field label="Number of Teams">
+                <Input
+                  type="number"
+                  min={2}
+                  value={values.team_count}
+                  onChange={(e) => set("team_count", Number(e.target.value) || 0)}
+                />
+              </Field>
+
+              <Field label="Number of Groups">
+                <Input
+                  type="number"
+                  min={1}
+                  max={16}
+                  value={values.group_count}
+                  onChange={(e) => set("group_count", Number(e.target.value) || 0)}
+                />
+                {isUnevenGroups && (
+                  <p className="mt-1 text-xs text-destructive">
+                    Warning: Teams cannot be evenly distributed ({teamsPerGroup.toFixed(1)} per
+                    group).
+                  </p>
+                )}
+              </Field>
+
+              <Field label="Teams per Group">
+                <Input
+                  type="text"
+                  readOnly
+                  disabled
+                  value={isUnevenGroups ? "Uneven" : teamsPerGroup || "—"}
+                  className="bg-muted"
+                />
+              </Field>
+
+              <Field
+                label="Teams Qualifying from Each Group"
+                hint="Top teams from each group advance to the knockout stage."
+              >
+                <Input
+                  type="number"
+                  min={1}
+                  max={Math.floor(teamsPerGroup) || 1}
+                  value={values.qualifiers_per_group}
+                  onChange={(e) => set("qualifiers_per_group", Number(e.target.value) || 1)}
+                />
+                {values.qualifiers_per_group > teamsPerGroup && teamsPerGroup > 0 && (
+                  <p className="mt-1 text-xs text-destructive">
+                    Qualifiers cannot exceed teams per group.
+                  </p>
+                )}
+              </Field>
+
+              <div className="col-span-full space-y-3 rounded-lg bg-muted/50 p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Tournament Structure
+                </h3>
+                <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">Total Teams</p>
+                    <p className="font-medium">{values.team_count}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Groups</p>
+                    <p className="font-medium">
+                      {values.group_count} ({teamsPerGroup.toFixed(0)} teams each)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Legs</p>
+                    <p className="font-medium">{values.legs} (Group Stage)</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Knockout Stage</p>
+                    <p
+                      className={`font-medium ${!isValidKnockoutSize(knockoutTeams) ? "text-destructive" : ""}`}
+                    >
+                      {knockoutTeams} Teams
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">Rounds</p>
+                    <p className="font-medium">{knockoutRoundLabel(knockoutTeams)}</p>
+                  </div>
+                </div>
+                {!isValidKnockoutSize(knockoutTeams) && knockoutTeams > 0 && (
+                  <p className="text-xs text-destructive">
+                    This setup would produce {knockoutTeams} knockout teams. Please choose a
+                    qualifier count that creates a supported knockout bracket (2, 4, 8, or 16
+                    teams).
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          {!isGroupKnockout && (
+            <Field label="Number of teams">
               <Input
                 type="number"
                 min={0}
-                max={16}
-                value={values.group_count}
-                onChange={(e) => set("group_count", Number(e.target.value) || 0)}
+                value={values.team_count}
+                onChange={(e) => set("team_count", Number(e.target.value) || 0)}
               />
             </Field>
           )}
-          <Field label="Number of teams">
-            <Input
-              type="number"
-              min={0}
-              value={values.team_count}
-              onChange={(e) => set("team_count", Number(e.target.value) || 0)}
-            />
-          </Field>
         </div>
       </div>
 
