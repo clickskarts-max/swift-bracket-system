@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { EmptyState } from "@/components/data-bits";
+import { EmptyState, TeamChip } from "@/components/data-bits";
 import type { Match, Team } from "@/lib/queries";
 
-type BracketTeamLike = Pick<Team, "id" | "name">;
+type BracketTeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color">;
 
 const KNOCKOUT_STAGES = new Set(["knockout", "playoff", "final", "losers", "winners"]);
 
@@ -14,8 +14,12 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
   }, [matches]);
 
-  const name = (id: string | null, fallback: string | null) =>
-    teams.find((t) => t.id === id)?.name ?? fallback ?? "TBD";
+  const side = (id: string | null, fallback: string | null) =>
+    teams.find((t) => t.id === id) ?? {
+      name: fallback ?? "TBD",
+      logo_url: null,
+      jersey_color: null,
+    };
 
   if (rounds.length === 0)
     return (
@@ -41,13 +45,23 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
                   <div
                     className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}
                   >
-                    <span className="truncate">{name(m.team_a_id, m.placeholder_a)}</span>
+                    <TeamChip
+                      name={side(m.team_a_id, m.placeholder_a).name}
+                      logoUrl={side(m.team_a_id, m.placeholder_a).logo_url}
+                      color={side(m.team_a_id, m.placeholder_a).jersey_color}
+                      className="min-w-0"
+                    />
                     <span className="tabular-nums">{m.score_a ?? "–"}</span>
                   </div>
                   <div
                     className={`flex items-center justify-between px-3 py-2 text-sm ${bWin ? "font-semibold text-primary" : ""}`}
                   >
-                    <span className="truncate">{name(m.team_b_id, m.placeholder_b)}</span>
+                    <TeamChip
+                      name={side(m.team_b_id, m.placeholder_b).name}
+                      logoUrl={side(m.team_b_id, m.placeholder_b).logo_url}
+                      color={side(m.team_b_id, m.placeholder_b).jersey_color}
+                      className="min-w-0"
+                    />
                     <span className="tabular-nums">{m.score_b ?? "–"}</span>
                   </div>
                 </div>

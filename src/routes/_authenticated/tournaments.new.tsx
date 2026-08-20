@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app-shell";
 import { TournamentForm } from "@/components/tournament-form";
-import { useUpsert } from "@/lib/queries";
+import { useUpsert, useTournament } from "@/lib/queries";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/tournaments/new")({
   head: () => ({
@@ -36,16 +37,37 @@ function NewTournament() {
       <TournamentForm
         submitLabel="Create tournament"
         pending={create.isPending}
-        onSubmit={(values) =>
-          create.mutate(values, {
-            onSuccess: (row) => {
-              toast.success("Tournament created");
+        onSubmit={async (values) => {
+          const { teams, ...tournamentData } = values;
+          create.mutate(tournamentData, {
+            onSuccess: async (row) => {
               const created = row as { id: string } | null;
+              if (created?.id && teams && teams.length > 0) {
+                const { data: userData } = await supabase.auth.getUser();
+                const owner_id = userData.user?.id;
+
+                if (owner_id) {
+                  const teamsWithIds = teams.map((t) => ({
+                    tournament_id: created.id,
+                    name: t.name,
+                    logo_url: t.logo_url,
+                    group_label: t.group_label,
+                    owner_id,
+                  }));
+
+                  const { error: teamError } = await supabase.from("teams").insert(teamsWithIds);
+                  if (teamError) {
+                    toast.error("Tournament created but teams could not be saved: " + teamError.message);
+                  }
+                }
+              }
+
+              toast.success("Tournament created");
               if (created?.id) navigate({ to: "/tournaments/$id", params: { id: created.id } });
             },
             onError: (e) => toast.error(e.message),
-          })
-        }
+          });
+        }}
       />
     </div>
   );
