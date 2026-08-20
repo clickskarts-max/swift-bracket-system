@@ -56,6 +56,7 @@ const empty = (): TournamentValues => ({
   legs: 1,
   playoff_format: "none",
   group_count: 0,
+  qualifiers_per_group: 1,
   team_count: 0,
   start_date: null,
   end_date: null,
