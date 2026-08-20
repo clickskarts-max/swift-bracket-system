@@ -89,7 +89,7 @@ export function TeamChip({
         <img
           src={logoUrl}
           alt=""
-          className={cn("shrink-0 rounded-full object-cover ring-1 ring-border", box)}
+          className={cn("shrink-0 rounded-lg object-contain ring-1 ring-border p-0.5 bg-white/5", box)}
         />
       ) : (
         <span
