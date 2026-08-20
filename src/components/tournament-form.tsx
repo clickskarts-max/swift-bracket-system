@@ -42,8 +42,9 @@ const schema = z.object({
   name: z.string().trim().min(2, "Tournament name is required").max(120),
   slug: z.string().trim().min(2).max(64),
   legs: z.number().int().min(1).max(6),
-  team_count: z.number().int().min(0).max(256),
+  team_count: z.number().int().min(2, "Must be greater than 1").max(256),
   group_count: z.number().int().min(0).max(16),
+  qualifiers_per_group: z.number().int().min(1).max(256),
   description: z.string().max(2000).nullable(),
   venue: z.string().max(200).nullable(),
 });
