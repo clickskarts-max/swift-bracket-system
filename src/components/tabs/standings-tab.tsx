@@ -274,7 +274,7 @@ export function StandingsTable({
       />
     );
 
-  const slots = playoffSlots(tournament?.playoff_format ?? null);
+  const slots = playoffSlots(tournament);
   const winPoints = 2;
   const showMarkers = matches.some(
     (m) => m.status === "completed" && m.score_a != null && m.score_b != null,
