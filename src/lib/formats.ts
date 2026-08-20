@@ -19,9 +19,6 @@ export type TeamRef = {
 };
 
 export const TOURNAMENT_FORMATS = [
-  { value: "single_elimination", label: "Single elimination" },
-  { value: "double_elimination", label: "Double elimination" },
-  { value: "round_robin", label: "Round robin (multi-leg)" },
   { value: "league", label: "League" },
   { value: "group_knockout", label: "Group stage + knockout" },
 ] as const;
