@@ -181,7 +181,7 @@ export function TournamentForm({
               />
             </Field>
           )}
-          {(values.format === "round_robin" || values.format === "league") && (
+          {values.format === "league" && (
             <Field label="Playoff after league">
               <Select value={values.playoff_format} onValueChange={(v) => set("playoff_format", v)}>
                 <SelectTrigger>
