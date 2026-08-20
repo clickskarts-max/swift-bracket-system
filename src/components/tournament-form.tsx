@@ -53,6 +53,7 @@ export type TournamentValues = {
   description: string | null;
   is_public: boolean;
   teams?: TeamValue[];
+  venues?: VenueValue[];
 };
 
 const schema = z.object({
