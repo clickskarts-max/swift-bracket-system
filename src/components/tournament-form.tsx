@@ -161,20 +161,42 @@ export function TournamentForm({
               placeholder="summer-classic"
             />
           </Field>
-          <Field label="Format">
-            <Select value={values.format} onValueChange={(v) => set("format", v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TOURNAMENT_FORMATS.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
+          <div className="col-span-full">
+            <Field label="Format">
+              {isGroupKnockout ? (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 font-display text-lg font-bold text-primary">
+                    <span>Group Stage</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span>Knockout</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Teams compete in groups, then top teams advance to knockout rounds.
+                  </p>
+                  <Button
+                    variant="link"
+                    className="h-auto w-fit p-0 text-xs text-muted-foreground underline"
+                    onClick={() => set("format", "league")}
+                  >
+                    Change Format
+                  </Button>
+                </div>
+              ) : (
+                <Select value={values.format} onValueChange={(v) => set("format", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TOURNAMENT_FORMATS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </Field>
+          </div>
           <Field label="Status">
             <Select value={values.status} onValueChange={(v) => set("status", v)}>
               <SelectTrigger>
