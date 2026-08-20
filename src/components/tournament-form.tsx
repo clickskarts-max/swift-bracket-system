@@ -86,6 +86,7 @@ const empty = (): TournamentValues => ({
   description: null,
   is_public: true,
   teams: [],
+  venues: [{ name: "", address: null, google_maps_url: null }],
 });
 
 export function TournamentForm({
