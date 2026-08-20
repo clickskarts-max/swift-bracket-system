@@ -147,7 +147,9 @@ export function TournamentForm({
   const setTeam = (index: number, team: Partial<TeamValue>) => {
     setValues((v) => {
       const nextTeams = [...(v.teams || [])];
-      nextTeams[index] = { ...nextTeams[index], ...team };
+      if (nextTeams[index]) {
+        nextTeams[index] = { ...nextTeams[index], ...team } as TeamValue;
+      }
       return { ...v, teams: nextTeams };
     });
   };
