@@ -70,7 +70,7 @@ function NewTournament() {
                       name: v.name,
                       address: v.address,
                       google_maps_url: v.google_maps_url,
-                      notes: v.notes,
+                      notes: v.notes ?? null,
                       owner_id,
                     }));
 
