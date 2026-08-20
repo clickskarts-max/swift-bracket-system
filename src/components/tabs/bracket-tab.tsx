@@ -45,13 +45,23 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
                   <div
                     className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}
                   >
-                    <span className="truncate">{name(m.team_a_id, m.placeholder_a)}</span>
+                    <TeamChip
+                      name={side(m.team_a_id, m.placeholder_a).name}
+                      logoUrl={side(m.team_a_id, m.placeholder_a).logo_url}
+                      color={side(m.team_a_id, m.placeholder_a).jersey_color}
+                      className="min-w-0"
+                    />
                     <span className="tabular-nums">{m.score_a ?? "–"}</span>
                   </div>
                   <div
                     className={`flex items-center justify-between px-3 py-2 text-sm ${bWin ? "font-semibold text-primary" : ""}`}
                   >
-                    <span className="truncate">{name(m.team_b_id, m.placeholder_b)}</span>
+                    <TeamChip
+                      name={side(m.team_b_id, m.placeholder_b).name}
+                      logoUrl={side(m.team_b_id, m.placeholder_b).logo_url}
+                      color={side(m.team_b_id, m.placeholder_b).jersey_color}
+                      className="min-w-0"
+                    />
                     <span className="tabular-nums">{m.score_b ?? "–"}</span>
                   </div>
                 </div>
