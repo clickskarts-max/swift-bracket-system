@@ -599,6 +599,24 @@ function MatchDialog({
               }
             />
           </Field>
+          <Field label="Venue">
+            <Select
+              value={(draft.venue_id as string) || "none"}
+              onValueChange={(v) => set("venue_id", v === "none" ? null : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select venue" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No venue</SelectItem>
+                {venues.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
           <Field label="Status">
             <Select value={draft.status} onValueChange={(v) => set("status", v)}>
               <SelectTrigger>
