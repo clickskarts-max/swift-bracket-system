@@ -286,7 +286,7 @@ function PublicTournament() {
               />
             ) : (
               <div className="space-y-6">
-                {groupByMatchday(results).map(([label, list]) => (
+                {groupByMatchday(results, true).map(([label, list]) => (
                   <div key={label}>
                     <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                       {label}
