@@ -89,6 +89,7 @@ export function TournamentForm({
           legs: initial.legs,
           playoff_format: initial.playoff_format,
           group_count: initial.group_count,
+          qualifiers_per_group: initial.qualifiers_per_group ?? 1,
           team_count: initial.team_count,
           start_date: initial.start_date,
           end_date: initial.end_date,
