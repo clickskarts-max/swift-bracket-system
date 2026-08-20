@@ -177,7 +177,117 @@ export function doubleElimination(teams: TeamRef[], startNo = 1): MatchDraft[] {
  * Knockout stage after group play, following the reference format document.
  * 2 groups -> semis, 4 groups -> quarters, 8 groups -> pre-quarters.
  */
-export function groupKnockout(groupLabels: string[], startNo = 1): MatchDraft[] {
+export function groupKnockout(
+  groupLabels: string[],
+  startNo = 1,
+  qualifiersPerGroup = 1,
+): MatchDraft[] {
+  const g = groupLabels.length;
+  const q = qualifiersPerGroup;
+  const out: MatchDraft[] = [];
+  let no = startNo;
+  const W = (l: string, rank: number) =>
+    rank === 1 ? `Winner ${l}` : rank === 2 ? `Runner-up ${l}` : `${rank}st ${l}`;
+
+  // If 1 qualifier per group, just run a standard single elimination
+  if (q === 1) {
+    const winners = groupLabels.map((l) => W(l, 1));
+    // We treat these as TeamRefs with placeholders
+    const fakeTeams: TeamRef[] = winners.map((w, i) => ({
+      id: `__winner_${groupLabels[i]}__`,
+      name: w,
+    }));
+    return singleElimination(fakeTeams, startNo);
+  }
+
+  // Standard case: 2 qualifiers per group (g groups -> 2g knockout teams)
+  if (q === 2) {
+    if (g === 8) {
+      // 16 teams: A1 vs C2, B1 vs D2, etc. (cross-pairing)
+      const [a, b, c, d, e, f, gg, h] = groupLabels;
+      const pairs: [string, string][] = [
+        [W(a!, 1), W(c!, 2)],
+        [W(b!, 1), W(d!, 2)],
+        [W(c!, 1), W(a!, 2)],
+        [W(d!, 1), W(b!, 2)],
+        [W(e!, 1), W(gg!, 2)],
+        [W(f!, 1), W(h!, 2)],
+        [W(gg!, 1), W(e!, 2)],
+        [W(h!, 1), W(f!, 2)],
+      ];
+      const pq = pairs.map(([x, y]) => {
+        const id = no++;
+        out.push(mk(id, "knockout", "Round of 16", 1, x, y));
+        return `Winner M${id}`;
+      });
+      // ... continue with standard QF, SF, F logic using pq ...
+      const qf: string[] = [];
+      for (let i = 0; i < pq.length; i += 2) {
+        const id = no++;
+        out.push(mk(id, "knockout", "Quarterfinal", 2, pq[i]!, pq[i + 1]!));
+        qf.push(`Winner M${id}`);
+      }
+      const sf: string[] = [];
+      for (let i = 0; i < qf.length; i += 2) {
+        const id = no++;
+        out.push(mk(id, "knockout", "Semifinal", 3, qf[i]!, qf[i + 1]!));
+        sf.push(`Winner M${id}`);
+      }
+      out.push(mk(no++, "final", "Final", 4, sf[0]!, sf[1]!));
+      return out;
+    }
+    if (g === 4) {
+      const [a, b, c, d] = groupLabels;
+      const pairs: [string, string][] = [
+        [W(a!, 1), W(c!, 2)],
+        [W(c!, 1), W(a!, 2)],
+        [W(b!, 1), W(d!, 2)],
+        [W(d!, 1), W(b!, 2)],
+      ];
+      const qf = pairs.map(([x, y]) => {
+        const id = no++;
+        out.push(mk(id, "knockout", "Quarterfinal", 1, x, y));
+        return `Winner M${id}`;
+      });
+      const sf: string[] = [];
+      for (let i = 0; i < qf.length; i += 2) {
+        const id = no++;
+        out.push(mk(id, "knockout", "Semifinal", 2, qf[i]!, qf[i + 1]!));
+        sf.push(`Winner M${id}`);
+      }
+      out.push(mk(no++, "final", "Final", 3, sf[0]!, sf[1]!));
+      return out;
+    }
+    if (g === 2) {
+      const [a, b] = groupLabels;
+      const s1 = no++;
+      out.push(mk(s1, "knockout", "Semifinal", 1, W(a!, 1), W(b!, 2)));
+      const s2 = no++;
+      out.push(mk(s2, "knockout", "Semifinal", 1, W(b!, 1), W(a!, 2)));
+      out.push(mk(no++, "final", "Final", 2, `Winner M${s1}`, `Winner M${s2}`));
+      return out;
+    }
+    if (g === 1) {
+      out.push(mk(no++, "final", "Final", 1, W(groupLabels[0]!, 1), W(groupLabels[0]!, 2)));
+      return out;
+    }
+  }
+
+  // Fallback for other combinations: produce a power-of-2 single elimination bracket
+  const totalQualifiers = g * q;
+  const qualifiers: string[] = [];
+  for (let rank = 1; rank <= q; rank++) {
+    for (const label of groupLabels) {
+      qualifiers.push(W(label, rank));
+    }
+  }
+  
+  const fakeTeams: TeamRef[] = qualifiers.map((name, i) => ({
+    id: `__qualifier_${i}__`,
+    name,
+  }));
+  return singleElimination(fakeTeams, startNo);
+}
   const g = groupLabels.length;
   const out: MatchDraft[] = [];
   let no = startNo;
