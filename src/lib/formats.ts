@@ -330,6 +330,7 @@ export function playoffMatches(kind: string, startNo = 1): MatchDraft[] {
 export type GenerateOptions = {
   format: string;
   legs: number;
+  qualifiersPerGroup?: number;
   playoffFormat: string;
   teams: TeamRef[];
 };
@@ -337,6 +338,7 @@ export type GenerateOptions = {
 export function generateSchedule({
   format,
   legs,
+  qualifiersPerGroup = 1,
   playoffFormat,
   teams,
 }: GenerateOptions): MatchDraft[] {
@@ -356,7 +358,7 @@ export function generateSchedule({
       no += rr.length;
       out = out.concat(rr);
     }
-    return out.concat(groupKnockout(labels, no, legs));
+    return out.concat(groupKnockout(labels, no, qualifiersPerGroup));
   }
   // league / round robin
   const rr = roundRobin(teams, legs);
