@@ -38,26 +38,46 @@ function NewTournament() {
         submitLabel="Create tournament"
         pending={create.isPending}
         onSubmit={async (values) => {
-          const { teams, ...tournamentData } = values;
+          const { teams, venues, ...tournamentData } = values;
           create.mutate(tournamentData, {
             onSuccess: async (row) => {
               const created = row as { id: string } | null;
-              if (created?.id && teams && teams.length > 0) {
+              if (created?.id) {
                 const { data: userData } = await supabase.auth.getUser();
                 const owner_id = userData.user?.id;
 
                 if (owner_id) {
-                  const teamsWithIds = teams.map((t) => ({
-                    tournament_id: created.id,
-                    name: t.name,
-                    logo_url: t.logo_url,
-                    group_label: t.group_label,
-                    owner_id,
-                  }));
+                  // Save teams
+                  if (teams && teams.length > 0) {
+                    const teamsWithIds = teams.map((t) => ({
+                      tournament_id: created.id,
+                      name: t.name,
+                      logo_url: t.logo_url,
+                      group_label: t.group_label,
+                      owner_id,
+                    }));
 
-                  const { error: teamError } = await supabase.from("teams").insert(teamsWithIds);
-                  if (teamError) {
-                    toast.error("Tournament created but teams could not be saved: " + teamError.message);
+                    const { error: teamError } = await supabase.from("teams").insert(teamsWithIds);
+                    if (teamError) {
+                      toast.error("Tournament created but teams could not be saved: " + teamError.message);
+                    }
+                  }
+
+                  // Save venues
+                  if (venues && venues.length > 0) {
+                    const venuesWithIds = venues.map((v) => ({
+                      tournament_id: created.id,
+                      name: v.name,
+                      address: v.address,
+                      google_maps_url: v.google_maps_url,
+                      notes: v.notes,
+                      owner_id,
+                    }));
+
+                    const { error: venueError } = await supabase.from("tournament_venues").insert(venuesWithIds);
+                    if (venueError) {
+                      toast.error("Tournament created but venues could not be saved: " + venueError.message);
+                    }
                   }
                 }
               }
