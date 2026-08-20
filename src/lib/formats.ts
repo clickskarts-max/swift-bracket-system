@@ -203,70 +203,87 @@ export function groupKnockout(
   // Standard case: 2 qualifiers per group (g groups -> 2g knockout teams)
   if (q === 2) {
     if (g === 8) {
-      // 16 teams: A1 vs C2, B1 vs D2, etc. (cross-pairing)
+      // 16 teams (Round of 16)
       const [a, b, c, d, e, f, gg, h] = groupLabels;
-      const pairs: [string, string][] = [
-        [W(a!, 1), W(c!, 2)],
-        [W(b!, 1), W(d!, 2)],
-        [W(c!, 1), W(a!, 2)],
-        [W(d!, 1), W(b!, 2)],
-        [W(e!, 1), W(gg!, 2)],
-        [W(f!, 1), W(h!, 2)],
-        [W(gg!, 1), W(e!, 2)],
-        [W(h!, 1), W(f!, 2)],
-      ];
-      const pq = pairs.map(([x, y]) => {
-        const id = no++;
-        out.push(mk(id, "knockout", "Round of 16", 1, x, y));
-        return `Winner M${id}`;
-      });
-      // ... continue with standard QF, SF, F logic using pq ...
-      const qf: string[] = [];
-      for (let i = 0; i < pq.length; i += 2) {
-        const id = no++;
-        out.push(mk(id, "knockout", "Quarterfinal", 2, pq[i]!, pq[i + 1]!));
-        qf.push(`Winner M${id}`);
-      }
-      const sf: string[] = [];
-      for (let i = 0; i < qf.length; i += 2) {
-        const id = no++;
-        out.push(mk(id, "knockout", "Semifinal", 3, qf[i]!, qf[i + 1]!));
-        sf.push(`Winner M${id}`);
-      }
-      out.push(mk(no++, "final", "Final", 4, sf[0]!, sf[1]!));
+      const m1 = no++;
+      out.push(mk(m1, "knockout", "Round of 16", 1, W(a!, 1), W(c!, 2))); // Match 1: A1 vs C2
+      const m2 = no++;
+      out.push(mk(m2, "knockout", "Round of 16", 1, W(b!, 1), W(d!, 2))); // Match 2: B1 vs D2
+      const m3 = no++;
+      out.push(mk(m3, "knockout", "Round of 16", 1, W(c!, 1), W(a!, 2))); // Match 3: C1 vs A2
+      const m4 = no++;
+      out.push(mk(m4, "knockout", "Round of 16", 1, W(d!, 1), W(b!, 2))); // Match 4: D1 vs B2
+      const m5 = no++;
+      out.push(mk(m5, "knockout", "Round of 16", 1, W(e!, 1), W(gg!, 2))); // Match 5: E1 vs G2
+      const m6 = no++;
+      out.push(mk(m6, "knockout", "Round of 16", 1, W(f!, 1), W(h!, 2))); // Match 6: F1 vs H2
+      const m7 = no++;
+      out.push(mk(m7, "knockout", "Round of 16", 1, W(gg!, 1), W(e!, 2))); // Match 7: G1 vs E2
+      const m8 = no++;
+      out.push(mk(m8, "knockout", "Round of 16", 1, W(h!, 1), W(f!, 2))); // Match 8: H1 vs F2
+
+      // Quarter-finals
+      const m9 = no++;
+      out.push(mk(m9, "knockout", "Quarterfinal", 2, `Winner M${m1}`, `Winner M${m2}`)); // QF 9: W1 vs W2
+      const m10 = no++;
+      out.push(mk(m10, "knockout", "Quarterfinal", 2, `Winner M${m3}`, `Winner M${m4}`)); // QF 10: W3 vs W4
+      const m11 = no++;
+      out.push(mk(m11, "knockout", "Quarterfinal", 2, `Winner M${m5}`, `Winner M${m6}`)); // QF 11: W5 vs W6
+      const m12 = no++;
+      out.push(mk(m12, "knockout", "Quarterfinal", 2, `Winner M${m7}`, `Winner M${m8}`)); // QF 12: W7 vs W8
+
+      // Semi-finals (Cross-bracket: 9 vs 11, 10 vs 12)
+      const m13 = no++;
+      out.push(mk(m13, "knockout", "Semifinal", 3, `Winner M${m9}`, `Winner M${m11}`)); // SF 13: W9 vs W11
+      const m14 = no++;
+      out.push(mk(m14, "knockout", "Semifinal", 3, `Winner M${m10}`, `Winner M${m12}`)); // SF 14: W10 vs W12
+
+      // Final (Winner 13 vs Runner-up 14 - per spec)
+      out.push(mk(no++, "final", "Final", 4, `Winner M${m13}`, `Runner-up M${m14}`));
       return out;
     }
+
     if (g === 4) {
       const [a, b, c, d] = groupLabels;
-      const pairs: [string, string][] = [
-        [W(a!, 1), W(c!, 2)],
-        [W(c!, 1), W(a!, 2)],
-        [W(b!, 1), W(d!, 2)],
-        [W(d!, 1), W(b!, 2)],
-      ];
-      const qf = pairs.map(([x, y]) => {
-        const id = no++;
-        out.push(mk(id, "knockout", "Quarterfinal", 1, x, y));
-        return `Winner M${id}`;
-      });
-      const sf: string[] = [];
-      for (let i = 0; i < qf.length; i += 2) {
-        const id = no++;
-        out.push(mk(id, "knockout", "Semifinal", 2, qf[i]!, qf[i + 1]!));
-        sf.push(`Winner M${id}`);
-      }
-      out.push(mk(no++, "final", "Final", 3, sf[0]!, sf[1]!));
+      // Exact mapping from spec:
+      // Quarter-final 1: A1 vs C2
+      const m1 = no++;
+      out.push(mk(m1, "knockout", "Quarterfinal", 1, W(a!, 1), W(c!, 2)));
+      // Quarter-final 2: C1 vs A2
+      const m2 = no++;
+      out.push(mk(m2, "knockout", "Quarterfinal", 1, W(c!, 1), W(a!, 2)));
+      // Quarter-final 3: B1 vs A2 (Spec says A2 again)
+      const m3 = no++;
+      out.push(mk(m3, "knockout", "Quarterfinal", 1, W(b!, 1), W(a!, 2)));
+      // Quarter-final 4: D1 vs B2
+      const m4 = no++;
+      out.push(mk(m4, "knockout", "Quarterfinal", 1, W(d!, 1), W(b!, 2)));
+
+      // Semi-finals
+      const m5 = no++;
+      out.push(mk(m5, "knockout", "Semifinal", 2, `Winner M${m1}`, `Winner M${m2}`));
+      const m6 = no++;
+      out.push(mk(m6, "knockout", "Semifinal", 2, `Winner M${m3}`, `Winner M${m4}`));
+
+      // Final: Winner Match 5 vs Runner Match 6 (Spec terminology)
+      out.push(mk(no++, "final", "Final", 3, `Winner M${m5}`, `Runner M${m6}`));
       return out;
     }
+
     if (g === 2) {
       const [a, b] = groupLabels;
-      const s1 = no++;
-      out.push(mk(s1, "knockout", "Semifinal", 1, W(a!, 1), W(b!, 2)));
-      const s2 = no++;
-      out.push(mk(s2, "knockout", "Semifinal", 1, W(b!, 1), W(a!, 2)));
-      out.push(mk(no++, "final", "Final", 2, `Winner M${s1}`, `Winner M${s2}`));
+      // Semi-final 1: A1 vs B2
+      const m1 = no++;
+      out.push(mk(m1, "knockout", "Semifinal", 1, W(a!, 1), W(b!, 2)));
+      // Semi-final 2: B1 vs A2
+      const m2 = no++;
+      out.push(mk(m2, "knockout", "Semifinal", 1, W(b!, 1), W(a!, 2)));
+      
+      // Final: Winner SF1 vs Winner SF2
+      out.push(mk(no++, "final", "Final", 2, `Winner M${m1}`, `Winner M${m2}`));
       return out;
     }
+
     if (g === 1) {
       out.push(mk(no++, "final", "Final", 1, W(groupLabels[0]!, 1), W(groupLabels[0]!, 2)));
       return out;
