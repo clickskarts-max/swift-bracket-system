@@ -14,8 +14,12 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
   }, [matches]);
 
-  const name = (id: string | null, fallback: string | null) =>
-    teams.find((t) => t.id === id)?.name ?? fallback ?? "TBD";
+  const side = (id: string | null, fallback: string | null) =>
+    teams.find((t) => t.id === id) ?? {
+      name: fallback ?? "TBD",
+      logo_url: null,
+      jersey_color: null,
+    };
 
   if (rounds.length === 0)
     return (
