@@ -197,10 +197,11 @@ export function TournamentForm({
       if (values.format === "group_knockout" && values.group_count > 0) {
         const teamsPerGroup = Math.ceil(values.team_count / values.group_count);
         const groupCounts: Record<string, number> = {};
-        for (const team of teams) {
+        for (let j = 0; j < teams.length; j++) {
+          const team = teams[j];
           if (team?.group_label) {
             groupCounts[team.group_label] = (groupCounts[team.group_label] || 0) + 1;
-            if (groupCounts[team.group_label] > teamsPerGroup) {
+            if (groupCounts[team.group_label]! > teamsPerGroup) {
               toast.error(
                 `Group ${team.group_label} already has the maximum of ${teamsPerGroup} teams.`,
               );
