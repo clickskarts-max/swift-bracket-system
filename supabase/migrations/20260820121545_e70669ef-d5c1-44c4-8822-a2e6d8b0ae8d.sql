@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN IF NOT EXISTS qualifiers_per_group integer NOT NULL DEFAULT 1;

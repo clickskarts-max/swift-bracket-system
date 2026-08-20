@@ -430,6 +430,7 @@ export type Database = {
           name: string
           owner_id: string
           playoff_format: string
+          qualifiers_per_group: number
           slug: string
           start_date: string | null
           status: string
@@ -454,6 +455,7 @@ export type Database = {
           name: string
           owner_id: string
           playoff_format?: string
+          qualifiers_per_group?: number
           slug: string
           start_date?: string | null
           status?: string
@@ -478,6 +480,7 @@ export type Database = {
           name?: string
           owner_id?: string
           playoff_format?: string
+          qualifiers_per_group?: number
           slug?: string
           start_date?: string | null
           status?: string
