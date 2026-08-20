@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { EmptyState } from "@/components/data-bits";
+import { EmptyState, TeamChip } from "@/components/data-bits";
 import type { Match, Team } from "@/lib/queries";
 
-type BracketTeamLike = Pick<Team, "id" | "name">;
+type BracketTeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color">;
 
 const KNOCKOUT_STAGES = new Set(["knockout", "playoff", "final", "losers", "winners"]);
 
