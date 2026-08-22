@@ -419,15 +419,23 @@ export function TournamentForm({
                 )}
               </Field>
 
-              <Field label="Teams per Group">
+              <Field
+                label="Teams per Group"
+                hint="Editing this updates the total number of teams."
+              >
                 <Input
-                  type="text"
-                  readOnly
-                  disabled
-                  value={isUnevenGroups ? "Uneven" : teamsPerGroup || "—"}
-                  className="bg-muted"
+                  type="number"
+                  min={1}
+                  value={isUnevenGroups ? "" : teamsPerGroup || ""}
+                  placeholder={isUnevenGroups ? "Uneven" : "—"}
+                  onChange={(e) => {
+                    const per = Number(e.target.value) || 0;
+                    const groups = values.group_count || 1;
+                    if (per > 0) set("team_count", per * groups);
+                  }}
                 />
               </Field>
+
 
               <Field
                 label="Qualifiers from Each Group"
