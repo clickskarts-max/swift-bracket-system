@@ -634,7 +634,7 @@ export function TournamentForm({
               <div className="bg-muted/10 p-6 flex flex-col gap-6">
                 <div className="space-y-4">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
-                    <ListOrdered className="h-4 w-4 text-primary" />
+                    <Zap className="h-4 w-4 text-primary" />
                     Quick Actions
                   </h3>
                   <div className="grid gap-2">
