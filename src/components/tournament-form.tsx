@@ -74,6 +74,7 @@ export type TournamentValues = {
   is_public: boolean;
   teams?: TeamValue[];
   venues?: VenueValue[];
+  group_capacities?: Record<string, number> | null;
 };
 
 const schema = z.object({
