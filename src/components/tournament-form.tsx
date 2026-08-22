@@ -621,40 +621,6 @@ export function TournamentForm({
                                   </TooltipContent>
                                 </Tooltip>
                               )}
-                              {!team.group_label && (
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                                    >
-                                      <GripVertical className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-48 p-2" align="end">
-                                    <div className="space-y-1">
-                                      <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Assign to Group</div>
-                                      {groups.map(g => {
-                                        const count = teams.filter(t => t.group_label === g).length;
-                                        const isFull = count >= teamsPerGroup;
-                                        return (
-                                          <Button
-                                            key={g}
-                                            variant="ghost"
-                                            size="sm"
-                                            disabled={isFull}
-                                            className="w-full justify-start font-bold text-xs h-8"
-                                            onClick={() => setTeam(team.originalIdx, { group_label: g, is_locked: true })}
-                                          >
-                                            Group {g} {isFull ? "(Full)" : ""}
-                                          </Button>
-                                        );
-                                      })}
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
-                              )}
                             </div>
                           </div>
                         );
