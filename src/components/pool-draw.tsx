@@ -353,9 +353,9 @@ export function PoolDraw({
                       <span className="font-bold">Group {label}</span>
                       <span className={cn(
                         "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                        groupTeams.length === teamsPerGroup ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
+                        groupTeams.length === (capacities[label] || 0) ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
                       )}>
-                        {groupTeams.length} / {teamsPerGroup}
+                        {groupTeams.length} / {capacities[label] || 0}
                       </span>
                     </div>
                     <div className="space-y-1.5">
