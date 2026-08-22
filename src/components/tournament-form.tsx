@@ -846,52 +846,6 @@ export function TournamentForm({
     </div>
   );
 
-  const renderStep4 = () => (
-    <div className="space-y-6">
-      <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold text-primary">Step 4: Branding & Details</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Logo image URL">
-             <ImageUpload 
-              value={values.logo_url}
-              onChange={(url) => set("logo_url", url)}
-              folder="tournament-logos"
-            />
-          </Field>
-          <Field label="Banner image URL">
-             <ImageUpload 
-              value={values.banner_url}
-              onChange={(url) => set("banner_url", url)}
-              folder="tournament-banners"
-            />
-          </Field>
-        </div>
-        <Field label="Description">
-          <Textarea
-            rows={4}
-            value={values.description ?? ""}
-            onChange={(e) => set("description", e.target.value || null)}
-            placeholder="Tell fans what this competition is about."
-          />
-        </Field>
-        <div className="flex items-center justify-between rounded-lg border border-border p-3">
-          <div>
-            <p className="text-sm font-medium">Public tournament page</p>
-            <p className="text-xs text-muted-foreground">Anyone with the link can view.</p>
-          </div>
-          <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <Button variant="outline" onClick={back}>
-          <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
-        </Button>
-        <Button size="lg" onClick={submit} disabled={pending} className="w-full sm:w-auto">
-          {submitLabel}
-        </Button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
