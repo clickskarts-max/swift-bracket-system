@@ -183,47 +183,45 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+function BrandingEffects() {
   const { data: org } = useBranding();
 
   // Apply branding colors and favicon
   useEffect(() => {
     if (org) {
       const root = document.documentElement;
-      
-      // Update primary colors if set
+
       if (org.primary_color) {
         root.style.setProperty("--primary", org.primary_color);
         root.style.setProperty("--ring", org.primary_color);
       }
-      
+
       if (org.accent_color) {
         root.style.setProperty("--accent", org.accent_color);
       }
-      
-      // Update favicon dynamically
+
       if (org.favicon_url) {
         const links = document.querySelectorAll("link[rel*='icon']");
         links.forEach((link) => {
           (link as HTMLLinkElement).href = org.favicon_url!;
         });
       }
-      
-      // Update page title if not already specific
-      const brandName = org.brand_name || org.name;
-      if (brandName && !document.title.includes(brandName)) {
-        // We only append if it's a generic title, but usually router head() handles this.
-        // This is a safety fallback for root.
-      }
     }
   }, [org]);
 
+  return null;
+}
+
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
+
   return (
     <QueryClientProvider client={queryClient}>
+      <BrandingEffects />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );
 }
+
