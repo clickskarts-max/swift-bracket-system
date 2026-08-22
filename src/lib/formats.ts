@@ -102,11 +102,13 @@ export function roundRobin(
   return out;
 }
 
-const roundLabel = (teamsInRound: number) => {
-  if (teamsInRound <= 2) return "Final";
-  if (teamsInRound <= 4) return "Semifinal";
-  if (teamsInRound <= 8) return "Quarterfinal";
-  if (teamsInRound <= 16) return "Round of 16";
+const roundLabel = (teamsInRound: number, stage: string) => {
+  if (stage === "knockout" || stage === "final") {
+    if (teamsInRound <= 2) return "Final";
+    if (teamsInRound <= 4) return "Semifinal";
+    if (teamsInRound <= 8) return "Quarterfinal";
+    if (teamsInRound <= 16) return "Round of 16";
+  }
   return `Round of ${teamsInRound}`;
 };
 
@@ -121,7 +123,7 @@ export function singleElimination(teams: TeamRef[], startNo = 1): MatchDraft[] {
   let current: (TeamRef | string | null)[] = seeded;
   while (current.length > 1) {
     const next: (TeamRef | string | null)[] = [];
-    const label = roundLabel(current.length);
+    const label = roundLabel(current.length, "knockout");
     for (let i = 0; i < current.length; i += 2) {
       const a = current[i] ?? null;
       const b = current[i + 1] ?? null;
@@ -187,7 +189,7 @@ export function groupKnockout(
   const out: MatchDraft[] = [];
   let no = startNo;
   const W = (l: string, rank: number) =>
-    rank === 1 ? `Winner ${l}` : rank === 2 ? `Runner-up ${l}` : `${rank}st ${l}`;
+    rank === 1 ? `1st Group ${l}` : rank === 2 ? `2nd Group ${l}` : `${rank}st ${l}`;
 
   // If 1 qualifier per group, just run a standard single elimination
   if (q === 1) {
