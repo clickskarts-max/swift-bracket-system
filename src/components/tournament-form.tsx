@@ -654,7 +654,7 @@ export function TournamentForm({
                                     </div>
                                   </PopoverContent>
                                 </Popover>
-                            </div>
+                              )}
                           </div>
                         );
                       })}
