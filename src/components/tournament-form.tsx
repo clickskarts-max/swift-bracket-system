@@ -188,6 +188,40 @@ export function TournamentForm({
     });
   };
 
+  const shuffleGroups = () => {
+    setValues((v) => {
+      const teams = [...(v.teams || [])];
+      for (let i = teams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [teams[i], teams[j]] = [teams[j]!, teams[i]!] as [TeamValue, TeamValue];
+      }
+      return { ...v, teams };
+    });
+  };
+
+  const poolDraw = () => {
+    setValues((v) => {
+      const teams = [...(v.teams || [])];
+      const groups = v.group_count || 1;
+      const perGroup = Math.ceil(teams.length / groups);
+      
+      // Shuffle first
+      for (let i = teams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [teams[i], teams[j]] = [teams[j]!, teams[i]!] as [TeamValue, TeamValue];
+      }
+
+      // Assign groups sequentially A, B, C...
+      const nextTeams = teams.map((t, i) => ({
+        ...t,
+        group_label: String.fromCharCode(65 + (i % groups)),
+      }));
+
+      return { ...v, teams: nextTeams };
+    });
+    toast.success("Teams randomly assigned to groups");
+  };
+
   const validateStep = (currentStep: number) => {
     if (currentStep === 1) {
       if (!values.name.trim()) {
@@ -275,6 +309,14 @@ export function TournamentForm({
 
   const next = () => {
     if (validateStep(step)) {
+      if (step === 3 && values.format !== "group_knockout") {
+        submit();
+        return;
+      }
+      if (step === 4) {
+        submit();
+        return;
+      }
       setStep((s) => s + 1);
       window.scrollTo(0, 0);
     }
@@ -309,28 +351,130 @@ export function TournamentForm({
     return `${size}-team bracket`;
   };
 
+  const renderStep4 = () => {
+    const teams = values.teams || [];
+    const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
+    
+    return (
+      <div className="space-y-6">
+        <div className="surface-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="font-display text-xl font-bold">Group Assignment</h2>
+              <p className="text-sm text-muted-foreground">Review and adjust team groups.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={shuffleGroups}>
+                <ChevronRight className="mr-1.5 h-4 w-4 rotate-90" /> Shuffle
+              </Button>
+              <Button size="sm" onClick={poolDraw}>
+                <ChevronRight className="mr-1.5 h-4 w-4" /> Pool Draw
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {groups.map((group) => {
+              const groupTeams = teams.filter(t => t.group_label === group || (!t.group_label && group === 'A'));
+              return (
+                <div key={group} className="rounded-lg border border-border/50 bg-muted/20 p-4">
+                  <h3 className="mb-4 font-display font-bold">Group {group}</h3>
+                  <div className="space-y-3">
+                    {groupTeams.length === 0 && (
+                      <p className="text-xs text-center py-4 text-muted-foreground italic">No teams assigned</p>
+                    )}
+                    {groupTeams.map((team, idx) => {
+                      const teamIndex = teams.findIndex(t => t.name === team.name);
+                      return (
+                        <div key={team.name} className="flex items-center justify-between gap-2 p-2 rounded-md bg-background border border-border/40">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="text-xs text-muted-foreground w-4">{idx + 1}.</span>
+                            <span className="text-sm font-medium truncate">{team.name}</span>
+                          </div>
+                          <Select 
+                            value={team.group_label || 'A'} 
+                            onValueChange={(v) => setTeam(teamIndex, { group_label: v })}
+                          >
+                            <SelectTrigger className="h-8 w-[100px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groups.map(g => (
+                                <SelectItem key={g} value={g} className="text-xs">
+                                  Group {g}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-4">
+          <Button variant="ghost" onClick={back}>
+            <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
+          </Button>
+          <Button onClick={next} disabled={pending}>
+            {pending ? "Creating..." : submitLabel}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold text-primary">Step 1: Basics & Format</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Tournament name">
-            <Input
-              value={values.name}
-              onChange={(e) => {
-                set("name", e.target.value);
-                if (!initial) set("slug", uniqueSlug(e.target.value));
-              }}
-              placeholder="Ecluid Summer Classic"
-            />
-          </Field>
-          <Field label="Public URL slug" hint={`/public/tournament/${values.slug || "your-slug"}`}>
-            <Input
-              value={values.slug}
-              onChange={(e) => set("slug", e.target.value)}
-              placeholder="summer-classic"
-            />
-          </Field>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-display text-lg font-semibold text-primary">Step 1: Basics & Branding</h2>
+        </div>
+        
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-4">
+            <Field label="Logo image">
+               <ImageUpload 
+                value={values.logo_url}
+                onChange={(url) => set("logo_url", url)}
+                folder="tournament-logos"
+              />
+            </Field>
+            <Field label="Banner image">
+               <ImageUpload 
+                value={values.banner_url}
+                onChange={(url) => set("banner_url", url)}
+                folder="tournament-banners"
+              />
+            </Field>
+          </div>
+          
+          <div className="space-y-4">
+            <Field label="Tournament name">
+              <Input
+                value={values.name}
+                onChange={(e) => {
+                  set("name", e.target.value);
+                  if (!initial) set("slug", uniqueSlug(e.target.value));
+                }}
+                placeholder="Ecluid Summer Classic"
+              />
+            </Field>
+            <Field label="Public URL slug" hint={`/public/tournament/${values.slug || "your-slug"}`}>
+              <Input
+                value={values.slug}
+                onChange={(e) => set("slug", e.target.value)}
+                placeholder="summer-classic"
+              />
+            </Field>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t border-border/40">
           <div className="col-span-full">
             <Field label="Format">
               <Select value={values.format} onValueChange={(v) => set("format", v)}>
@@ -435,7 +579,6 @@ export function TournamentForm({
                   }}
                 />
               </Field>
-
 
               <Field
                 label="Qualifiers from Each Group"
@@ -716,37 +859,10 @@ export function TournamentForm({
           )}
         </div>
       </div>
-      <div className="flex items-center justify-between gap-4">
-        <Button variant="outline" onClick={back}>
-          <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
-        </Button>
-        <Button onClick={next} className="w-full sm:w-auto">
-          Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold text-primary">Step 4: Branding & Details</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Logo image URL">
-             <ImageUpload 
-              value={values.logo_url}
-              onChange={(url) => set("logo_url", url)}
-              folder="tournament-logos"
-            />
-          </Field>
-          <Field label="Banner image URL">
-             <ImageUpload 
-              value={values.banner_url}
-              onChange={(url) => set("banner_url", url)}
-              folder="tournament-banners"
-            />
-          </Field>
-        </div>
+        <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Additional Details
+        </h3>
         <Field label="Description">
           <Textarea
             rows={4}
@@ -763,21 +879,26 @@ export function TournamentForm({
           <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
         </div>
       </div>
+
       <div className="flex items-center justify-between gap-4">
         <Button variant="outline" onClick={back}>
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
-        <Button size="lg" onClick={submit} disabled={pending} className="w-full sm:w-auto">
-          {submitLabel}
+        <Button onClick={next} className="w-full sm:w-auto">
+          {values.format === "group_knockout" ? "Next Step" : submitLabel} 
+          {values.format === "group_knockout" && <ChevronRight className="ml-1.5 h-4 w-4" />}
         </Button>
       </div>
     </div>
   );
 
+
+  const totalSteps = values.format === "group_knockout" ? 4 : 3;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-2 overflow-x-auto py-2">
-        {[1, 2, 3, 4].map((s) => (
+        {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
           <div key={s} className="flex items-center shrink-0">
             <div 
               className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors ${
@@ -786,7 +907,7 @@ export function TournamentForm({
             >
               {s}
             </div>
-            {s < 4 && (
+            {s < totalSteps && (
               <div className={`h-[2px] w-8 mx-2 ${step > s ? "bg-primary" : "bg-muted"}`} />
             )}
           </div>
@@ -795,7 +916,7 @@ export function TournamentForm({
       
       <div className="mb-4">
         <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-          Step {step} of 4
+          Step {step} of {totalSteps}
         </p>
       </div>
 
