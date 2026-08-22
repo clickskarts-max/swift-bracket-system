@@ -451,7 +451,7 @@ export function TournamentForm({
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-bold flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
-                  Team List
+                  Teams
                 </h3>
               </div>
               
@@ -575,7 +575,7 @@ export function TournamentForm({
 
               <div className="space-y-4 flex-1">
                 <h3 className="font-bold flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
-                  Group Assignment
+                  Groups
                 </h3>
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                   {groups.map((g) => {
