@@ -403,7 +403,7 @@ export function TournamentForm({
   const isGroupKnockout = values.format === "group_knockout";
   const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
   const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
-  const knockoutTeams = isGroupKnockout ? values.group_count * values.qualifiers_per_group : 0;
+  const knockoutTeams = isGroupKnockout ? values.group_count * 2 : 0;
 
   const knockoutRoundLabel = (size: number) => {
     if (size === 2) return "Final";
