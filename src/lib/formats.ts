@@ -353,7 +353,7 @@ export type GenerateOptions = {
 export function generateSchedule({
   format,
   legs,
-  qualifiersPerGroup = 1,
+  qualifiersPerGroup = 2,
   playoffFormat,
   teams,
 }: GenerateOptions): MatchDraft[] {
