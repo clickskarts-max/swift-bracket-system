@@ -76,7 +76,7 @@ function Landing() {
       <section className="hero-surface relative overflow-hidden border-y border-border/60">
         <div className="absolute inset-0 pointer-events-none opacity-40">
           <DotField 
-            dotSize={1.5}
+            dotRadius={1.5}
             dotSpacing={20}
             glowColor="rgba(255, 107, 26, 0.2)"
             gradientFrom="rgba(255, 107, 26, 0.15)"
