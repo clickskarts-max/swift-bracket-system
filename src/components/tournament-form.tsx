@@ -339,42 +339,44 @@ export function TournamentForm({
   };
 
   const next = () => {
-    if (validateStep(step)) {
-      if (step === 3 && values.format !== "group_knockout") {
-        submit();
-        return;
-      }
-      if (step === 4) {
-        // Final validation for Group stage + knockout
-        const teams = values.teams || [];
-        const unassigned = teams.filter(t => !t.group_label);
-        if (unassigned.length > 0) {
-          toast.error(`${unassigned.length} teams have not been assigned to a group.`);
-          return false;
-        }
+    if (!validateStep(step)) return;
 
-        const groups = values.group_count || 1;
-        const teamsPerGroup = Math.ceil(values.team_count / groups);
-        const groupCounts: Record<string, number> = {};
-        teams.forEach(t => {
-          if (t.group_label) groupCounts[t.group_label] = (groupCounts[t.group_label] || 0) + 1;
-        });
-
-        for (let i = 0; i < groups; i++) {
-          const label = String.fromCharCode(65 + i);
-          const count = groupCounts[label] || 0;
-          if (count > teamsPerGroup) {
-            toast.error(`Group ${label} contains ${count} teams but should contain at most ${teamsPerGroup}.`);
-            return false;
-          }
-        }
-
-        submit();
-        return;
-      }
-      setStep((s) => s + 1);
-      window.scrollTo(0, 0);
+    if (step === 3 && values.format !== "group_knockout") {
+      submit();
+      return;
     }
+    
+    if (step === 4) {
+      // Final validation for Group stage + knockout
+      const teams = values.teams || [];
+      const unassigned = teams.filter(t => !t.group_label);
+      if (unassigned.length > 0) {
+        toast.error(`${unassigned.length} teams have not been assigned to a group.`);
+        return;
+      }
+
+      const groups = values.group_count || 1;
+      const tpg = Math.ceil(values.team_count / groups);
+      const groupCounts: Record<string, number> = {};
+      teams.forEach(t => {
+        if (t.group_label) groupCounts[t.group_label] = (groupCounts[t.group_label] || 0) + 1;
+      });
+
+      for (let i = 0; i < groups; i++) {
+        const label = String.fromCharCode(65 + i);
+        const count = groupCounts[label] || 0;
+        if (count > tpg) {
+          toast.error(`Group ${label} contains ${count} teams but should contain at most ${tpg}.`);
+          return;
+        }
+      }
+
+      submit();
+      return;
+    }
+
+    setStep((s) => s + 1);
+    window.scrollTo(0, 0);
   };
 
   const back = () => {
