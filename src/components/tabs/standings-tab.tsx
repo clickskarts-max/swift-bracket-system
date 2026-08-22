@@ -33,9 +33,22 @@ const fmtWinPct = (v: number) => {
   return s.startsWith("0") ? s.slice(1) : s;
 };
 
-function StandingsLegend() {
+function StandingsLegend({ tournament }: { tournament: Tournament | null }) {
+  const isLeague = tournament?.format === "league";
+  
   return (
     <div className="surface-card border border-border/70 p-4 text-xs text-muted-foreground">
+      <div className="mb-3 flex flex-wrap gap-x-6 gap-y-2 border-b border-border/40 pb-3">
+        <span className="flex items-center gap-1.5">
+          <span className="font-semibold text-foreground">Points:</span>
+          {isLeague ? (
+            <span className="text-primary">Win: 2 · Loss: 1 · Forfeit: 0</span>
+          ) : (
+            <span className="text-primary">Win: 2 · Loss: 0</span>
+          )}
+        </span>
+      </div>
+      
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <span>
           <span className="font-semibold text-foreground">P</span> Played
@@ -62,7 +75,7 @@ function StandingsLegend() {
           <span className="font-semibold text-foreground">WIN%</span> Win Percentage
         </span>
         <span>
-          <span className="font-semibold text-foreground">OT</span> Overtime (placeholder)
+          <span className="font-semibold text-foreground">OT</span> Overtime
         </span>
         <span>
           <span className="font-semibold text-foreground">LAST 3</span> Last 3 Games
@@ -77,7 +90,6 @@ function StandingsLegend() {
         </span>
         <span>
           <span className="font-semibold text-destructive">o</span> Eliminated from Playoffs
-          Contention
         </span>
       </div>
     </div>
@@ -101,6 +113,23 @@ function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
         These rules apply when teams are level on points in the league table. Tie-breaks are
         resolved top-to-bottom until the tie is broken.
       </p>
+
+      <div className="mt-4 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Classification Points
+        </p>
+        <ul className="list-inside list-disc text-sm text-muted-foreground">
+          <li><span className="font-semibold text-foreground">Win</span>: 2 Points</li>
+          {format === "league" ? (
+            <>
+              <li><span className="font-semibold text-foreground">Loss</span>: 1 Point</li>
+              <li><span className="font-semibold text-foreground">Loss by forfeit</span>: 0 Points</li>
+            </>
+          ) : (
+            <li><span className="font-semibold text-foreground">Loss</span>: 0 Points</li>
+          )}
+        </ul>
+      </div>
 
       {hasGroups ? (
         <div className="mt-3 space-y-2">
@@ -375,7 +404,7 @@ export function StandingsTab({
               groupLabel={g}
               tournament={tournament}
             />
-            <StandingsLegend />
+            <StandingsLegend tournament={tournament} />
           </div>
         ))}
         <TieBreakProcedures tournament={tournament} />
@@ -385,7 +414,7 @@ export function StandingsTab({
   return (
     <div className="space-y-4">
       <StandingsTable teams={teams} matches={matches} tournament={tournament} />
-      <StandingsLegend />
+      <StandingsLegend tournament={tournament} />
       <TieBreakProcedures tournament={tournament} />
     </div>
   );
