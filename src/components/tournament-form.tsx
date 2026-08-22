@@ -275,6 +275,14 @@ export function TournamentForm({
 
   const next = () => {
     if (validateStep(step)) {
+      if (step === 3 && values.format !== "group_knockout") {
+        submit();
+        return;
+      }
+      if (step === 4) {
+        submit();
+        return;
+      }
       setStep((s) => s + 1);
       window.scrollTo(0, 0);
     }
