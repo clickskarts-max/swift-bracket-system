@@ -474,24 +474,6 @@ export function TournamentForm({
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-border/40">
-          <Field label="Tournament name">
-            <Input
-              value={values.name}
-              onChange={(e) => {
-                set("name", e.target.value);
-                if (!initial) set("slug", uniqueSlug(e.target.value));
-              }}
-              placeholder="Ecluid Summer Classic"
-            />
-          </Field>
-          <Field label="Public URL slug" hint={`/public/tournament/${values.slug || "your-slug"}`}>
-            <Input
-              value={values.slug}
-              onChange={(e) => set("slug", e.target.value)}
-              placeholder="summer-classic"
-            />
-          </Field>
           <div className="col-span-full">
             <Field label="Format">
               <Select value={values.format} onValueChange={(v) => set("format", v)}>
