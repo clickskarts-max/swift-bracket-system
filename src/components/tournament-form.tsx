@@ -36,6 +36,7 @@ export type TeamValue = {
   name: string;
   logo_url: string | null;
   group_label: string | null;
+  is_locked?: boolean;
 };
 
 export type VenueValue = {
@@ -113,6 +114,8 @@ export function TournamentForm({
   pending?: boolean;
 }) {
   const [step, setStep] = useState(1);
+  const [showPoolDraw, setShowPoolDraw] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [values, setValues] = useState<TournamentValues>(
     initial
       ? {
@@ -203,66 +206,59 @@ export function TournamentForm({
   const shuffleGroups = () => {
     setValues((v) => {
       const teams = [...(v.teams || [])];
-      // Only shuffle teams that are not manually assigned OR all teams if needed
-      // Actually the request says: "Shuffle should redistribute eligible teams randomly between groups... manually locked/pre-assigned teams should remain"
-      // We'll mark teams that had a group_label manually set in Step 2 as "locked" if we had that state, 
-      // but since we don't, we'll just shuffle those that are currently "none" or all if organizer clicks shuffle.
-      // Re-reading: "Shuffle should reshuffle automatically assigned teams. Manually pre-assigned teams should remain in their assigned groups"
-      
-      // We don't track "manual" vs "auto" yet. Let's assume teams with group_label are locked for "Pool Draw" but not "Shuffle"?
-      // No, "Shuffle" should also respect manual assignments.
-      // For now, let's just implement basic shuffle and pool draw.
-      for (let i = teams.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [teams[i], teams[j]] = [teams[j]!, teams[i]!] as [TeamValue, TeamValue];
-      }
-      return { ...v, teams };
-    });
-  };
-
-  const poolDraw = () => {
-    setValues((v) => {
-      const teams = [...(v.teams || [])];
       const groups = v.group_count || 1;
       const teamsPerGroup = Math.ceil(v.team_count / groups);
       
-      const unassigned = teams.filter(t => !t.group_label);
-      const assigned = teams.filter(t => !!t.group_label);
+      const lockedTeams = teams.filter(t => t.is_locked && t.group_label);
+      const eligibleTeams = teams.filter(t => !t.is_locked || !t.group_label);
       
-      // Count current group sizes
+      // Randomize eligible teams
+      for (let i = eligibleTeams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [eligibleTeams[i], eligibleTeams[j]] = [eligibleTeams[j]!, eligibleTeams[i]!] as [TeamValue, TeamValue];
+      }
+
+      const nextTeams = [...lockedTeams];
+      
+      // Count current group sizes from locked teams
       const counts: Record<string, number> = {};
-      assigned.forEach(t => {
+      lockedTeams.forEach(t => {
         if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
       });
 
-      // Randomize unassigned
-      for (let i = unassigned.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [unassigned[i], unassigned[j]] = [unassigned[j]!, unassigned[i]!] as [TeamValue, TeamValue];
-      }
-
-      const nextTeams = [...assigned];
-      let unIdx = 0;
-
+      let eligibleIdx = 0;
       for (let i = 0; i < groups; i++) {
         const label = String.fromCharCode(65 + i);
         let currentCount = counts[label] || 0;
-        while (currentCount < teamsPerGroup && unIdx < unassigned.length) {
-          nextTeams.push({ ...unassigned[unIdx]!, group_label: label });
-          unIdx++;
+        while (currentCount < teamsPerGroup && eligibleIdx < eligibleTeams.length) {
+          nextTeams.push({ ...eligibleTeams[eligibleIdx]!, group_label: label });
+          eligibleIdx++;
           currentCount++;
         }
       }
 
-      // If any left due to rounding/etc
-      while (unIdx < unassigned.length) {
-        nextTeams.push(unassigned[unIdx]!);
-        unIdx++;
+      // Any remaining due to rounding
+      while (eligibleIdx < eligibleTeams.length) {
+        nextTeams.push(eligibleTeams[eligibleIdx]!);
+        eligibleIdx++;
       }
 
       return { ...v, teams: nextTeams };
     });
-    toast.success("Pool draw complete");
+    toast.success("Teams shuffled successfully.");
+  };
+
+  const clearGroups = () => {
+    setValues((v) => ({
+      ...v,
+      teams: (v.teams || []).map(t => t.is_locked ? t : { ...t, group_label: null })
+    }));
+    toast.success("Group assignments cleared");
+    setShowClearConfirm(false);
+  };
+
+  const poolDraw = () => {
+    setShowPoolDraw(true);
   };
 
   const validateStep = (currentStep: number) => {
