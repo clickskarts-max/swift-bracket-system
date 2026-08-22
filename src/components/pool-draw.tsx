@@ -30,8 +30,9 @@ interface PoolDrawProps {
   onOpenChange: (open: boolean) => void;
   teams: TeamValue[];
   groupCount: number;
-  teamsPerGroup: number;
-  onApply: (teams: TeamValue[]) => void;
+  teamCount: number;
+  initialCapacities?: Record<string, number> | null;
+  onApply: (teams: TeamValue[], capacities: Record<string, number>) => void;
 }
 
 export function PoolDraw({ 
