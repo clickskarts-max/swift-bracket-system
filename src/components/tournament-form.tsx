@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, Zap, Trash2, Trophy, ArrowRight, Lock, Unlock, Play } from "lucide-react";
+import { 
+  MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, 
+  Zap, Trash2, Trophy, ArrowRight, Lock, Unlock, Play, Search, Edit2, GripVertical, Check
+} from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,6 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+// Badge imported from ui below
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Field } from "@/components/data-bits";
 import { ImageUpload } from "@/components/image-upload";
 import { PoolDraw } from "@/components/pool-draw";
@@ -116,6 +123,8 @@ export function TournamentForm({
   const [step, setStep] = useState(1);
   const [showPoolDraw, setShowPoolDraw] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingTeamIdx, setEditingTeamIdx] = useState<number | null>(null);
   const [values, setValues] = useState<TournamentValues>(
     initial
       ? {
@@ -218,9 +227,8 @@ export function TournamentForm({
         [eligibleTeams[i], eligibleTeams[j]] = [eligibleTeams[j]!, eligibleTeams[i]!] as [TeamValue, TeamValue];
       }
 
-      const nextTeams = [...lockedTeams];
+      const nextTeams: TeamValue[] = [...lockedTeams];
       
-      // Count current group sizes from locked teams
       const counts: Record<string, number> = {};
       lockedTeams.forEach(t => {
         if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
@@ -237,12 +245,13 @@ export function TournamentForm({
         }
       }
 
-      // Any remaining due to rounding
       while (eligibleIdx < eligibleTeams.length) {
         nextTeams.push(eligibleTeams[eligibleIdx]!);
         eligibleIdx++;
       }
 
+      // Restore original order based on original indices if we want to keep the roster list stable
+      // But for knockout, the shuffle result IS the new state.
       return { ...v, teams: nextTeams };
     });
     toast.success("Teams shuffled successfully.");
@@ -351,13 +360,6 @@ export function TournamentForm({
 
     if (step === 2 && isGroupKnockout) {
       // Step 2 is now the combined "Teams & Group Draw" for knockout
-      // We don't submit yet, we go to Step 3 (Schedule)
-    } else if (step === 3 && !isGroupKnockout) {
-      submit();
-      return;
-    }
-    
-    if (step === 4) {
       // Final validation for Group stage + knockout
       const teams = values.teams || [];
       const unassigned = teams.filter(t => !t.group_label);
@@ -365,23 +367,12 @@ export function TournamentForm({
         toast.error(`${unassigned.length} teams have not been assigned to a group.`);
         return;
       }
-
-      const groups = values.group_count || 1;
-      const tpg = Math.ceil(values.team_count / groups);
-      const groupCounts: Record<string, number> = {};
-      teams.forEach(t => {
-        if (t.group_label) groupCounts[t.group_label] = (groupCounts[t.group_label] || 0) + 1;
-      });
-
-      for (let i = 0; i < groups; i++) {
-        const label = String.fromCharCode(65 + i);
-        const count = groupCounts[label] || 0;
-        if (count > tpg) {
-          toast.error(`Group ${label} contains ${count} teams but should contain at most ${tpg}.`);
-          return;
-        }
-      }
-
+    } else if (step === 3 && !isGroupKnockout) {
+      submit();
+      return;
+    }
+    
+    if (step === 4 && isGroupKnockout) {
       submit();
       return;
     }
@@ -419,242 +410,393 @@ export function TournamentForm({
     return `${size}-team bracket`;
   };
 
-  const renderStep4 = () => {
-    // This step is removed for Group stage + knockout as it's merged into Step 2.
-    // However, the wizard 'step' logic might still reach here if not careful.
-    return null;
+  const renderStep2 = () => {
+    if (isGroupKnockout) return renderCombinedStep2();
+    
+    return (
+      <div className="space-y-6">
+        <div className="surface-card p-6">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h2 className="font-display text-lg font-bold">Teams Roster</h2>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{values.team_count} Teams</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(values.teams || []).map((team, idx) => (
+              <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20">
+                <div className="w-10 h-10 shrink-0">
+                  <ImageUpload 
+                    value={team.logo_url}
+                    onChange={(url) => setTeam(idx, { logo_url: url })}
+                    folder="team-logos"
+                    className="!gap-0 !p-0"
+                  />
+                </div>
+                <Input
+                  value={team.name}
+                  onChange={(e) => setTeam(idx, { name: e.target.value })}
+                  placeholder={`Team ${idx + 1}`}
+                  className="bg-background border-border/60"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <Button variant="outline" onClick={back}>
+            <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
+          </Button>
+          <Button onClick={next} className="w-full sm:w-auto">
+            Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   const renderCombinedStep2 = () => {
     const teams = values.teams || [];
+    const filteredTeams = teams.map((t, i) => ({ ...t, originalIdx: i })).filter(t => 
+      t.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
     const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
     const teamsPerGroup = Math.ceil(values.team_count / (values.group_count || 1));
 
     return (
-      <div className="space-y-6">
-        <div className="surface-card p-0 overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-4 p-5 border-b border-border/40 bg-muted/20">
-            <div>
-              <h2 className="font-display text-xl font-bold text-primary">Teams & Group Draw</h2>
-              <p className="text-sm text-muted-foreground">Add teams, upload logos, and assign them to groups manually or through a draw.</p>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-               <div className="text-lg font-bold font-display px-3 py-1 rounded-md bg-background border border-border">
-                {values.team_count} <span className="text-xs text-muted-foreground uppercase">Teams</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px]">
-            {/* Left Column: Team Entry */}
-            <div className="p-5 border-r border-border/40">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-bold flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
-                  Teams
-                </h3>
-              </div>
-              
+      <TooltipProvider>
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="surface-card p-0 overflow-hidden border-primary/20 shadow-xl shadow-primary/5">
+            <div className="flex flex-wrap items-center justify-between gap-4 p-5 border-b border-border/40 bg-muted/20">
               <div className="space-y-1">
-                <div className="grid grid-cols-[40px_60px_1fr_120px] gap-4 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40">
-                  <div>#</div>
-                  <div>Logo</div>
-                  <div>Team Name</div>
-                  <div>Group</div>
-                </div>
-
-                <div className="max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                  {teams.map((team, idx) => (
-                    <div 
-                      key={idx} 
-                      className={cn(
-                        "grid grid-cols-[40px_60px_1fr_120px] gap-4 items-center px-3 py-2 rounded-lg transition-colors border border-transparent",
-                        team.group_label ? "bg-primary/5 border-primary/10" : "hover:bg-muted/50"
-                      )}
-                    >
-                      <div className="text-xs font-medium text-muted-foreground">{idx + 1}</div>
-                      
-                      <div className="relative group w-10 h-10">
-                        <div className="h-full w-full shrink-0 overflow-hidden rounded-md bg-muted border border-border flex items-center justify-center">
-                          {team.logo_url ? (
-                            <img src={team.logo_url} alt="" className="h-full w-full object-contain" />
-                          ) : (
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded-md">
-                          <ImageUpload 
-                            value={team.logo_url}
-                            onChange={(url) => setTeam(idx, { logo_url: url })}
-                            folder="team-logos"
-                            className="!gap-0 !p-0"
-                            rounded="rounded-md"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Input
-                          value={team.name}
-                          onChange={(e) => setTeam(idx, { name: e.target.value })}
-                          placeholder={`Team ${idx + 1}`}
-                          className="h-9 text-sm bg-background/50 border-border/40"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={team.group_label || "none"}
-                          onValueChange={(v) => {
-                            const newGroup = v === "none" ? null : v;
-                            setTeam(idx, { 
-                              group_label: newGroup,
-                              is_locked: !!newGroup // Automatically lock when manually assigned
-                            });
-                          }}
-                        >
-                          <SelectTrigger className="h-8 text-xs px-2 border-border/40">
-                            <SelectValue placeholder="No group" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none" className="text-xs">No group</SelectItem>
-                            {groups.map((g) => {
-                              const count = teams.filter(t => t.group_label === g).length;
-                              const isFull = count >= teamsPerGroup && team.group_label !== g;
-                              return (
-                                <SelectItem key={g} value={g} disabled={isFull} className="text-xs">
-                                  Group {g} {isFull ? "(Full)" : ""}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        
-                        {team.group_label && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-primary"
-                            onClick={() => setTeam(idx, { is_locked: !team.is_locked })}
-                            title={team.is_locked ? "Unlock Group (allow Shuffle/Draw to change)" : "Lock Group"}
-                          >
-                            {team.is_locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                <h2 className="font-display text-2xl font-bold text-primary flex items-center gap-2">
+                  <Users className="h-6 w-6" />
+                  Teams & Group Draw
+                </h2>
+                <p className="text-sm text-muted-foreground">Manage your roster and assign groups in one workspace.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                 <div className="text-lg font-bold font-display px-4 py-2 rounded-xl bg-background border-2 border-primary/20 flex items-center gap-2">
+                  <span className="text-primary">{values.team_count}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-sans">Total Teams</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Group Summary & Actions */}
-            <div className="bg-muted/10 p-5 flex flex-col gap-6">
-              <div className="space-y-3">
-                <h3 className="font-bold flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
-                  <Zap className="h-4 w-4 text-primary" />
-                  Quick Actions
-                </h3>
-                <div className="grid gap-2">
-                  <Button variant="outline" size="sm" onClick={shuffleGroups} className="justify-start border-border/60 hover:border-primary/40 hover:bg-primary/5">
-                    <RefreshCw className="mr-2 h-4 w-4" /> Shuffle All
-                  </Button>
-                  <Button size="sm" onClick={poolDraw} className="justify-start shadow-md animate-pulse-ring">
-                    <Trophy className="mr-2 h-4 w-4" /> Pool Draw
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setShowClearConfirm(true)} 
-                    className="justify-start text-destructive hover:text-destructive hover:bg-destructive/5"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Clear Groups
-                  </Button>
+            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_350px]">
+              {/* Left Column: Team Roster Workspace */}
+              <div className="p-6 border-r border-border/40 space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search teams..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 bg-muted/30 border-border/40 focus:border-primary/50 transition-all rounded-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="border rounded-xl overflow-hidden bg-background/50 backdrop-blur-sm">
+                  <div className="grid grid-cols-[50px_60px_1fr_120px] gap-4 px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 border-b bg-muted/10">
+                    <div className="text-center">#</div>
+                    <div>Logo</div>
+                    <div>Team Identity</div>
+                    <div>Assignment</div>
+                  </div>
+
+                  <ScrollArea className="h-[550px]">
+                    <div className="divide-y divide-border/20">
+                      {filteredTeams.map((team) => {
+                        const isEditing = editingTeamIdx === team.originalIdx;
+                        return (
+                          <div 
+                            key={team.originalIdx} 
+                            className={cn(
+                              "grid grid-cols-[50px_60px_1fr_120px] gap-4 items-center px-4 py-3 transition-all hover:bg-primary/5",
+                              team.group_label && "bg-primary/[0.02]"
+                            )}
+                          >
+                            <div className="text-xs font-mono text-muted-foreground text-center">
+                              {team.originalIdx + 1}
+                            </div>
+                            
+                            <div className="relative group w-11 h-11">
+                              <div className="h-full w-full rounded-xl bg-muted/50 border border-border/60 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+                                {team.logo_url ? (
+                                  <img src={team.logo_url} alt="" className="h-full w-full object-contain p-1" />
+                                ) : (
+                                  <Users className="h-5 w-5 text-muted-foreground/30" />
+                                )}
+                              </div>
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/60 rounded-xl">
+                                <ImageUpload 
+                                  value={team.logo_url}
+                                  onChange={(url) => setTeam(team.originalIdx, { logo_url: url })}
+                                  folder="team-logos"
+                                  className="!gap-0 !p-0"
+                                  rounded="rounded-xl"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="group/name relative">
+                              {isEditing ? (
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    autoFocus
+                                    value={team.name}
+                                    onChange={(e) => setTeam(team.originalIdx, { name: e.target.value })}
+                                    onBlur={() => setEditingTeamIdx(null)}
+                                    onKeyDown={(e) => e.key === 'Enter' && setEditingTeamIdx(null)}
+                                    className="h-8 text-sm focus-visible:ring-primary/30"
+                                  />
+                                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingTeamIdx(null)}>
+                                    <Check className="h-4 w-4 text-green-500" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div 
+                                  className="flex items-center gap-2 cursor-text group"
+                                  onClick={() => setEditingTeamIdx(team.originalIdx)}
+                                >
+                                  <span className="font-semibold text-sm truncate max-w-[180px]">{team.name}</span>
+                                  <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <Select
+                                value={team.group_label || "unassigned"}
+                                onValueChange={(v) => {
+                                  const newGroup = v === "unassigned" ? null : v;
+                                  setTeam(team.originalIdx, { 
+                                    group_label: newGroup,
+                                    is_locked: !!newGroup
+                                  });
+                                }}
+                              >
+                                <SelectTrigger className={cn(
+                                  "h-8 text-[11px] font-bold px-3 border-border/40 rounded-lg",
+                                  team.group_label ? "bg-primary text-primary-foreground border-transparent" : "bg-background"
+                                )}>
+                                  <SelectValue placeholder="-" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="unassigned" className="text-xs">No Group</SelectItem>
+                                  {groups.map((g) => {
+                                    const count = teams.filter(t => t.group_label === g).length;
+                                    const isFull = count >= teamsPerGroup && team.group_label !== g;
+                                    return (
+                                      <SelectItem key={g} value={g} disabled={isFull} className="text-xs">
+                                        Group {g} {isFull ? "(Full)" : ""}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              
+                              {team.group_label && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                                      onClick={() => setTeam(team.originalIdx, { is_locked: !team.is_locked })}
+                                    >
+                                      {team.is_locked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {team.is_locked ? "Locked: Won't be changed by Shuffle" : "Unlocked: Can be shuffled"}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              {!team.group_label && (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                                    >
+                                      <GripVertical className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-48 p-2" align="end">
+                                    <div className="space-y-1">
+                                      <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Assign to Group</div>
+                                      {groups.map(g => {
+                                        const count = teams.filter(t => t.group_label === g).length;
+                                        const isFull = count >= teamsPerGroup;
+                                        return (
+                                          <Button
+                                            key={g}
+                                            variant="ghost"
+                                            size="sm"
+                                            disabled={isFull}
+                                            className="w-full justify-start font-bold text-xs h-8"
+                                            onClick={() => setTeam(team.originalIdx, { group_label: g, is_locked: true })}
+                                          >
+                                            Group {g} {isFull ? "(Full)" : ""}
+                                          </Button>
+                                        );
+                                      })}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
                 </div>
               </div>
 
-              <div className="space-y-4 flex-1">
-                <h3 className="font-bold flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
-                  Groups
-                </h3>
-                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                  {groups.map((g) => {
-                    const groupTeams = teams.filter(t => t.group_label === g);
-                    const isFull = groupTeams.length >= teamsPerGroup;
-                    
-                    return (
-                      <div 
-                        key={g} 
-                        className={cn(
-                          "p-3 rounded-lg border transition-colors",
-                          isFull ? "border-green-500/30 bg-green-500/5" : "border-border/60 bg-background/50"
-                        )}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-sm">Group {g}</span>
-                          <span className={cn(
-                            "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                            isFull ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
-                          )}>
-                            {groupTeams.length} / {teamsPerGroup}
-                          </span>
-                        </div>
-                        <div className="space-y-1">
-                          {groupTeams.map((t) => (
-                            <div key={t.name} className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                              <div className="w-1 h-1 rounded-full bg-primary/40" />
-                              <span className="truncate">{t.name}</span>
-                              {t.is_locked && <Lock className="h-2 w-2 ml-auto text-muted-foreground/50" />}
+              {/* Right Column: Groups Workspace */}
+              <div className="bg-muted/10 p-6 flex flex-col gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
+                    <ListOrdered className="h-4 w-4 text-primary" />
+                    Quick Actions
+                  </h3>
+                  <div className="grid gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={shuffleGroups} 
+                      className="justify-start border-border/60 bg-background/50 hover:bg-primary/5 hover:border-primary/40 rounded-xl h-11"
+                    >
+                      <RefreshCw className="mr-3 h-4 w-4 text-primary" /> 
+                      <span className="font-semibold">Shuffle All</span>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={poolDraw} 
+                      className="justify-start shadow-lg shadow-primary/20 rounded-xl h-11 bg-primary hover:bg-primary/90"
+                    >
+                      <Trophy className="mr-3 h-4 w-4" /> 
+                      <span className="font-semibold">Pool Draw</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowClearConfirm(true)} 
+                      className="justify-start text-destructive hover:bg-destructive/5 rounded-xl h-11"
+                    >
+                      <Trash2 className="mr-3 h-4 w-4" /> 
+                      <span className="font-semibold">Reset Assignments</span>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-4 flex-1 min-h-0">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                    Group Overview
+                  </h3>
+                  <ScrollArea className="h-[400px] pr-4 -mr-4">
+                    <div className="grid gap-3">
+                      {groups.map((g) => {
+                        const groupTeams = teams.filter(t => t.group_label === g);
+                        const isFull = groupTeams.length >= teamsPerGroup;
+                        
+                        return (
+                          <div 
+                            key={g} 
+                            className={cn(
+                              "p-4 rounded-2xl border transition-all duration-300",
+                              isFull ? "border-green-500/30 bg-green-500/5" : "border-border/60 bg-background shadow-sm"
+                            )}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <span className="text-[10px] font-black text-primary">{g}</span>
+                                </div>
+                                <span className="font-bold text-sm">Group {g}</span>
+                              </div>
+                              <Badge variant={isFull ? "default" : "outline"} className={cn(
+                                "text-[10px] font-bold rounded-full px-2 h-5",
+                                isFull ? "bg-green-500 hover:bg-green-500 text-white" : "border-primary/20 text-primary"
+                              )}>
+                                {groupTeams.length} / {teamsPerGroup}
+                              </Badge>
                             </div>
-                          ))}
-                          {groupTeams.length === 0 && (
-                            <div className="text-[10px] text-muted-foreground italic">Empty</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                            <div className="space-y-2">
+                              {groupTeams.map((t) => (
+                                <div key={t.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20 text-[11px] font-medium animate-in fade-in slide-in-from-left-1">
+                                  <div className="h-4 w-4 rounded bg-background border border-border/40 flex items-center justify-center overflow-hidden shrink-0">
+                                    {t.logo_url ? (
+                                      <img src={t.logo_url} alt="" className="h-full w-full object-contain p-0.5" />
+                                    ) : (
+                                      <Users className="h-2 w-2 text-muted-foreground" />
+                                    )}
+                                  </div>
+                                  <span className="truncate flex-1">{t.name}</span>
+                                  {t.is_locked && <Lock className="h-2.5 w-2.5 text-muted-foreground/40" />}
+                                </div>
+                              ))}
+                              {groupTeams.length === 0 && (
+                                <div className="text-[10px] text-muted-foreground/40 italic py-2 text-center bg-muted/5 rounded-lg border border-dashed border-border/40">
+                                  Waiting for teams...
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
                 </div>
               </div>
             </div>
           </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <Button variant="ghost" onClick={back} className="rounded-xl px-6 h-12">
+              <ChevronLeft className="mr-2 h-4 w-4" /> Back to Format
+            </Button>
+            <Button onClick={next} disabled={pending} className="px-10 h-12 font-bold rounded-xl shadow-xl shadow-primary/20">
+              Continue to Venues <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+
+          <PoolDraw 
+            open={showPoolDraw}
+            onOpenChange={setShowPoolDraw}
+            teams={teams}
+            groupCount={values.group_count}
+            teamsPerGroup={teamsPerGroup}
+            onApply={(drawn) => set("teams", drawn)}
+          />
+
+          <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+            <AlertDialogContent className="rounded-2xl border-primary/20">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl font-display font-bold">Reset assignments?</AlertDialogTitle>
+                <AlertDialogDescription className="text-base">
+                  This will move all teams back to the "Unassigned" pool. Your team names and logos will be preserved.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="gap-3">
+                <AlertDialogCancel className="rounded-xl">Keep Current</AlertDialogCancel>
+                <AlertDialogAction onClick={clearGroups} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                  Reset Everything
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-
-        <div className="flex items-center justify-between pt-4">
-          <Button variant="ghost" onClick={back}>
-            <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
-          </Button>
-          <Button onClick={next} disabled={pending} className="px-8 font-bold">
-            Next Step <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </div>
-
-        <PoolDraw 
-          open={showPoolDraw}
-          onOpenChange={setShowPoolDraw}
-          teams={teams}
-          groupCount={values.group_count}
-          teamsPerGroup={teamsPerGroup}
-          onApply={(drawn) => set("teams", drawn)}
-        />
-
-        <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Clear all group assignments?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will reset all teams to "No group". Manually locked teams will also be reset.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={clearGroups} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Clear All
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      </TooltipProvider>
     );
   };
 
@@ -873,77 +1015,6 @@ export function TournamentForm({
     </div>
   );
 
-  const renderStep2 = () => {
-    if (isGroupKnockout) return renderCombinedStep2();
-    
-    const teams = values.teams || [];
-
-    return (
-      <div className="space-y-6">
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-primary">Step 2: Team Details</h2>
-            <div className="text-sm text-muted-foreground">
-              {teams.length} teams total
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="hidden grid-cols-[80px_1fr] gap-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:grid">
-              <div>Logo</div>
-              <div>Team Name</div>
-            </div>
-
-            <div className="space-y-3">
-              {teams.map((team, idx) => (
-                <div key={idx} className="flex flex-col gap-4 rounded-lg border border-border p-3 sm:grid sm:grid-cols-[80px_1fr] sm:items-center">
-                  <div className="flex justify-center sm:justify-start">
-                    <div className="relative group w-14 h-14">
-                      <div className="h-full w-full shrink-0 overflow-hidden rounded-lg bg-muted border border-border flex items-center justify-center">
-                        {team.logo_url ? (
-                          <img src={team.logo_url} alt="" className="h-full w-full object-contain" />
-                        ) : (
-                          <Users className="h-6 w-6 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
-                        <ImageUpload 
-                          value={team.logo_url}
-                          onChange={(url) => setTeam(idx, { logo_url: url })}
-                          folder="team-logos"
-                          className="!p-0"
-                          rounded="rounded-lg"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="mb-1.5 block text-xs sm:hidden text-muted-foreground font-semibold uppercase">Team Name</div>
-                    <Input
-                      value={team.name}
-                      onChange={(e) => setTeam(idx, { name: e.target.value })}
-                      placeholder={`Team ${idx + 1}`}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-4">
-          <Button variant="outline" onClick={back}>
-            <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
-          </Button>
-          <Button onClick={next} className="w-full sm:w-auto">
-            Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  };
 
   const renderStep3 = () => (
     <div className="space-y-6">
@@ -1093,15 +1164,15 @@ export function TournamentForm({
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
         <Button onClick={next} className="w-full sm:w-auto">
-          {values.format === "group_knockout" ? "Next Step" : submitLabel} 
-          {values.format === "group_knockout" && <ChevronRight className="ml-1.5 h-4 w-4" />}
+          {isGroupKnockout ? "Next Step" : submitLabel} 
+          {isGroupKnockout && <ChevronRight className="ml-1.5 h-4 w-4" />}
         </Button>
       </div>
     </div>
   );
 
 
-  const totalSteps = values.format === "group_knockout" ? 4 : 3;
+  const totalSteps = isGroupKnockout ? 4 : 3;
 
   return (
     <div className="space-y-6">
@@ -1155,20 +1226,51 @@ export function TournamentForm({
 }
 
 function Badge({ children, variant = "default", className }: { children: React.ReactNode, variant?: "default" | "outline", className?: string }) {
+  const variants = {
+    default: "bg-primary text-primary-foreground border-transparent",
+    outline: "text-muted-foreground border-border",
+    secondary: "bg-secondary text-secondary-foreground border-transparent",
+    destructive: "bg-destructive text-destructive-foreground border-transparent",
+  };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
-      variant === "outline" ? "text-muted-foreground border-border" : "bg-primary text-primary-foreground border-transparent"
-    } ${className}`}>
+    <span className={cn(
+      "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+      variants[variant as keyof typeof variants] || variants.default,
+      className
+    )}>
       {children}
     </span>
   );
 }
 
-// Add a Label helper if missing from UI components (it was imported from radix/react-label but let's be safe)
 function Label({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <label className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}>
+    <label className={cn("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", className)}>
       {children}
     </label>
+  );
+}
+
+function ListOrdered({ className }: { className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <line x1="10" x2="21" y1="6" y2="6"/>
+      <line x1="10" x2="21" y1="12" y2="12"/>
+      <line x1="10" x2="21" y1="18" y2="18"/>
+      <path d="M4 6h1v4"/>
+      <path d="M4 10h2"/>
+      <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+    </svg>
   );
 }
