@@ -805,7 +805,7 @@ export function TournamentForm({
             teams={teams}
             groupCount={values.group_count}
             teamCount={values.team_count}
-            initialCapacities={values.group_capacities}
+            initialCapacities={values.group_capacities || null}
             onApply={(drawn, finalCapacities) => {
               setValues(v => ({
                 ...v,
