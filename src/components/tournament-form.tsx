@@ -417,110 +417,240 @@ export function TournamentForm({
   };
 
   const renderStep4 = () => {
+    // This step is removed for Group stage + knockout as it's merged into Step 2.
+    // However, the wizard 'step' logic might still reach here if not careful.
+    return null;
+  };
+
+  const renderCombinedStep2 = () => {
     const teams = values.teams || [];
     const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
-    
+    const teamsPerGroup = Math.ceil(values.team_count / (values.group_count || 1));
+
     return (
       <div className="space-y-6">
-        <div className="surface-card p-5">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="surface-card p-0 overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-5 border-b border-border/40 bg-muted/20">
             <div>
-              <h2 className="font-display text-xl font-bold text-primary">Step 4: Group Assignment</h2>
-              <p className="text-sm text-muted-foreground">Review and adjust team groups before creating the tournament.</p>
+              <h2 className="font-display text-xl font-bold text-primary">Teams & Group Draw</h2>
+              <p className="text-sm text-muted-foreground">Add teams, upload logos, and assign them to groups.</p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={shuffleGroups}>
-                <ChevronRight className="mr-1.5 h-4 w-4 rotate-90" /> Shuffle
-              </Button>
-              <Button size="sm" onClick={poolDraw}>
-                <ChevronRight className="mr-1.5 h-4 w-4" /> Pool Draw
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {groups.map((group) => {
-              const groupTeams = teams.filter(t => t.group_label === group);
-              const teamsPerGroup = Math.ceil(values.team_count / values.group_count);
-              
-              return (
-                <div key={group} className="rounded-xl border border-border/50 bg-muted/20 p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-display font-bold text-lg">Group {group}</h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      groupTeams.length > teamsPerGroup ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
-                    }`}>
-                      {groupTeams.length} / {teamsPerGroup} Teams
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {groupTeams.length === 0 && (
-                      <p className="text-xs text-center py-6 text-muted-foreground italic border border-dashed border-border/60 rounded-lg">
-                        No teams assigned
-                      </p>
-                    )}
-                    {groupTeams.map((team, idx) => {
-                      const teamIndex = teams.findIndex(t => t.name === team.name);
-                      return (
-                        <div key={team.name} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-background border border-border/40 shadow-sm">
-                          <div className="flex items-center gap-2 overflow-hidden">
-                            <div className="h-6 w-6 rounded bg-muted flex items-center justify-center shrink-0">
-                              {team.logo_url ? (
-                                <img src={team.logo_url} alt="" className="h-full w-full object-contain" />
-                              ) : (
-                                <Users className="h-3 w-3 text-muted-foreground" />
-                              )}
-                            </div>
-                            <span className="text-sm font-medium truncate">{team.name}</span>
-                          </div>
-                          <Select 
-                            value={team.group_label || 'none'} 
-                            onValueChange={(v) => setTeam(teamIndex, { group_label: v === 'none' ? null : v })}
-                          >
-                            <SelectTrigger className="h-7 w-[90px] text-[10px] px-2">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none" className="text-xs">No group</SelectItem>
-                              {groups.map(g => (
-                                <SelectItem key={g} value={g} className="text-xs">
-                                  Group {g}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {teams.some(t => !t.group_label) && (
-            <div className="mt-8 p-4 rounded-lg bg-warning/5 border border-warning/20">
-              <h4 className="text-sm font-bold text-warning mb-1">Unassigned Teams</h4>
-              <div className="flex flex-wrap gap-2">
-                {teams.filter(t => !t.group_label).map(t => (
-                  <Badge key={t.name} variant="outline" className="text-[10px] py-0 px-2">
-                    {t.name}
-                  </Badge>
-                ))}
+            <div className="flex flex-col items-end gap-1">
+               <div className="text-lg font-bold font-display px-3 py-1 rounded-md bg-background border border-border">
+                {values.team_count} <span className="text-xs text-muted-foreground uppercase">Teams</span>
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px]">
+            {/* Left Column: Team Entry */}
+            <div className="p-5 border-r border-border/40">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-bold flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  Team List
+                </h3>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="grid grid-cols-[40px_60px_1fr_120px] gap-4 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40">
+                  <div>#</div>
+                  <div>Logo</div>
+                  <div>Team Name</div>
+                  <div>Group</div>
+                </div>
+
+                <div className="max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                  {teams.map((team, idx) => (
+                    <div 
+                      key={idx} 
+                      className={cn(
+                        "grid grid-cols-[40px_60px_1fr_120px] gap-4 items-center px-3 py-2 rounded-lg transition-colors border border-transparent",
+                        team.group_label ? "bg-primary/5 border-primary/10" : "hover:bg-muted/50"
+                      )}
+                    >
+                      <div className="text-xs font-medium text-muted-foreground">{idx + 1}</div>
+                      
+                      <div className="relative group w-10 h-10">
+                        <div className="h-full w-full shrink-0 overflow-hidden rounded-md bg-muted border border-border flex items-center justify-center">
+                          {team.logo_url ? (
+                            <img src={team.logo_url} alt="" className="h-full w-full object-contain" />
+                          ) : (
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded-md">
+                          <ImageUpload 
+                            value={team.logo_url}
+                            onChange={(url) => setTeam(idx, { logo_url: url })}
+                            folder="team-logos"
+                            className="!gap-0 !p-0"
+                            rounded="rounded-md"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Input
+                          value={team.name}
+                          onChange={(e) => setTeam(idx, { name: e.target.value })}
+                          placeholder={`Team ${idx + 1}`}
+                          className="h-9 text-sm bg-background/50 border-border/40"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={team.group_label || "none"}
+                          onValueChange={(v) => {
+                            const newGroup = v === "none" ? null : v;
+                            setTeam(idx, { 
+                              group_label: newGroup,
+                              is_locked: !!newGroup // Automatically lock when manually assigned
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="h-8 text-xs px-2 border-border/40">
+                            <SelectValue placeholder="No group" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none" className="text-xs">No group</SelectItem>
+                            {groups.map((g) => {
+                              const count = teams.filter(t => t.group_label === g).length;
+                              const isFull = count >= teamsPerGroup && team.group_label !== g;
+                              return (
+                                <SelectItem key={g} value={g} disabled={isFull} className="text-xs">
+                                  Group {g} {isFull ? "(Full)" : ""}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        
+                        {team.group_label && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                            onClick={() => setTeam(idx, { is_locked: !team.is_locked })}
+                            title={team.is_locked ? "Unlock Group (allow Shuffle/Draw to change)" : "Lock Group"}
+                          >
+                            {team.is_locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Group Summary & Actions */}
+            <div className="bg-muted/10 p-5 flex flex-col gap-6">
+              <div className="space-y-3">
+                <h3 className="font-bold flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
+                  <Zap className="h-4 w-4 text-primary" />
+                  Quick Actions
+                </h3>
+                <div className="grid gap-2">
+                  <Button variant="outline" size="sm" onClick={shuffleGroups} className="justify-start border-border/60 hover:border-primary/40 hover:bg-primary/5">
+                    <RefreshCw className="mr-2 h-4 w-4" /> Shuffle All
+                  </Button>
+                  <Button size="sm" onClick={poolDraw} className="justify-start shadow-md animate-pulse-ring">
+                    <Trophy className="mr-2 h-4 w-4" /> Pool Draw
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowClearConfirm(true)} 
+                    className="justify-start text-destructive hover:text-destructive hover:bg-destructive/5"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Clear Groups
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4 flex-1">
+                <h3 className="font-bold flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
+                  Group Assignment
+                </h3>
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                  {groups.map((g) => {
+                    const groupTeams = teams.filter(t => t.group_label === g);
+                    const isFull = groupTeams.length >= teamsPerGroup;
+                    
+                    return (
+                      <div 
+                        key={g} 
+                        className={cn(
+                          "p-3 rounded-lg border transition-colors",
+                          isFull ? "border-green-500/30 bg-green-500/5" : "border-border/60 bg-background/50"
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-sm">Group {g}</span>
+                          <span className={cn(
+                            "text-[10px] font-bold px-1.5 py-0.5 rounded",
+                            isFull ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
+                          )}>
+                            {groupTeams.length} / {teamsPerGroup}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          {groupTeams.map((t) => (
+                            <div key={t.name} className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                              <div className="w-1 h-1 rounded-full bg-primary/40" />
+                              <span className="truncate">{t.name}</span>
+                              {t.is_locked && <Lock className="h-2 w-2 ml-auto text-muted-foreground/50" />}
+                            </div>
+                          ))}
+                          {groupTeams.length === 0 && (
+                            <div className="text-[10px] text-muted-foreground italic">Empty</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center justify-between pt-4">
           <Button variant="ghost" onClick={back}>
             <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
           </Button>
-          <Button onClick={next} disabled={pending} className="px-8">
-            {pending ? "Creating..." : submitLabel}
+          <Button onClick={next} disabled={pending} className="px-8 font-bold">
+            Next Step <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
         </div>
+
+        <PoolDraw 
+          open={showPoolDraw}
+          onOpenChange={setShowPoolDraw}
+          teams={teams}
+          groupCount={values.group_count}
+          teamsPerGroup={teamsPerGroup}
+          onApply={(drawn) => set("teams", drawn)}
+        />
+
+        <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear all group assignments?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will reset all teams to "No group". Manually locked teams will also be reset.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={clearGroups} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Clear All
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   };
