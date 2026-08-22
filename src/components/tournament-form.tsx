@@ -490,7 +490,17 @@ export function TournamentForm({
     );
     
     const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
-    const teamsPerGroup = Math.ceil(values.team_count / (values.group_count || 1));
+    const currentCapacities = values.group_capacities;
+    
+    // Total teams in each group based on current state
+    const getCapacityForGroup = (label: string) => {
+      if (currentCapacities?.[label]) return currentCapacities[label];
+      // Fallback to even/uneven calculation if not explicitly set yet
+      const base = Math.floor(values.team_count / values.group_count);
+      const rem = values.team_count % values.group_count;
+      const idx = label.charCodeAt(0) - 65;
+      return idx < rem ? base + 1 : base;
+    };
 
     return (
       <TooltipProvider>
