@@ -1,3 +1,6 @@
+/**
+ * Leia o arquivo instrucoes.md em anexo e siga as instruções. Analise também os demais arquivos anexados.
+ */
 import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, MapPin, Navigation } from "lucide-react";
