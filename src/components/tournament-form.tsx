@@ -618,10 +618,11 @@ export function TournamentForm({
                                   <SelectItem value="unassigned" className="text-xs">No Group</SelectItem>
                                   {groups.map((g) => {
                                     const count = teams.filter(t => t.group_label === g).length;
-                                    const isFull = count >= teamsPerGroup && team.group_label !== g;
+                                    const capacity = getCapacityForGroup(g);
+                                    const isFull = count >= capacity && team.group_label !== g;
                                     return (
                                       <SelectItem key={g} value={g} disabled={isFull} className="text-xs">
-                                        Group {g} {isFull ? "(Full)" : ""}
+                                        Group {g} ({count}/{capacity}) {isFull ? "FULL" : ""}
                                       </SelectItem>
                                     );
                                   })}
