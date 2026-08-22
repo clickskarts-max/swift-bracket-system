@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, Zap, Trash2, Trophy, ArrowRight, Lock, Unlock } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,21 @@ import {
 } from "@/components/ui/select";
 import { Field } from "@/components/data-bits";
 import { ImageUpload } from "@/components/image-upload";
+import { PoolDraw } from "@/components/pool-draw";
 import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS } from "@/lib/formats";
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
+import { cn } from "@/lib/utils";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export type TeamValue = {
   id?: string;
