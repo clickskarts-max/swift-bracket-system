@@ -123,6 +123,9 @@ export function computeStandings(
       const order = m.scheduled_at ? new Date(m.scheduled_at).getTime() : (m.match_no ?? 0);
       bumpOutcome(a.team.id, order, "L");
       bumpOutcome(b.team.id, order, "W");
+    else if (m.score_a === m.score_b && m.score_a != null) {
+      a.points += 1;
+      b.points += 1;
     }
   }
 
