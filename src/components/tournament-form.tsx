@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, Zap, Trash2, Trophy, ArrowRight, Lock, Unlock } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, Zap, Trash2, Trophy, ArrowRight, Lock, Unlock, Play } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
