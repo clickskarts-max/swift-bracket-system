@@ -96,6 +96,47 @@ function StandingsLegend({ tournament }: { tournament: Tournament | null }) {
   );
 }
 
+function PointDistribution({ tournament }: { tournament: Tournament | null }) {
+  const format = tournament?.format ?? "league";
+  const isLeague = format === "league";
+
+  return (
+    <div className="surface-card border border-border/70 p-4">
+      <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        Point Distribution
+      </h3>
+      <div className="mt-3 grid grid-cols-3 gap-4">
+        <div className="flex flex-col items-center justify-center rounded-lg bg-success/5 p-3 text-center border border-success/20">
+          <span className="text-2xl font-bold text-success">2</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Win</span>
+        </div>
+        {isLeague ? (
+          <>
+            <div className="flex flex-col items-center justify-center rounded-lg bg-warning/5 p-3 text-center border border-warning/20">
+              <span className="text-2xl font-bold text-warning">1</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Loss</span>
+            </div>
+            <div className="flex flex-col items-center justify-center rounded-lg bg-destructive/5 p-3 text-center border border-destructive/20">
+              <span className="text-2xl font-bold text-destructive">0</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Forfeit</span>
+            </div>
+          </>
+        ) : (
+          <div className="col-span-2 flex flex-col items-center justify-center rounded-lg bg-destructive/5 p-3 text-center border border-destructive/20">
+            <span className="text-2xl font-bold text-destructive">0</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Loss</span>
+          </div>
+        )}
+      </div>
+      <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed italic">
+        {isLeague 
+          ? "Points are awarded per game according to FIBA classification rules: 2 for a win, 1 for a loss, and 0 for a loss by forfeit." 
+          : "Standard tournament points: 2 points for a win and 0 points for a loss."}
+      </p>
+    </div>
+  );
+}
+
 function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
   const format = tournament?.format ?? "league";
   const playoff = tournament?.playoff_format ?? "none";
@@ -404,7 +445,13 @@ export function StandingsTab({
               groupLabel={g}
               tournament={tournament}
             />
-            <StandingsLegend tournament={tournament} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <PointDistribution tournament={tournament} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <PointDistribution tournament={tournament} />
+        <StandingsLegend tournament={tournament} />
+      </div>
+            </div>
           </div>
         ))}
         <TieBreakProcedures tournament={tournament} />
