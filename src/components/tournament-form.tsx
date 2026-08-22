@@ -392,7 +392,11 @@ export function TournamentForm({
   };
 
   const submit = () => {
-    const nextVal = { ...values, slug: values.slug || uniqueSlug(values.name) };
+    const nextVal = { 
+      ...values, 
+      slug: values.slug || uniqueSlug(values.name),
+      qualifiers_per_group: values.format === "group_knockout" ? 2 : values.qualifiers_per_group 
+    };
     const parsed = schema.safeParse(nextVal);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check the form");
