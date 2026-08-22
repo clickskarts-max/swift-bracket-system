@@ -10,9 +10,11 @@ import {
   Zap, 
   ArrowRight,
   ChevronRight,
-  ListOrdered
+  ListOrdered,
+  Loader2
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { calculateGroupCapacities } from "@/lib/formats";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
@@ -30,8 +32,9 @@ interface PoolDrawProps {
   onOpenChange: (open: boolean) => void;
   teams: TeamValue[];
   groupCount: number;
-  teamsPerGroup: number;
-  onApply: (teams: TeamValue[]) => void;
+  teamCount: number;
+  initialCapacities?: Record<string, number> | null;
+  onApply: (teams: TeamValue[], capacities: Record<string, number>) => void;
 }
 
 export function PoolDraw({ 
@@ -39,16 +42,36 @@ export function PoolDraw({
   onOpenChange, 
   teams: initialTeams, 
   groupCount, 
-  teamsPerGroup, 
+  teamCount, 
+  initialCapacities, 
   onApply 
 }: PoolDrawProps) {
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isAllocating, setIsAllocating] = useState(false);
+  const [capacities, setCapacities] = useState<Record<string, number>>({});
   const [drawnTeams, setDrawnTeams] = useState<TeamValue[]>([]);
   const [remainingTeams, setRemainingTeams] = useState<TeamValue[]>([]);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
   const [lastDrawn, setLastDrawn] = useState<{ team: TeamValue, group: string } | null>(null);
   const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
+
+  const determineCapacities = useCallback(() => {
+    setIsAllocating(true);
+    // Determine locked assignments to respect them during allocation
+    const lockedCounts: Record<string, number> = {};
+    initialTeams.forEach(t => {
+      if (t.group_label) lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
+    });
+
+    const newCapacities = calculateGroupCapacities(teamCount, groupCount, lockedCounts);
+    
+    // Quick delay for effect
+    setTimeout(() => {
+      if (newCapacities) setCapacities(newCapacities);
+      setIsAllocating(false);
+    }, 1500);
+  }, [initialTeams, teamCount, groupCount]);
 
   // Initialize: Locked teams (those already assigned) are excluded from the wheel
   useEffect(() => {
@@ -59,17 +82,24 @@ export function PoolDraw({
       setDrawnTeams(assigned);
       setRemainingTeams(unassigned);
       
+      if (initialCapacities) {
+        setCapacities(initialCapacities);
+      } else {
+        determineCapacities();
+      }
+
       // Determine next group to fill based on current counts
       const counts: Record<string, number> = {};
       assigned.forEach(t => {
         if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
       });
 
-      // Find first group that isn't full
+      // Find first group that isn't full (using alphabetical order A, B, C...)
       let nextIdx = 0;
       for (let i = 0; i < groupCount; i++) {
         const label = String.fromCharCode(65 + i);
-        if ((counts[label] || 0) < teamsPerGroup) {
+        const capacity = capacities[label] || Math.ceil(teamCount / groupCount);
+        if ((counts[label] || 0) < capacity) {
           nextIdx = i;
           break;
         }
@@ -78,10 +108,10 @@ export function PoolDraw({
       setLastDrawn(null);
       setIsSpinning(false);
     }
-  }, [open, initialTeams, groupCount, teamsPerGroup]);
+  }, [open, initialTeams, groupCount, teamCount, initialCapacities, determineCapacities]);
 
   const spin = useCallback(() => {
-    if (isSpinning || remainingTeams.length === 0) return;
+    if (isSpinning || remainingTeams.length === 0 || isAllocating) return;
 
     setIsSpinning(true);
     
@@ -90,12 +120,8 @@ export function PoolDraw({
     const winner = remainingTeams[winnerIdx]!;
     
     // 2. Calculate animation
-    // Each segment is 360 / remainingTeams.length
     const segmentDegree = 360 / remainingTeams.length;
-    // We want to land on the center of the segment
-    // The wheel rotates clockwise, so we subtract the degree to find the point
     const targetDegree = 360 - (winnerIdx * segmentDegree) - (segmentDegree / 2);
-    // Add multiple full rotations (5-8) for effect
     const totalRotation = rotation + (360 * 5) + targetDegree - (rotation % 360);
     
     setRotation(totalRotation);
@@ -122,7 +148,8 @@ export function PoolDraw({
         for (let i = 0; i < groupCount; i++) {
           const idx = (nextIdx + i) % groupCount;
           const label = String.fromCharCode(65 + idx);
-          if ((counts[label] || 0) < teamsPerGroup) {
+          const capacity = capacities[label] || Math.ceil(teamCount / groupCount);
+          if ((counts[label] || 0) < capacity) {
             setCurrentGroupIdx(idx);
             break;
           }
@@ -137,10 +164,10 @@ export function PoolDraw({
         colors: ['#ff6b1a', '#ffffff', '#22c55e']
       });
     }, 3500);
-  }, [isSpinning, remainingTeams, rotation, currentGroupIdx, groupCount, teamsPerGroup]);
+  }, [isSpinning, isAllocating, remainingTeams, rotation, currentGroupIdx, groupCount, teamCount, capacities]);
 
   const handleApply = () => {
-    onApply(drawnTeams);
+    onApply(drawnTeams, capacities);
     onOpenChange(false);
   };
 
@@ -166,7 +193,18 @@ export function PoolDraw({
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left: The Wheel */}
           <div className="flex-1 flex flex-col items-center justify-center p-6 border-r border-border/40 relative bg-muted/5">
-            {remainingTeams.length > 0 ? (
+            {isAllocating ? (
+              <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
+                <div className="relative">
+                  <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                  <Zap className="h-6 w-6 text-primary absolute inset-0 m-auto" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold font-display uppercase tracking-widest">Phase 1</h3>
+                  <p className="text-muted-foreground">Randomizing group capacities...</p>
+                </div>
+              </div>
+            ) : remainingTeams.length > 0 ? (
               <div className="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
                 {/* Pointer */}
                 <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-20 w-8 h-8 flex items-center justify-center">
@@ -189,7 +227,6 @@ export function PoolDraw({
                       const startAngle = i * segmentAngle;
                       const endAngle = (i + 1) * segmentAngle;
                       
-                      // Convert to radians for SVG path
                       const x1 = 50 + 50 * Math.cos((Math.PI * startAngle) / 180);
                       const y1 = 50 + 50 * Math.sin((Math.PI * startAngle) / 180);
                       const x2 = 50 + 50 * Math.cos((Math.PI * endAngle) / 180);
@@ -326,9 +363,9 @@ export function PoolDraw({
                       <span className="font-bold">Group {label}</span>
                       <span className={cn(
                         "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                        groupTeams.length === teamsPerGroup ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
+                        groupTeams.length === (capacities[label] || 0) ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
                       )}>
-                        {groupTeams.length} / {teamsPerGroup}
+                        {groupTeams.length} / {capacities[label] || 0}
                       </span>
                     </div>
                     <div className="space-y-1.5">

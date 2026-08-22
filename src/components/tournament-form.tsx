@@ -23,7 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Field } from "@/components/data-bits";
 import { ImageUpload } from "@/components/image-upload";
 import { PoolDraw } from "@/components/pool-draw";
-import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS } from "@/lib/formats";
+import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS, calculateGroupCapacities } from "@/lib/formats";
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
 import { cn } from "@/lib/utils";
@@ -74,6 +74,7 @@ export type TournamentValues = {
   is_public: boolean;
   teams?: TeamValue[];
   venues?: VenueValue[];
+  group_capacities?: Record<string, number> | null;
 };
 
 const schema = z.object({
@@ -217,44 +218,49 @@ export function TournamentForm({
   const shuffleGroups = () => {
     setValues((v) => {
       const teams = [...(v.teams || [])];
-      const groups = v.group_count || 1;
-      const teamsPerGroup = Math.ceil(v.team_count / groups);
+      const groupsCount = v.group_count || 1;
       
       const lockedTeams = teams.filter(t => t.is_locked && t.group_label);
       const eligibleTeams = teams.filter(t => !t.is_locked || !t.group_label);
       
-      // Randomize eligible teams
+      // 1. Determine/Get randomized capacities
+      const lockedCounts: Record<string, number> = {};
+      lockedTeams.forEach(t => {
+        if (t.group_label) lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
+      });
+
+      const newCapacities = calculateGroupCapacities(v.team_count, groupsCount, lockedCounts);
+      if (!newCapacities) {
+        toast.error("Could not find a valid group distribution for locked teams.");
+        return v;
+      }
+
+      // 2. Randomize eligible teams
       for (let i = eligibleTeams.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [eligibleTeams[i], eligibleTeams[j]] = [eligibleTeams[j]!, eligibleTeams[i]!] as [TeamValue, TeamValue];
       }
 
+      // 3. Distribute teams into groups based on capacities
       const nextTeams: TeamValue[] = [...lockedTeams];
-      
-      const counts: Record<string, number> = {};
-      lockedTeams.forEach(t => {
-        if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
-      });
-
+      const counts: Record<string, number> = { ...lockedCounts };
       let eligibleIdx = 0;
-      for (let i = 0; i < groups; i++) {
+
+      for (let i = 0; i < groupsCount; i++) {
         const label = String.fromCharCode(65 + i);
-        let currentCount = counts[label] || 0;
-        while (currentCount < teamsPerGroup && eligibleIdx < eligibleTeams.length) {
+        const capacity = newCapacities[label]!;
+        while ((counts[label] || 0) < capacity && eligibleIdx < eligibleTeams.length) {
           nextTeams.push({ ...eligibleTeams[eligibleIdx]!, group_label: label });
           eligibleIdx++;
-          currentCount++;
+          counts[label] = (counts[label] || 0) + 1;
         }
       }
 
-      while (eligibleIdx < eligibleTeams.length) {
-        nextTeams.push(eligibleTeams[eligibleIdx]!);
-        eligibleIdx++;
-      }
-
-      // Restore original order based on original indices if we want to keep the roster list stable
-      // But for knockout, the shuffle result IS the new state.
-      return { ...v, teams: nextTeams };
+      return { 
+        ...v, 
+        teams: nextTeams,
+        group_capacities: newCapacities
+      };
     });
     toast.success("Teams shuffled successfully.");
   };
@@ -285,6 +291,13 @@ export function TournamentForm({
       }
       const isGroupKnockout = values.format === "group_knockout";
       if (isGroupKnockout) {
+        // Enforce power-of-two group counts
+        const isValidGroupCount = values.group_count > 0 && (values.group_count & (values.group_count - 1)) === 0;
+        if (!isValidGroupCount) {
+          toast.error("Group count must be a power of two (2, 4, 8, 16...)");
+          return false;
+        }
+
         // Force qualifiers_per_group to 2 for group_knockout as per instructions
         if (values.qualifiers_per_group !== 2) {
           set("qualifiers_per_group", 2);
@@ -408,7 +421,9 @@ export function TournamentForm({
   const isLeague = values.format === "league";
   const isGroupKnockout = values.format === "group_knockout";
   const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
-  const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
+  const baseSize = isGroupKnockout && values.group_count > 0 ? Math.floor(values.team_count / values.group_count) : 0;
+  const remainder = isGroupKnockout && values.group_count > 0 ? values.team_count % values.group_count : 0;
+  const isUnevenGroups = remainder > 0;
   const knockoutTeams = isGroupKnockout ? values.group_count * 2 : 0;
 
   const knockoutRoundLabel = (size: number) => {
@@ -475,7 +490,17 @@ export function TournamentForm({
     );
     
     const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
-    const teamsPerGroup = Math.ceil(values.team_count / (values.group_count || 1));
+    const currentCapacities = values.group_capacities;
+    
+    // Total teams in each group based on current state
+    const getCapacityForGroup = (label: string) => {
+      if (currentCapacities?.[label]) return currentCapacities[label];
+      // Fallback to even/uneven calculation if not explicitly set yet
+      const base = Math.floor(values.team_count / values.group_count);
+      const rem = values.team_count % values.group_count;
+      const idx = label.charCodeAt(0) - 65;
+      return idx < rem ? base + 1 : base;
+    };
 
     return (
       <TooltipProvider>
@@ -581,6 +606,28 @@ export function TournamentForm({
                                     group_label: newGroup,
                                     is_locked: !!newGroup
                                   });
+                                  
+                                  const lockedCounts: Record<string, number> = {};
+                                  const updatedTeams = [...(values.teams || [])];
+                                  const t = updatedTeams[team.originalIdx];
+                                  if (t) {
+                                    updatedTeams[team.originalIdx] = { 
+                                      ...t, 
+                                      group_label: newGroup,
+                                      is_locked: !!newGroup
+                                    };
+                                  }
+                                  
+                                  updatedTeams.forEach(ut => {
+                                    if (ut.group_label) {
+                                      lockedCounts[ut.group_label] = (lockedCounts[ut.group_label] || 0) + 1;
+                                    }
+                                  });
+                                  
+                                  const newCapacities = calculateGroupCapacities(values.team_count, values.group_count, lockedCounts);
+                                  if (newCapacities) {
+                                    set("group_capacities", newCapacities);
+                                  }
                                 }}
                               >
                                 <SelectTrigger className={cn(
@@ -593,10 +640,11 @@ export function TournamentForm({
                                   <SelectItem value="unassigned" className="text-xs">No Group</SelectItem>
                                   {groups.map((g) => {
                                     const count = teams.filter(t => t.group_label === g).length;
-                                    const isFull = count >= teamsPerGroup && team.group_label !== g;
+                                    const capacity = getCapacityForGroup(g);
+                                    const isFull = count >= capacity && team.group_label !== g;
                                     return (
                                       <SelectItem key={g} value={g} disabled={isFull} className="text-xs">
-                                        Group {g} {isFull ? "(Full)" : ""}
+                                        Group {g} ({count}/{capacity}) {isFull ? "FULL" : ""}
                                       </SelectItem>
                                     );
                                   })}
@@ -636,7 +684,8 @@ export function TournamentForm({
                                       <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Assign to Group</div>
                                       {groups.map(g => {
                                         const count = teams.filter(t => t.group_label === g).length;
-                                        const isFull = count >= teamsPerGroup;
+                                        const capacity = getCapacityForGroup(g);
+                                        const isFull = count >= capacity;
                                         return (
                                           <Button
                                             key={g}
@@ -646,7 +695,7 @@ export function TournamentForm({
                                             className="w-full justify-start font-bold text-xs h-8"
                                             onClick={() => setTeam(team.originalIdx, { group_label: g, is_locked: true })}
                                           >
-                                            Group {g} {isFull ? "(Full)" : ""}
+                                            Group {g} ({count}/{capacity}) {isFull ? "FULL" : ""}
                                           </Button>
                                         );
                                       })}
@@ -708,7 +757,8 @@ export function TournamentForm({
                     <div className="grid gap-3">
                       {groups.map((g) => {
                         const groupTeams = teams.filter(t => t.group_label === g);
-                        const isFull = groupTeams.length >= teamsPerGroup;
+                        const capacity = getCapacityForGroup(g);
+                        const isFull = groupTeams.length >= capacity;
                         
                         return (
                           <div 
@@ -729,7 +779,7 @@ export function TournamentForm({
                                 "text-[10px] font-bold rounded-full px-2 h-5",
                                 isFull ? "bg-green-500 hover:bg-green-500 text-white" : "border-primary/20 text-primary"
                               )}>
-                                {groupTeams.length} / {teamsPerGroup}
+                                {groupTeams.length} / {capacity}
                               </Badge>
                             </div>
                             <div className="space-y-2">
@@ -776,8 +826,15 @@ export function TournamentForm({
             onOpenChange={setShowPoolDraw}
             teams={teams}
             groupCount={values.group_count}
-            teamsPerGroup={teamsPerGroup}
-            onApply={(drawn) => set("teams", drawn)}
+            teamCount={values.team_count}
+            initialCapacities={values.group_capacities || null}
+            onApply={(drawn, finalCapacities) => {
+              setValues(v => ({
+                ...v,
+                teams: drawn,
+                group_capacities: finalCapacities
+              }));
+            }}
           />
 
           <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
@@ -958,8 +1015,17 @@ export function TournamentForm({
                   </div>
                   <div>
                     <p className="text-muted-foreground">Groups</p>
-                    <p className="font-medium">
-                      {values.group_count} ({Math.floor(teamsPerGroup)} teams each)
+                    <p className="font-medium text-xs">
+                      {values.group_count} Total Groups
+                      {isUnevenGroups ? (
+                        <span className="block text-muted-foreground mt-1">
+                          ({remainder} groups of {baseSize + 1}, {values.group_count - remainder} groups of {baseSize})
+                        </span>
+                      ) : (
+                        <span className="block text-muted-foreground mt-1">
+                          ({baseSize} teams each)
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div>
