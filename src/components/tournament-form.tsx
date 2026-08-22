@@ -877,12 +877,34 @@ export function TournamentForm({
           )}
         </div>
       </div>
+      <div className="surface-card space-y-4 p-5">
+        <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Additional Details
+        </h3>
+        <Field label="Description">
+          <Textarea
+            rows={4}
+            value={values.description ?? ""}
+            onChange={(e) => set("description", e.target.value || null)}
+            placeholder="Tell fans what this competition is about."
+          />
+        </Field>
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
+          <div>
+            <p className="text-sm font-medium">Public tournament page</p>
+            <p className="text-xs text-muted-foreground">Anyone with the link can view.</p>
+          </div>
+          <Switch checked={values.is_public} onCheckedChange={(v) => set("is_public", v)} />
+        </div>
+      </div>
+
       <div className="flex items-center justify-between gap-4">
         <Button variant="outline" onClick={back}>
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
         <Button onClick={next} className="w-full sm:w-auto">
-          Next Step <ChevronRight className="ml-1.5 h-4 w-4" />
+          {values.format === "group_knockout" ? "Next Step" : submitLabel} 
+          {values.format === "group_knockout" && <ChevronRight className="ml-1.5 h-4 w-4" />}
         </Button>
       </div>
     </div>
