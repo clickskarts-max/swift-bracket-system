@@ -421,7 +421,9 @@ export function TournamentForm({
   const isLeague = values.format === "league";
   const isGroupKnockout = values.format === "group_knockout";
   const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
-  const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
+  const baseSize = isGroupKnockout && values.group_count > 0 ? Math.floor(values.team_count / values.group_count) : 0;
+  const remainder = isGroupKnockout && values.group_count > 0 ? values.team_count % values.group_count : 0;
+  const isUnevenGroups = remainder > 0;
   const knockoutTeams = isGroupKnockout ? values.group_count * 2 : 0;
 
   const knockoutRoundLabel = (size: number) => {
