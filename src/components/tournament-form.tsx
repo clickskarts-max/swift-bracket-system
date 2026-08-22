@@ -662,7 +662,8 @@ export function TournamentForm({
                                       <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Assign to Group</div>
                                       {groups.map(g => {
                                         const count = teams.filter(t => t.group_label === g).length;
-                                        const isFull = count >= teamsPerGroup;
+                                        const capacity = getCapacityForGroup(g);
+                                        const isFull = count >= capacity;
                                         return (
                                           <Button
                                             key={g}
@@ -672,7 +673,7 @@ export function TournamentForm({
                                             className="w-full justify-start font-bold text-xs h-8"
                                             onClick={() => setTeam(team.originalIdx, { group_label: g, is_locked: true })}
                                           >
-                                            Group {g} {isFull ? "(Full)" : ""}
+                                            Group {g} ({count}/{capacity}) {isFull ? "FULL" : ""}
                                           </Button>
                                         );
                                       })}
