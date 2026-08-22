@@ -283,7 +283,11 @@ export function TournamentForm({
       }
       const isGroupKnockout = values.format === "group_knockout";
       if (isGroupKnockout) {
-        const knockoutTeams = values.group_count * values.qualifiers_per_group;
+        // Force qualifiers_per_group to 2 for group_knockout as per instructions
+        if (values.qualifiers_per_group !== 2) {
+          set("qualifiers_per_group", 2);
+        }
+        const knockoutTeams = values.group_count * 2;
         const isValidKnockoutSize = (size: number) => size > 0 && (size & (size - 1)) === 0;
         if (!isValidKnockoutSize(knockoutTeams)) {
           toast.error(`Invalid knockout size (${knockoutTeams}). Must be 2, 4, 8, or 16.`);
