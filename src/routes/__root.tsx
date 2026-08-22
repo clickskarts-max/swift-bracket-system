@@ -151,6 +151,27 @@ function RootShell({ children }: { children: ReactNode }) {
 })();`,
           }}
         />
+        <script
+          // Recovery links can land on the site root (Supabase Site URL fallback).
+          // Forward them to the dedicated reset page with tokens intact.
+          dangerouslySetInnerHTML={{
+            __html: `
+(() => {
+  try {
+    if (location.pathname === "/reset-password") return;
+    const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
+    const query = new URLSearchParams(location.search);
+    const isRecovery =
+      hash.get("type") === "recovery" ||
+      query.get("type") === "recovery" ||
+      ((hash.get("access_token") || query.get("code")) && (hash.get("type") || query.get("type")) === "recovery");
+    if (!isRecovery) return;
+    location.replace("/reset-password" + location.search + location.hash);
+  } catch {}
+})();`,
+          }}
+        />
+
       </head>
       <body>
         {children}
