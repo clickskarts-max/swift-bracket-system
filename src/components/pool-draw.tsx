@@ -111,7 +111,7 @@ export function PoolDraw({
   }, [open, initialTeams, groupCount, teamCount, initialCapacities, determineCapacities]);
 
   const spin = useCallback(() => {
-    if (isSpinning || remainingTeams.length === 0) return;
+    if (isSpinning || remainingTeams.length === 0 || isAllocating) return;
 
     setIsSpinning(true);
     
@@ -120,12 +120,8 @@ export function PoolDraw({
     const winner = remainingTeams[winnerIdx]!;
     
     // 2. Calculate animation
-    // Each segment is 360 / remainingTeams.length
     const segmentDegree = 360 / remainingTeams.length;
-    // We want to land on the center of the segment
-    // The wheel rotates clockwise, so we subtract the degree to find the point
     const targetDegree = 360 - (winnerIdx * segmentDegree) - (segmentDegree / 2);
-    // Add multiple full rotations (5-8) for effect
     const totalRotation = rotation + (360 * 5) + targetDegree - (rotation % 360);
     
     setRotation(totalRotation);
@@ -152,7 +148,8 @@ export function PoolDraw({
         for (let i = 0; i < groupCount; i++) {
           const idx = (nextIdx + i) % groupCount;
           const label = String.fromCharCode(65 + idx);
-          if ((counts[label] || 0) < teamsPerGroup) {
+          const capacity = capacities[label] || Math.ceil(teamCount / groupCount);
+          if ((counts[label] || 0) < capacity) {
             setCurrentGroupIdx(idx);
             break;
           }
@@ -167,7 +164,7 @@ export function PoolDraw({
         colors: ['#ff6b1a', '#ffffff', '#22c55e']
       });
     }, 3500);
-  }, [isSpinning, remainingTeams, rotation, currentGroupIdx, groupCount, teamsPerGroup]);
+  }, [isSpinning, isAllocating, remainingTeams, rotation, currentGroupIdx, groupCount, teamCount, capacities]);
 
   const handleApply = () => {
     onApply(drawnTeams);
