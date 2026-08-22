@@ -422,7 +422,6 @@ export function StandingsTab({
     const sortedGroups = groups.length > 0 ? groups.sort() : ["A"];
 
     return (
-    return (
       <div className="space-y-12">
         <div className="space-y-12">
           {sortedGroups.map((g) => (
