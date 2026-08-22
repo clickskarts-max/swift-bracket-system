@@ -349,7 +349,10 @@ export function TournamentForm({
   const next = () => {
     if (!validateStep(step)) return;
 
-    if (step === 3 && values.format !== "group_knockout") {
+    if (step === 2 && isGroupKnockout) {
+      // Step 2 is now the combined "Teams & Group Draw" for knockout
+      // We don't submit yet, we go to Step 3 (Schedule)
+    } else if (step === 3 && !isGroupKnockout) {
       submit();
       return;
     }
