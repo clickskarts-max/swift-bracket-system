@@ -431,8 +431,50 @@ export function TournamentForm({
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
-        <h2 className="font-display text-lg font-semibold text-primary">Step 1: Basics & Format</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-display text-lg font-semibold text-primary">Step 1: Basics & Branding</h2>
+        </div>
+        
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-4">
+            <Field label="Logo image">
+               <ImageUpload 
+                value={values.logo_url}
+                onChange={(url) => set("logo_url", url)}
+                folder="tournament-logos"
+              />
+            </Field>
+            <Field label="Banner image">
+               <ImageUpload 
+                value={values.banner_url}
+                onChange={(url) => set("banner_url", url)}
+                folder="tournament-banners"
+              />
+            </Field>
+          </div>
+          
+          <div className="space-y-4">
+            <Field label="Tournament name">
+              <Input
+                value={values.name}
+                onChange={(e) => {
+                  set("name", e.target.value);
+                  if (!initial) set("slug", uniqueSlug(e.target.value));
+                }}
+                placeholder="Ecluid Summer Classic"
+              />
+            </Field>
+            <Field label="Public URL slug" hint={`/public/tournament/${values.slug || "your-slug"}`}>
+              <Input
+                value={values.slug}
+                onChange={(e) => set("slug", e.target.value)}
+                placeholder="summer-classic"
+              />
+            </Field>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-border/40">
           <Field label="Tournament name">
             <Input
               value={values.name}
