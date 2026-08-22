@@ -167,7 +167,7 @@ export function PoolDraw({
   }, [isSpinning, isAllocating, remainingTeams, rotation, currentGroupIdx, groupCount, teamCount, capacities]);
 
   const handleApply = () => {
-    onApply(drawnTeams);
+    onApply(drawnTeams, capacities);
     onOpenChange(false);
   };
 
