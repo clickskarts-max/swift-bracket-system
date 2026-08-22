@@ -82,17 +82,24 @@ export function PoolDraw({
       setDrawnTeams(assigned);
       setRemainingTeams(unassigned);
       
+      if (initialCapacities) {
+        setCapacities(initialCapacities);
+      } else {
+        determineCapacities();
+      }
+
       // Determine next group to fill based on current counts
       const counts: Record<string, number> = {};
       assigned.forEach(t => {
         if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
       });
 
-      // Find first group that isn't full
+      // Find first group that isn't full (using alphabetical order A, B, C...)
       let nextIdx = 0;
       for (let i = 0; i < groupCount; i++) {
         const label = String.fromCharCode(65 + i);
-        if ((counts[label] || 0) < teamsPerGroup) {
+        const capacity = capacities[label] || Math.ceil(teamCount / groupCount);
+        if ((counts[label] || 0) < capacity) {
           nextIdx = i;
           break;
         }
@@ -101,7 +108,7 @@ export function PoolDraw({
       setLastDrawn(null);
       setIsSpinning(false);
     }
-  }, [open, initialTeams, groupCount, teamsPerGroup]);
+  }, [open, initialTeams, groupCount, teamCount, initialCapacities, determineCapacities]);
 
   const spin = useCallback(() => {
     if (isSpinning || remainingTeams.length === 0) return;
