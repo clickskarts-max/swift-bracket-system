@@ -8,162 +8,71 @@ import { BrandWordmark } from "@/components/brand";
 import DotField from "@/components/react-bits/DotField/DotField";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Ecluid Basketball — Basketball Tournament Management" },
-      {
-        name: "description",
-        content:
-          "Create leagues, group stages and knockout brackets, schedule matches, track live standings and publish shareable tournament pages.",
-      },
-      { property: "og:title", content: "Ecluid Basketball — Basketball Tournament Management" },
-      {
-        property: "og:description",
-        content: "Fixtures, standings, brackets, teams and sponsors for basketball organizers.",
-      },
-    ],
-  }),
-  component: Landing,
+  component: Index,
 });
 
-const FEATURES = [
-  {
-    icon: Trophy,
-    title: "Every format",
-    body: "Single & double elimination, multi-leg round robin, league and group stage + knockout.",
-  },
-  {
-    icon: Upload,
-    title: "Import fixtures",
-    body: "Drop in a PDF or XML schedule — teams, rounds and match days are auto-detected.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Match day control",
-    body: "Calendar or list scheduling with venues, courts, referees, live scores and home/away swap.",
-  },
-  {
-    icon: ListOrdered,
-    title: "Instant standings",
-    body: "Played, W-L, points for/against, difference and ranking recalculated as scores land.",
-  },
-  {
-    icon: Users,
-    title: "Teams & rosters",
-    body: "Team profiles, jersey colors, staff contacts, socials and full player statistics.",
-  },
-  {
-    icon: Share2,
-    title: "Public pages",
-    body: "Share /public/tournament/your-slug with fixtures, results, brackets, teams and sponsors.",
-  },
-];
-
-function Landing() {
+function Index() {
   return (
-    <div className="min-h-screen">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-        <BrandWordmark />
-        <div className="flex items-center gap-2">
-          <Link to="/auth">
-            <Button variant="ghost" size="sm">
-              Sign in
-            </Button>
-          </Link>
-          <Link to="/auth">
-            <Button size="sm">Get started</Button>
-          </Link>
-        </div>
-      </header>
+    <div className="relative min-h-screen bg-background overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 z-0">
+        <DotField
+          speed={0.03}
+          columnCount={15}
+          direction="up"
+          dotColor="rgba(255, 107, 26, 0.15)"
+        />
+      </div>
 
-      <section className="hero-surface relative overflow-hidden border-y border-border/60">
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <DotField 
-            dotRadius={1.5}
-            dotSpacing={20}
-            glowColor="rgba(255, 107, 26, 0.2)"
-            gradientFrom="rgba(255, 107, 26, 0.15)"
-            gradientTo="rgba(255, 107, 26, 0.05)"
-          />
-        </div>
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
-          <div className="animate-rise">
-            <p className="mb-3 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
-              Tournament operations
-            </p>
-            <h1 className="font-display text-4xl font-bold leading-[1.05] sm:text-5xl md:text-6xl">
-              Run your basketball season <span className="text-gradient">like a pro league</span>
-            </h1>
-            <p className="mt-5 max-w-lg text-base text-muted-foreground">
-              Ecluid Basketball turns fixtures, rosters, scores and sponsors into one live operating
-              system — and publishes a beautiful public page for the fans.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+      {/* Hero Section */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[90vh] px-6 text-center">
+        <div className="animate-in fade-in slide-in-from-top-8 duration-1000">
+          <BrandWordmark />
+          
+          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter mb-6 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent uppercase">
+            Manage Your <br />
+            <span className="text-primary italic">Basketball</span> Dynasty
+          </h1>
+          
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 font-medium">
+            Professional league management, real-time standings, and dynamic knockout brackets. 
+            Built for the modern game.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button size="lg" className="h-14 px-10 text-lg font-bold rounded-2xl group shadow-2xl shadow-primary/20" asChild>
               <Link to="/auth">
-                <Button size="lg" className="animate-pulse-ring">
-                  Start a tournament
-                </Button>
+                Get Started 
+                <Trophy className="ml-2 h-5 w-5 transition-transform group-hover:scale-110 group-hover:rotate-12" />
               </Link>
-              <a href="#features">
-                <Button size="lg" variant="outline">
-                  See what's inside
-                </Button>
-              </a>
-            </div>
-          </div>
-          <div className="animate-fade relative flex items-center justify-center min-h-[300px]">
-            <div className="relative z-10 p-8 rounded-2xl border border-border/50 bg-background/30 backdrop-blur-sm shadow-[var(--shadow-glow)]">
-              <Trophy className="w-32 h-32 text-primary mx-auto opacity-80" />
-              <div className="mt-6 text-center">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tournament Engine Active</p>
-                <div className="flex gap-2 justify-center mt-3">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.2s]" />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.4s]" />
-                </div>
-              </div>
-            </div>
-            <div className="absolute inset-0 -z-10 bg-primary/5 blur-3xl rounded-full" />
+            </Button>
+            <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold rounded-2xl border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10" asChild>
+              <Link to="/auth">View Demo</Link>
+            </Button>
           </div>
         </div>
-      </section>
 
-      <section id="features" className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="font-display text-2xl font-bold sm:text-3xl">
-          Built for the whole competition
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          From the draw to the trophy lift — schedule generation, live scoring, standings, brackets
-          and sponsor placement.
-        </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map(({ icon: Icon, title, body }) => (
-            <div
-              key={title}
-              className="surface-card animate-rise p-5 transition-transform hover:-translate-y-1"
-            >
-              <Icon className="h-6 w-6 text-primary" />
-              <h3 className="mt-3 font-display text-lg font-semibold">{title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
+        {/* Feature Grid Preview */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          {[
+            { icon: ListOrdered, label: "Live Standings" },
+            { icon: CalendarDays, label: "Smart Scheduling" },
+            { icon: Users, label: "Team Hub" },
+            { icon: Share2, label: "Public Pages" }
+          ].map((feature, i) => (
+            <div key={i} className="flex flex-col items-center p-4 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm">
+              <feature.icon className="h-6 w-6 text-primary mb-2" />
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{feature.label}</span>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="mx-auto max-w-6xl px-4 pb-20">
-        <div className="surface-card hero-surface flex flex-col items-center gap-4 p-10 text-center">
-          <h2 className="font-display text-2xl font-bold sm:text-3xl">Tip-off is one click away</h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Create your first tournament, add teams and let Ecluid generate the full fixture list.
-          </p>
-          <Link to="/auth">
-            <Button size="lg">Create free account</Button>
-          </Link>
-        </div>
-      </section>
-
-      <footer className="border-t border-border/60 py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Ecluid Basketball
+      {/* Footer */}
+      <footer className="relative z-10 py-10 border-t border-white/5 text-center">
+        <p className="text-sm text-muted-foreground font-medium">
+          © {new Date().getFullYear()} Ecluid Basketball · The future of tournament management.
+        </p>
       </footer>
     </div>
   );

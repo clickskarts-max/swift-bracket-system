@@ -377,8 +377,10 @@ export function TournamentForm({
       return;
     }
 
-    setStep((s) => s + 1);
-    window.scrollTo(0, 0);
+    if (step < totalSteps) {
+      setStep((s) => s + 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   const back = () => {
@@ -1164,8 +1166,8 @@ export function TournamentForm({
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
         <Button onClick={next} className="w-full sm:w-auto">
-          {isGroupKnockout ? "Continue to Venues" : submitLabel} 
-          {isGroupKnockout && <ChevronRight className="ml-1.5 h-4 w-4" />}
+          {isGroupKnockout ? "Review & Finish" : submitLabel} 
+          <ChevronRight className="ml-1.5 h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -1173,6 +1175,7 @@ export function TournamentForm({
 
 
   const totalSteps = isGroupKnockout ? 4 : 3;
+  const currentDisplayStep = Math.min(step, totalSteps);
 
   return (
     <div className="space-y-6">
@@ -1197,7 +1200,7 @@ export function TournamentForm({
       
       <div className="mb-6">
         <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
-          Step {step} of {totalSteps}
+          Step {currentDisplayStep} of {totalSteps}
         </h2>
       </div>
 
