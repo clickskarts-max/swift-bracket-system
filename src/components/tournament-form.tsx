@@ -134,7 +134,7 @@ export function TournamentForm({
           legs: initial.legs,
           playoff_format: initial.playoff_format,
           group_count: initial.group_count,
-          qualifiers_per_group: initial.qualifiers_per_group ?? 1,
+          qualifiers_per_group: initial.qualifiers_per_group ?? 2,
           team_count: initial.team_count,
           start_date: initial.start_date,
           end_date: initial.end_date,
@@ -147,7 +147,7 @@ export function TournamentForm({
           is_public: initial.is_public,
           teams: [], // Handled separately if needed, but usually creation only
         }
-      : empty(),
+      : { ...empty(), qualifiers_per_group: 2 },
   );
 
   // Initialize teams when team_count changes in Step 1
@@ -807,13 +807,6 @@ export function TournamentForm({
                 folder="tournament-logos"
               />
             </Field>
-            <Field label="Banner image">
-               <ImageUpload 
-                value={values.banner_url}
-                onChange={(url) => set("banner_url", url)}
-                folder="tournament-banners"
-              />
-            </Field>
           </div>
           
           <div className="space-y-4">
@@ -943,18 +936,6 @@ export function TournamentForm({
                 />
               </Field>
 
-              <Field
-                label="Qualifiers from Each Group"
-                hint="Top teams advancing to knockout."
-              >
-                <Input
-                  type="number"
-                  min={1}
-                  max={Math.floor(teamsPerGroup) || 1}
-                  value={values.qualifiers_per_group}
-                  onChange={(e) => set("qualifiers_per_group", Number(e.target.value) || 1)}
-                />
-              </Field>
 
               <div className="col-span-full space-y-3 rounded-lg bg-muted/50 p-4">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
