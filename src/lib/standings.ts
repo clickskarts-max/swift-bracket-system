@@ -41,10 +41,16 @@ const LEAGUE_STAGES = new Set(["league", "group"]);
 export function computeStandings(
   teams: StandingsTeam[],
   matches: StandingsMatch[],
-  opts: { winPoints?: number; lossPoints?: number; groupLabel?: string | null } = {},
+  opts: {
+    winPoints?: number;
+    lossPoints?: number;
+    groupLabel?: string | null;
+    format?: string;
+  } = {},
 ): StandingRow[] {
+  const isLeague = opts.format === "league";
   const winPoints = opts.winPoints ?? 2;
-  const lossPoints = opts.lossPoints ?? 0;
+  const lossPoints = opts.lossPoints ?? (isLeague ? 1 : 0);
   const pool = teams.filter((t) =>
     opts.groupLabel ? (t.group_label ?? "") === opts.groupLabel : true,
   );
@@ -96,12 +102,24 @@ export function computeStandings(
     if (m.score_a > m.score_b) {
       a.wins++;
       b.losses++;
+      if (isLeague) {
+        // Normal/default loss = 1, Forfeit = 0
+        // We check status for forfeit if available, otherwise assume normal loss = 1
+        const bLossPts = m.status === "forfeit" ? 0 : 1;
+        a.points += 2;
+        b.points += bLossPts;
+      }
       const order = m.scheduled_at ? new Date(m.scheduled_at).getTime() : (m.match_no ?? 0);
       bumpOutcome(a.team.id, order, "W");
       bumpOutcome(b.team.id, order, "L");
     } else if (m.score_b > m.score_a) {
       b.wins++;
       a.losses++;
+      if (isLeague) {
+        const aLossPts = m.status === "forfeit" ? 0 : 1;
+        b.points += 2;
+        a.points += aLossPts;
+      }
       const order = m.scheduled_at ? new Date(m.scheduled_at).getTime() : (m.match_no ?? 0);
       bumpOutcome(a.team.id, order, "L");
       bumpOutcome(b.team.id, order, "W");
@@ -111,7 +129,7 @@ export function computeStandings(
   const rows = [...base.values()].map((r) => ({
     ...r,
     diff: r.pointsFor - r.pointsAgainst,
-    points: r.wins * winPoints + r.losses * lossPoints,
+    points: isLeague ? r.points : r.wins * winPoints + r.losses * lossPoints,
     winPct: r.played ? r.wins / r.played : 0,
     remaining: Math.max(0, r.scheduled - r.played),
   }));
