@@ -911,10 +911,12 @@ export function TournamentForm({
   );
 
 
+  const totalSteps = values.format === "group_knockout" ? 4 : 3;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 mb-2 overflow-x-auto py-2">
-        {[1, 2, 3, 4].map((s) => (
+        {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
           <div key={s} className="flex items-center shrink-0">
             <div 
               className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors ${
@@ -923,7 +925,7 @@ export function TournamentForm({
             >
               {s}
             </div>
-            {s < 4 && (
+            {s < totalSteps && (
               <div className={`h-[2px] w-8 mx-2 ${step > s ? "bg-primary" : "bg-muted"}`} />
             )}
           </div>
@@ -932,7 +934,7 @@ export function TournamentForm({
       
       <div className="mb-4">
         <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-          Step {step} of 4
+          Step {step} of {totalSteps}
         </p>
       </div>
 
