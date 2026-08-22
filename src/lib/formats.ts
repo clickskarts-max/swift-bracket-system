@@ -31,6 +31,11 @@ export const PLAYOFF_FORMATS = [
   { value: "top6_ipl", label: "Top 6 — wildcards + qualifiers + final" },
 ] as const;
 
+const isUUID = (str: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
+
 const mk = (
   n: number,
   stage: string,
@@ -40,18 +45,26 @@ const mk = (
   b: string | TeamRef | null,
   leg = 1,
   group_label: string | null = null,
-): MatchDraft => ({
-  match_no: n,
-  stage,
-  round_name,
-  round_index,
-  leg,
-  group_label,
-  team_a_id: typeof a === "object" && a ? a.id : null,
-  team_b_id: typeof b === "object" && b ? b.id : null,
-  placeholder_a: typeof a === "string" ? a : null,
-  placeholder_b: typeof b === "string" ? b : null,
-});
+): MatchDraft => {
+  const idA = typeof a === "object" && a ? a.id : typeof a === "string" ? a : null;
+  const idB = typeof b === "object" && b ? b.id : typeof b === "string" ? b : null;
+  
+  const validA = idA && isUUID(idA) ? idA : null;
+  const validB = idB && isUUID(idB) ? idB : null;
+
+  return {
+    match_no: n,
+    stage,
+    round_name,
+    round_index,
+    leg,
+    group_label,
+    team_a_id: validA,
+    team_b_id: validB,
+    placeholder_a: !validA && idA ? idA : null,
+    placeholder_b: !validB && idB ? idB : null,
+  };
+};
 
 /** Circle-method round robin. legs >= 1; even legs mirror home/away. */
 export function roundRobin(
