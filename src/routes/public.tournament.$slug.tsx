@@ -1,7 +1,7 @@
 /**
  * Leia o arquivo instrucoes.md em anexo e siga as instruções. Analise também os demais arquivos anexados.
  */
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, MapPin, Navigation } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +15,7 @@ import { BracketTab } from "@/components/tabs/bracket-tab";
 import { MatchBreakdown } from "@/components/match-breakdown";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
+import { useBranding } from "@/hooks/use-branding";
 import {
   useMatches,
   usePublicPlayers,
@@ -23,6 +24,7 @@ import {
   useTournamentBySlug,
   useVenues,
 } from "@/lib/queries";
+
 
 export const Route = createFileRoute("/public/tournament/$slug")({
   head: ({ params }) => {
@@ -55,6 +57,16 @@ function PublicTournament() {
   const { data: sponsors = [] } = usePublicSponsors(tournament?.id ?? "");
   const { data: players = [] } = usePublicPlayers(tournament?.id ?? "");
   const { data: venues = [] } = useVenues(tournament?.id ?? "");
+  const { data: org } = useBranding();
+
+  // Update document title for SEO
+  useEffect(() => {
+    if (tournament) {
+      const brandName = org?.brand_name || org?.name || "Ecluid Basketball";
+      document.title = `${tournament.name} | ${brandName}`;
+    }
+  }, [tournament, org]);
+
 
   const venueById = useMemo(() => new Map(venues.map((v) => [v.id, v])), [venues]);
 
@@ -391,8 +403,16 @@ function PublicTournament() {
         </section>
       )}
 
-      <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        Powered by Ecluid Basketball
+      <footer className="border-t border-border/60 py-10 text-center text-xs text-muted-foreground bg-secondary/5">
+        <div className="flex flex-col items-center gap-2">
+          <BrandWordmark />
+          <p className="mt-2">
+            {org?.footer_text || `© ${new Date().getFullYear()} ${org?.brand_name || org?.name || "Ecluid Basketball"}`}
+            {org?.powered_by_enabled !== false && (
+              <span className="block mt-1 opacity-50 italic">Powered by Ecluid Basketball · Professional Tournament Management</span>
+            )}
+          </p>
+        </div>
       </footer>
     </div>
   );

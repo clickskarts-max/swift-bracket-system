@@ -8,6 +8,27 @@ import { BrandWordmark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { OWNER_EMAIL } from "@/lib/activation";
+import { useBranding } from "@/hooks/use-branding";
+
+function OrganizationFooter() {
+  const { data: org } = useBranding();
+  if (org) {
+    return (
+      <div className="flex flex-col items-center gap-1">
+        <span>{org.footer_text || `© ${new Date().getFullYear()} ${org.brand_name || org.name}`}</span>
+        {org.powered_by_enabled !== false && (
+          <span className="opacity-60">Powered by Ecluid Basketball</span>
+        )}
+      </div>
+    );
+  }
+  return (
+    <>
+      <Trophy className="mr-1 inline h-3.5 w-3.5" /> Ecluid Basketball · tournament operations
+    </>
+  );
+}
+
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
@@ -89,7 +110,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6 pb-20">{children}</main>
       <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        <Trophy className="mr-1 inline h-3.5 w-3.5" /> Ecluid Basketball · tournament operations
+        <OrganizationFooter />
       </footer>
     </div>
   );

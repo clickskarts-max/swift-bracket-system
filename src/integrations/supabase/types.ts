@@ -203,42 +203,66 @@ export type Database = {
       organizations: {
         Row: {
           accent_color: string | null
+          brand_name: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          custom_domain: string | null
+          favicon_url: string | null
+          footer_text: string | null
           id: string
+          logo_dark_url: string | null
           logo_url: string | null
           name: string
           owner_id: string
+          powered_by_enabled: boolean | null
           primary_color: string | null
+          secondary_color: string | null
+          short_name: string | null
           socials: Json
           updated_at: string
           website: string | null
         }
         Insert: {
           accent_color?: string | null
+          brand_name?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          custom_domain?: string | null
+          favicon_url?: string | null
+          footer_text?: string | null
           id?: string
+          logo_dark_url?: string | null
           logo_url?: string | null
           name?: string
           owner_id: string
+          powered_by_enabled?: boolean | null
           primary_color?: string | null
+          secondary_color?: string | null
+          short_name?: string | null
           socials?: Json
           updated_at?: string
           website?: string | null
         }
         Update: {
           accent_color?: string | null
+          brand_name?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          custom_domain?: string | null
+          favicon_url?: string | null
+          footer_text?: string | null
           id?: string
+          logo_dark_url?: string | null
           logo_url?: string | null
           name?: string
           owner_id?: string
+          powered_by_enabled?: boolean | null
           primary_color?: string | null
+          secondary_color?: string | null
+          short_name?: string | null
           socials?: Json
           updated_at?: string
           website?: string | null

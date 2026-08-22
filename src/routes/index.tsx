@@ -6,12 +6,35 @@ import { CalendarDays, ListOrdered, Share2, Trophy, Upload, Users } from "lucide
 import { Button } from "@/components/ui/button";
 import { BrandWordmark } from "@/components/brand";
 import DotField from "@/components/react-bits/DotField/DotField";
+import { useBranding } from "@/hooks/use-branding";
+
+function OrganizationFooter() {
+  const { data: org } = useBranding();
+  if (org) {
+    return (
+      <p className="text-sm text-muted-foreground font-medium">
+        {org.footer_text || `© ${new Date().getFullYear()} ${org.brand_name || org.name}`}
+        {org.powered_by_enabled !== false && (
+          <span className="ml-2 opacity-50 block sm:inline">Powered by Ecluid Basketball</span>
+        )}
+      </p>
+    );
+  }
+  return (
+    <p className="text-sm text-muted-foreground font-medium">
+      © {new Date().getFullYear()} Ecluid Basketball · The future of tournament management.
+    </p>
+  );
+}
+
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
+  const { data: org } = useBranding();
+  
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
       {/* Animated Background */}
@@ -20,9 +43,10 @@ function Index() {
           speed={0.03}
           columnCount={15}
           direction="up"
-          dotColor="rgba(255, 107, 26, 0.15)"
+          dotColor={org?.primary_color ? `${org.primary_color}26` : "rgba(255, 107, 26, 0.15)"}
         />
       </div>
+
 
       {/* Hero Section */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[90vh] px-6 text-center">
@@ -70,9 +94,7 @@ function Index() {
 
       {/* Footer */}
       <footer className="relative z-10 py-10 border-t border-white/5 text-center">
-        <p className="text-sm text-muted-foreground font-medium">
-          © {new Date().getFullYear()} Ecluid Basketball · The future of tournament management.
-        </p>
+        <OrganizationFooter />
       </footer>
     </div>
   );

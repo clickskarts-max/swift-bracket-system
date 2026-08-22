@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/data-bits";
 import { PasswordInput } from "@/components/password-input";
 import { BrandWordmark } from "@/components/brand";
+import { useBranding } from "@/hooks/use-branding";
+
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
@@ -35,6 +37,8 @@ function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { data: org } = useBranding();
+
 
   useEffect(() => {
     let settled = false;
@@ -104,7 +108,14 @@ function ResetPasswordPage() {
       <Link to="/" className="mb-8">
         <BrandWordmark />
       </Link>
-      <div className="surface-card w-full max-w-md space-y-4 p-6">
+      <div className="surface-card w-full max-w-md space-y-4 p-6 relative overflow-hidden">
+        {org && (
+          <div 
+            className="absolute top-0 left-0 w-full h-1" 
+            style={{ backgroundColor: org.primary_color || "var(--primary)" }}
+          />
+        )}
+
         {status === "checking" && (
           <p className="text-sm text-muted-foreground">Verifying your reset link…</p>
         )}
