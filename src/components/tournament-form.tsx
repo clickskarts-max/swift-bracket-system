@@ -23,7 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Field } from "@/components/data-bits";
 import { ImageUpload } from "@/components/image-upload";
 import { PoolDraw } from "@/components/pool-draw";
-import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS } from "@/lib/formats";
+import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS, calculateGroupCapacities } from "@/lib/formats";
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
 import { cn } from "@/lib/utils";
