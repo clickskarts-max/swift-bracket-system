@@ -423,35 +423,41 @@ export function StandingsTab({
 
     return (
       <div className="space-y-12">
-        {sortedGroups.map((g) => (
-          <div key={g} className="space-y-4">
-            <div className="flex items-center gap-3 border-l-4 border-primary pl-4">
-              <h3 className="font-display text-2xl font-bold uppercase tracking-tight">
-                Group {g}
-              </h3>
+        <div className="space-y-12">
+          {sortedGroups.map((g) => (
+            <div key={g} className="space-y-4">
+              <div className="flex items-center gap-3 border-l-4 border-primary pl-4">
+                <h3 className="font-display text-2xl font-bold uppercase tracking-tight">
+                  Group {g}
+                </h3>
+              </div>
+              
+              <StandingsTable
+                teams={teams}
+                matches={matches}
+                groupLabel={g}
+                tournament={tournament}
+              />
             </div>
-            
-            <StandingsTable
-              teams={teams}
-              matches={matches}
-              groupLabel={g}
-              tournament={tournament}
-            />
+          ))}
+        </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <PointDistribution tournament={tournament} />
-              <StandingsLegend tournament={tournament} />
-            </div>
-          </div>
-        ))}
+        <div className="grid gap-6 md:grid-cols-2">
+          <PointDistribution tournament={tournament} />
+          <StandingsLegend tournament={tournament} />
+        </div>
         <TieBreakProcedures tournament={tournament} />
       </div>
     );
   }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <StandingsTable teams={teams} matches={matches} tournament={tournament} />
-      <StandingsLegend tournament={tournament} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <PointDistribution tournament={tournament} />
+        <StandingsLegend tournament={tournament} />
+      </div>
       <TieBreakProcedures tournament={tournament} />
     </div>
   );
