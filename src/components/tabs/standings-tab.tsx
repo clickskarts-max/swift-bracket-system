@@ -33,9 +33,22 @@ const fmtWinPct = (v: number) => {
   return s.startsWith("0") ? s.slice(1) : s;
 };
 
-function StandingsLegend() {
+function StandingsLegend({ tournament }: { tournament: Tournament | null }) {
+  const isLeague = tournament?.format === "league";
+  
   return (
     <div className="surface-card border border-border/70 p-4 text-xs text-muted-foreground">
+      <div className="mb-3 flex flex-wrap gap-x-6 gap-y-2 border-b border-border/40 pb-3">
+        <span className="flex items-center gap-1.5">
+          <span className="font-semibold text-foreground">Points:</span>
+          {isLeague ? (
+            <span className="text-primary">Win: 2 · Loss: 1 · Forfeit: 0</span>
+          ) : (
+            <span className="text-primary">Win: 2 · Loss: 0</span>
+          )}
+        </span>
+      </div>
+      
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <span>
           <span className="font-semibold text-foreground">P</span> Played
@@ -62,7 +75,7 @@ function StandingsLegend() {
           <span className="font-semibold text-foreground">WIN%</span> Win Percentage
         </span>
         <span>
-          <span className="font-semibold text-foreground">OT</span> Overtime (placeholder)
+          <span className="font-semibold text-foreground">OT</span> Overtime
         </span>
         <span>
           <span className="font-semibold text-foreground">LAST 3</span> Last 3 Games
@@ -77,9 +90,49 @@ function StandingsLegend() {
         </span>
         <span>
           <span className="font-semibold text-destructive">o</span> Eliminated from Playoffs
-          Contention
         </span>
       </div>
+    </div>
+  );
+}
+
+function PointDistribution({ tournament }: { tournament: Tournament | null }) {
+  const format = tournament?.format ?? "league";
+  const isLeague = format === "league";
+
+  return (
+    <div className="surface-card border border-border/70 p-4">
+      <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        Point Distribution
+      </h3>
+      <div className="mt-3 grid grid-cols-3 gap-4">
+        <div className="flex flex-col items-center justify-center rounded-lg bg-success/5 p-3 text-center border border-success/20">
+          <span className="text-2xl font-bold text-success">2</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Win</span>
+        </div>
+        {isLeague ? (
+          <>
+            <div className="flex flex-col items-center justify-center rounded-lg bg-warning/5 p-3 text-center border border-warning/20">
+              <span className="text-2xl font-bold text-warning">1</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Loss</span>
+            </div>
+            <div className="flex flex-col items-center justify-center rounded-lg bg-destructive/5 p-3 text-center border border-destructive/20">
+              <span className="text-2xl font-bold text-destructive">0</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Forfeit</span>
+            </div>
+          </>
+        ) : (
+          <div className="col-span-2 flex flex-col items-center justify-center rounded-lg bg-destructive/5 p-3 text-center border border-destructive/20">
+            <span className="text-2xl font-bold text-destructive">0</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Loss</span>
+          </div>
+        )}
+      </div>
+      <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed italic">
+        {isLeague 
+          ? "Points are awarded per game according to FIBA classification rules: 2 for a win, 1 for a loss, and 0 for a loss by forfeit." 
+          : "Standard tournament points: 2 points for a win and 0 points for a loss."}
+      </p>
     </div>
   );
 }
@@ -375,7 +428,13 @@ export function StandingsTab({
               groupLabel={g}
               tournament={tournament}
             />
-            <StandingsLegend />
+            <div className="grid gap-4 md:grid-cols-2">
+              <PointDistribution tournament={tournament} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <PointDistribution tournament={tournament} />
+        <StandingsLegend tournament={tournament} />
+      </div>
+            </div>
           </div>
         ))}
         <TieBreakProcedures tournament={tournament} />
@@ -385,7 +444,7 @@ export function StandingsTab({
   return (
     <div className="space-y-4">
       <StandingsTable teams={teams} matches={matches} tournament={tournament} />
-      <StandingsLegend />
+      <StandingsLegend tournament={tournament} />
       <TieBreakProcedures tournament={tournament} />
     </div>
   );
