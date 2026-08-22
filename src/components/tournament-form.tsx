@@ -267,6 +267,7 @@ export function TournamentForm({
   };
 
   const poolDraw = () => {
+    // Before opening pool draw, ensure we sync current assignments
     setShowPoolDraw(true);
   };
 
@@ -1164,7 +1165,7 @@ export function TournamentForm({
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
         <Button onClick={next} className="w-full sm:w-auto">
-          {isGroupKnockout ? "Next Step" : submitLabel} 
+          {isGroupKnockout ? "Continue to Venues" : submitLabel} 
           {isGroupKnockout && <ChevronRight className="ml-1.5 h-4 w-4" />}
         </Button>
       </div>
