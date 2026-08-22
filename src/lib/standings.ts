@@ -45,7 +45,7 @@ export function computeStandings(
     winPoints?: number;
     lossPoints?: number;
     groupLabel?: string | null;
-    format?: string | null;
+    format?: string | null | undefined;
   } = {},
 ): StandingRow[] {
   const isLeague = opts.format === "league";
