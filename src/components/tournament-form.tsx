@@ -218,44 +218,49 @@ export function TournamentForm({
   const shuffleGroups = () => {
     setValues((v) => {
       const teams = [...(v.teams || [])];
-      const groups = v.group_count || 1;
-      const teamsPerGroup = Math.ceil(v.team_count / groups);
+      const groupsCount = v.group_count || 1;
       
       const lockedTeams = teams.filter(t => t.is_locked && t.group_label);
       const eligibleTeams = teams.filter(t => !t.is_locked || !t.group_label);
       
-      // Randomize eligible teams
+      // 1. Determine/Get randomized capacities
+      const lockedCounts: Record<string, number> = {};
+      lockedTeams.forEach(t => {
+        if (t.group_label) lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
+      });
+
+      const newCapacities = calculateGroupCapacities(v.team_count, groupsCount, lockedCounts);
+      if (!newCapacities) {
+        toast.error("Could not find a valid group distribution for locked teams.");
+        return v;
+      }
+
+      // 2. Randomize eligible teams
       for (let i = eligibleTeams.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [eligibleTeams[i], eligibleTeams[j]] = [eligibleTeams[j]!, eligibleTeams[i]!] as [TeamValue, TeamValue];
       }
 
+      // 3. Distribute teams into groups based on capacities
       const nextTeams: TeamValue[] = [...lockedTeams];
-      
-      const counts: Record<string, number> = {};
-      lockedTeams.forEach(t => {
-        if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
-      });
-
+      const counts: Record<string, number> = { ...lockedCounts };
       let eligibleIdx = 0;
-      for (let i = 0; i < groups; i++) {
+
+      for (let i = 0; i < groupsCount; i++) {
         const label = String.fromCharCode(65 + i);
-        let currentCount = counts[label] || 0;
-        while (currentCount < teamsPerGroup && eligibleIdx < eligibleTeams.length) {
+        const capacity = newCapacities[label]!;
+        while ((counts[label] || 0) < capacity && eligibleIdx < eligibleTeams.length) {
           nextTeams.push({ ...eligibleTeams[eligibleIdx]!, group_label: label });
           eligibleIdx++;
-          currentCount++;
+          counts[label] = (counts[label] || 0) + 1;
         }
       }
 
-      while (eligibleIdx < eligibleTeams.length) {
-        nextTeams.push(eligibleTeams[eligibleIdx]!);
-        eligibleIdx++;
-      }
-
-      // Restore original order based on original indices if we want to keep the roster list stable
-      // But for knockout, the shuffle result IS the new state.
-      return { ...v, teams: nextTeams };
+      return { 
+        ...v, 
+        teams: nextTeams,
+        group_capacities: newCapacities
+      };
     });
     toast.success("Teams shuffled successfully.");
   };
