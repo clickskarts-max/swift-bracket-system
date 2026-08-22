@@ -188,6 +188,40 @@ export function TournamentForm({
     });
   };
 
+  const shuffleGroups = () => {
+    setValues((v) => {
+      const teams = [...(v.teams || [])];
+      for (let i = teams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [teams[i], teams[j]] = [teams[j]!, teams[i]!] as [TeamValue, TeamValue];
+      }
+      return { ...v, teams };
+    });
+  };
+
+  const poolDraw = () => {
+    setValues((v) => {
+      const teams = [...(v.teams || [])];
+      const groups = v.group_count || 1;
+      const perGroup = Math.ceil(teams.length / groups);
+      
+      // Shuffle first
+      for (let i = teams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [teams[i], teams[j]] = [teams[j]!, teams[i]!] as [TeamValue, TeamValue];
+      }
+
+      // Assign groups sequentially A, B, C...
+      const nextTeams = teams.map((t, i) => ({
+        ...t,
+        group_label: String.fromCharCode(65 + (i % groups)),
+      }));
+
+      return { ...v, teams: nextTeams };
+    });
+    toast.success("Teams randomly assigned to groups");
+  };
+
   const validateStep = (currentStep: number) => {
     if (currentStep === 1) {
       if (!values.name.trim()) {
