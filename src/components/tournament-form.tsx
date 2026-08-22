@@ -602,10 +602,30 @@ export function TournamentForm({
                                 value={team.group_label || "unassigned"}
                                 onValueChange={(v) => {
                                   const newGroup = v === "unassigned" ? null : v;
+                                  // Update the team and set is_locked to true if assigned manually
                                   setTeam(team.originalIdx, { 
                                     group_label: newGroup,
                                     is_locked: !!newGroup
                                   });
+                                  
+                                  // Recalculate capacities if assignment changed
+                                  const lockedCounts: Record<string, number> = {};
+                                  const updatedTeams = [...values.teams];
+                                  updatedTeams[team.originalIdx] = { 
+                                    ...updatedTeams[team.originalIdx], 
+                                    group_label: newGroup 
+                                  };
+                                  
+                                  updatedTeams.forEach(t => {
+                                    if (t.group_label) {
+                                      lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
+                                    }
+                                  });
+                                  
+                                  const newCapacities = calculateGroupCapacities(values.team_count, values.group_count, lockedCounts);
+                                  if (newCapacities) {
+                                    set("group_capacities", newCapacities);
+                                  }
                                 }}
                               >
                                 <SelectTrigger className={cn(
