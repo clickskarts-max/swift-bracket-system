@@ -94,7 +94,7 @@ const empty = (): TournamentValues => ({
   legs: 1,
   playoff_format: "none",
   group_count: 0,
-  qualifiers_per_group: 1,
+  qualifiers_per_group: 2,
   team_count: 0,
   start_date: null,
   end_date: null,
@@ -121,6 +121,8 @@ export function TournamentForm({
   pending?: boolean;
 }) {
   const [step, setStep] = useState(1);
+  
+
   const [showPoolDraw, setShowPoolDraw] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,7 +136,7 @@ export function TournamentForm({
           legs: initial.legs,
           playoff_format: initial.playoff_format,
           group_count: initial.group_count,
-          qualifiers_per_group: initial.qualifiers_per_group ?? 1,
+          qualifiers_per_group: initial.qualifiers_per_group ?? 2,
           team_count: initial.team_count,
           start_date: initial.start_date,
           end_date: initial.end_date,
@@ -147,7 +149,7 @@ export function TournamentForm({
           is_public: initial.is_public,
           teams: [], // Handled separately if needed, but usually creation only
         }
-      : empty(),
+      : { ...empty(), qualifiers_per_group: 2 },
   );
 
   // Initialize teams when team_count changes in Step 1
@@ -283,7 +285,11 @@ export function TournamentForm({
       }
       const isGroupKnockout = values.format === "group_knockout";
       if (isGroupKnockout) {
-        const knockoutTeams = values.group_count * values.qualifiers_per_group;
+        // Force qualifiers_per_group to 2 for group_knockout as per instructions
+        if (values.qualifiers_per_group !== 2) {
+          set("qualifiers_per_group", 2);
+        }
+        const knockoutTeams = values.group_count * 2;
         const isValidKnockoutSize = (size: number) => size > 0 && (size & (size - 1)) === 0;
         if (!isValidKnockoutSize(knockoutTeams)) {
           toast.error(`Invalid knockout size (${knockoutTeams}). Must be 2, 4, 8, or 16.`);
@@ -367,12 +373,9 @@ export function TournamentForm({
         toast.error(`${unassigned.length} teams have not been assigned to a group.`);
         return;
       }
-    } else if (step === 3 && !isGroupKnockout) {
-      submit();
-      return;
     }
-    
-    if (step === 4 && isGroupKnockout) {
+
+    if (step === totalSteps) {
       submit();
       return;
     }
@@ -389,7 +392,11 @@ export function TournamentForm({
   };
 
   const submit = () => {
-    const nextVal = { ...values, slug: values.slug || uniqueSlug(values.name) };
+    const nextVal = { 
+      ...values, 
+      slug: values.slug || uniqueSlug(values.name),
+      qualifiers_per_group: values.format === "group_knockout" ? 2 : values.qualifiers_per_group 
+    };
     const parsed = schema.safeParse(nextVal);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check the form");
@@ -402,7 +409,7 @@ export function TournamentForm({
   const isGroupKnockout = values.format === "group_knockout";
   const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
   const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
-  const knockoutTeams = isGroupKnockout ? values.group_count * values.qualifiers_per_group : 0;
+  const knockoutTeams = isGroupKnockout ? values.group_count * 2 : 0;
 
   const knockoutRoundLabel = (size: number) => {
     if (size === 2) return "Final";
@@ -810,13 +817,6 @@ export function TournamentForm({
                 folder="tournament-logos"
               />
             </Field>
-            <Field label="Banner image">
-               <ImageUpload 
-                value={values.banner_url}
-                onChange={(url) => set("banner_url", url)}
-                folder="tournament-banners"
-              />
-            </Field>
           </div>
           
           <div className="space-y-4">
@@ -946,18 +946,6 @@ export function TournamentForm({
                 />
               </Field>
 
-              <Field
-                label="Qualifiers from Each Group"
-                hint="Top teams advancing to knockout."
-              >
-                <Input
-                  type="number"
-                  min={1}
-                  max={Math.floor(teamsPerGroup) || 1}
-                  value={values.qualifiers_per_group}
-                  onChange={(e) => set("qualifiers_per_group", Number(e.target.value) || 1)}
-                />
-              </Field>
 
               <div className="col-span-full space-y-3 rounded-lg bg-muted/50 p-4">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -1145,7 +1133,7 @@ export function TournamentForm({
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
         <Button onClick={next} className="w-full sm:w-auto">
-          {isGroupKnockout ? "Review & Finish" : submitLabel} 
+          {submitLabel} 
           <ChevronRight className="ml-1.5 h-4 w-4" />
         </Button>
       </div>
@@ -1153,7 +1141,7 @@ export function TournamentForm({
   );
 
 
-  const totalSteps = isGroupKnockout ? 4 : 3;
+  const totalSteps = 3;
   const currentDisplayStep = Math.min(step, totalSteps);
 
   return (
@@ -1187,21 +1175,6 @@ export function TournamentForm({
         {step === 1 && renderStep1()}
         {step === 2 && renderStep2()}
         {step === 3 && renderStep3()}
-        {step === 4 && isGroupKnockout && (
-          <div className="surface-card p-10 text-center space-y-4">
-             <Trophy className="h-16 w-16 text-primary mx-auto opacity-20" />
-             <div>
-               <h2 className="text-2xl font-display font-bold">Ready to Create</h2>
-               <p className="text-muted-foreground">Review your settings and finalize the tournament.</p>
-             </div>
-             <div className="flex justify-center gap-4 pt-4">
-               <Button variant="outline" onClick={back}>Back</Button>
-               <Button onClick={submit} disabled={pending} size="lg" className="px-10 font-bold">
-                 {pending ? "Creating..." : submitLabel}
-               </Button>
-             </div>
-          </div>
-        )}
       </div>
     </div>
   );

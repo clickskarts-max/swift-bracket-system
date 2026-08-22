@@ -20,7 +20,7 @@ export type TeamRef = {
 
 export const TOURNAMENT_FORMATS = [
   { value: "league", label: "League" },
-  { value: "group_knockout", label: "Group stage + knockout" },
+  { value: "group_knockout", label: "league-cum-knockout" },
 ] as const;
 
 export const PLAYOFF_FORMATS = [
@@ -353,7 +353,7 @@ export type GenerateOptions = {
 export function generateSchedule({
   format,
   legs,
-  qualifiersPerGroup = 1,
+  qualifiersPerGroup = 2,
   playoffFormat,
   teams,
 }: GenerateOptions): MatchDraft[] {
