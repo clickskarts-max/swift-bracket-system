@@ -40,7 +40,8 @@ export function PoolDraw({
   onOpenChange, 
   teams: initialTeams, 
   groupCount, 
-  teamsPerGroup, 
+  teamCount, 
+  initialCapacities, 
   onApply 
 }: PoolDrawProps) {
   const [isSpinning, setIsSpinning] = useState(false);
