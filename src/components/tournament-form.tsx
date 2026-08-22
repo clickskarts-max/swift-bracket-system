@@ -1173,6 +1173,7 @@ export function TournamentForm({
 
 
   const totalSteps = isGroupKnockout ? 4 : 3;
+  const currentDisplayStep = Math.min(step, totalSteps);
 
   return (
     <div className="space-y-6">
@@ -1197,7 +1198,7 @@ export function TournamentForm({
       
       <div className="mb-6">
         <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
-          Step {step} of {totalSteps}
+          Step {currentDisplayStep} of {totalSteps}
         </h2>
       </div>
 
