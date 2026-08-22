@@ -804,8 +804,15 @@ export function TournamentForm({
             onOpenChange={setShowPoolDraw}
             teams={teams}
             groupCount={values.group_count}
-            teamsPerGroup={teamsPerGroup}
-            onApply={(drawn) => set("teams", drawn)}
+            teamCount={values.team_count}
+            initialCapacities={values.group_capacities}
+            onApply={(drawn, finalCapacities) => {
+              setValues(v => ({
+                ...v,
+                teams: drawn,
+                group_capacities: finalCapacities
+              }));
+            }}
           />
 
           <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
