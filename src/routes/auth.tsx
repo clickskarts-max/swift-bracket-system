@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Field } from "@/components/data-bits";
 import { BrandWordmark } from "@/components/brand";
 import { authRedirect, RESET_PASSWORD_PATH } from "@/lib/app-url";
+import { useBranding } from "@/hooks/use-branding";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -39,6 +41,8 @@ function AuthPage() {
   const [recoveryMode, setRecoveryMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { data: org } = useBranding();
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -137,7 +141,14 @@ function AuthPage() {
       <Link to="/" className="mb-8">
         <BrandWordmark />
       </Link>
-      <div className="surface-card w-full max-w-md p-6">
+      <div className="surface-card w-full max-w-md p-6 relative overflow-hidden">
+        {org && (
+          <div 
+            className="absolute top-0 left-0 w-full h-1" 
+            style={{ backgroundColor: org.primary_color || "var(--primary)" }}
+          />
+        )}
+
         {recoveryMode ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Set a new password for your account.</p>
