@@ -121,6 +121,8 @@ export function TournamentForm({
   pending?: boolean;
 }) {
   const [step, setStep] = useState(1);
+  const isGroupKnockout = initial ? initial.format === "group_knockout" : true; // Default or based on initial state
+
   const [showPoolDraw, setShowPoolDraw] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
