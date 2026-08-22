@@ -51,9 +51,12 @@ export function computeStandings(
   const isLeague = opts.format === "league";
   const winPoints = opts.winPoints ?? 2;
   const lossPoints = opts.lossPoints ?? (isLeague ? 1 : 0);
-  const pool = teams.filter((t) =>
-    opts.groupLabel ? (t.group_label ?? "") === opts.groupLabel : true,
-  );
+  const pool = teams.filter((t) => {
+    if (!opts.groupLabel) return true;
+    const teamGroup = (t.group_label || "").toUpperCase();
+    const filterGroup = opts.groupLabel.toUpperCase();
+    return teamGroup === filterGroup;
+  });
   const base = new Map<string, StandingRow>(
     pool.map((t) => [
       t.id,

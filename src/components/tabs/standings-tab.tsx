@@ -413,27 +413,34 @@ export function StandingsTab({
   matches: Match[];
   tournament: Tournament | null;
 }) {
+  const isGroupKnockout = tournament?.format === "group_knockout";
   const groups = [...new Set(teams.map((t) => t.group_label).filter(Boolean))] as string[];
-  if (groups.length > 1) {
+  
+  if (isGroupKnockout || groups.length > 1) {
+    // For group knockout, we must show groups even if only one group label exists or even if none (though creation now enforces it)
+    // If no group labels found, but it is group knockout, we might have a data issue, but we'll fallback to showing what we have.
+    const sortedGroups = groups.length > 0 ? groups.sort() : ["A"];
+
     return (
-      <div className="space-y-6">
-        {groups.sort().map((g) => (
-          <div key={g}>
-            <h3 className="mb-2 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-              Group {g}
-            </h3>
+      <div className="space-y-12">
+        {sortedGroups.map((g) => (
+          <div key={g} className="space-y-4">
+            <div className="flex items-center gap-3 border-l-4 border-primary pl-4">
+              <h3 className="font-display text-2xl font-bold uppercase tracking-tight">
+                Group {g}
+              </h3>
+            </div>
+            
             <StandingsTable
               teams={teams}
               matches={matches}
               groupLabel={g}
               tournament={tournament}
             />
-            <div className="grid gap-4 md:grid-cols-2">
+
+            <div className="grid gap-6 md:grid-cols-2">
               <PointDistribution tournament={tournament} />
-      <div className="grid gap-4 md:grid-cols-2">
-        <PointDistribution tournament={tournament} />
-        <StandingsLegend tournament={tournament} />
-      </div>
+              <StandingsLegend tournament={tournament} />
             </div>
           </div>
         ))}
