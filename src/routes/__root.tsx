@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { useBranding } from "@/hooks/use-branding";
+
 
 import appCss from "../styles.css?url";
 import { Toaster } from "../components/ui/sonner";
@@ -183,6 +185,39 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { data: org } = useBranding();
+
+  // Apply branding colors and favicon
+  useEffect(() => {
+    if (org) {
+      const root = document.documentElement;
+      
+      // Update primary colors if set
+      if (org.primary_color) {
+        root.style.setProperty("--primary", org.primary_color);
+        root.style.setProperty("--ring", org.primary_color);
+      }
+      
+      if (org.accent_color) {
+        root.style.setProperty("--accent", org.accent_color);
+      }
+      
+      // Update favicon dynamically
+      if (org.favicon_url) {
+        const links = document.querySelectorAll("link[rel*='icon']");
+        links.forEach((link) => {
+          (link as HTMLLinkElement).href = org.favicon_url!;
+        });
+      }
+      
+      // Update page title if not already specific
+      const brandName = org.brand_name || org.name;
+      if (brandName && !document.title.includes(brandName)) {
+        // We only append if it's a generic title, but usually router head() handles this.
+        // This is a safety fallback for root.
+      }
+    }
+  }, [org]);
 
   return (
     <QueryClientProvider client={queryClient}>
