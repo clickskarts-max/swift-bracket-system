@@ -735,7 +735,8 @@ export function TournamentForm({
                     <div className="grid gap-3">
                       {groups.map((g) => {
                         const groupTeams = teams.filter(t => t.group_label === g);
-                        const isFull = groupTeams.length >= teamsPerGroup;
+                        const capacity = getCapacityForGroup(g);
+                        const isFull = groupTeams.length >= capacity;
                         
                         return (
                           <div 
@@ -756,7 +757,7 @@ export function TournamentForm({
                                 "text-[10px] font-bold rounded-full px-2 h-5",
                                 isFull ? "bg-green-500 hover:bg-green-500 text-white" : "border-primary/20 text-primary"
                               )}>
-                                {groupTeams.length} / {teamsPerGroup}
+                                {groupTeams.length} / {capacity}
                               </Badge>
                             </div>
                             <div className="space-y-2">
