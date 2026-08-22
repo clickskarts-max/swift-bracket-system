@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Field } from "@/components/data-bits";
 import { BrandWordmark } from "@/components/brand";
+import { authRedirect, RESET_PASSWORD_PATH } from "@/lib/app-url";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -66,7 +67,7 @@ function AuthPage() {
         ? await supabase.auth.signInWithPassword(parsed.data)
         : await supabase.auth.signUp({
             ...parsed.data,
-            options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+            options: { emailRedirectTo: authRedirect("/dashboard") },
           });
     setLoading(false);
     if (error) {
@@ -85,7 +86,7 @@ function AuthPage() {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: `${window.location.origin}/auth`,
+      redirectTo: authRedirect(RESET_PASSWORD_PATH),
     });
     setLoading(false);
     if (error) {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/app-shell";
 import { Field } from "@/components/data-bits";
+import { PasswordSecurity } from "@/components/password-security";
 import { useAuth } from "@/hooks/use-auth";
 import { OWNER_EMAIL } from "@/lib/activation";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,6 +159,8 @@ function SettingsPage() {
           </Button>
         </div>
       )}
+
+      <PasswordSecurity user={user} />
 
       <div className="surface-card mt-6 flex flex-wrap items-center justify-between gap-3 p-5">
         <div>
