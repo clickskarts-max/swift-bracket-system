@@ -291,6 +291,13 @@ export function TournamentForm({
       }
       const isGroupKnockout = values.format === "group_knockout";
       if (isGroupKnockout) {
+        // Enforce power-of-two group counts
+        const isValidGroupCount = values.group_count > 0 && (values.group_count & (values.group_count - 1)) === 0;
+        if (!isValidGroupCount) {
+          toast.error("Group count must be a power of two (2, 4, 8, 16...)");
+          return false;
+        }
+
         // Force qualifiers_per_group to 2 for group_knockout as per instructions
         if (values.qualifiers_per_group !== 2) {
           set("qualifiers_per_group", 2);
