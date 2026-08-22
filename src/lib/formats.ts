@@ -361,6 +361,7 @@ export type GenerateOptions = {
   qualifiersPerGroup?: number;
   playoffFormat: string;
   teams: TeamRef[];
+  groupCapacities?: Record<string, number>;
 };
 
 export function generateSchedule({
@@ -369,6 +370,7 @@ export function generateSchedule({
   qualifiersPerGroup = 2,
   playoffFormat,
   teams,
+  groupCapacities,
 }: GenerateOptions): MatchDraft[] {
   if (format === "single_elimination") return singleElimination(teams);
   if (format === "double_elimination") return doubleElimination(teams);
@@ -392,4 +394,54 @@ export function generateSchedule({
   const rr = roundRobin(teams, legs);
   const playoffs = playoffMatches(playoffFormat, rr.length + 1);
   return rr.concat(playoffs);
+}
+
+export function calculateGroupCapacities(
+  teamCount: number,
+  groupCount: number,
+  lockedAssignments?: Record<string, number>
+): Record<string, number> | null {
+  if (groupCount <= 0) return null;
+  
+  const baseSize = Math.floor(teamCount / groupCount);
+  const remainder = teamCount % groupCount;
+  
+  const capacities: number[] = [
+    ...Array(remainder).fill(baseSize + 1),
+    ...Array(groupCount - remainder).fill(baseSize)
+  ];
+
+  const shuffle = (array: number[]) => {
+    const next = [...array];
+    for (let i = next.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [next[i], next[j]] = [next[j]!, next[i]!];
+    }
+    return next;
+  };
+
+  let attempts = 0;
+  const labels = Array.from({ length: groupCount }, (_, i) => String.fromCharCode(65 + i));
+  
+  while (attempts < 50) {
+    const shuffled = shuffle(capacities);
+    const result: Record<string, number> = {};
+    let valid = true;
+    
+    for (let i = 0; i < labels.length; i++) {
+      const label = labels[i]!;
+      const cap = shuffled[i]!;
+      const locked = lockedAssignments?.[label] || 0;
+      if (locked > cap) {
+        valid = false;
+        break;
+      }
+      result[label] = cap;
+    }
+    
+    if (valid) return result;
+    attempts++;
+  }
+
+  return null;
 }
