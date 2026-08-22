@@ -429,12 +429,13 @@ export function TournamentForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(values.teams || []).map((team, idx) => (
               <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20">
-                <div className="w-10 h-10 shrink-0">
+                <div className="w-12 h-12 shrink-0 bg-background rounded-lg border border-border/60 p-1">
                   <ImageUpload 
                     value={team.logo_url}
                     onChange={(url) => setTeam(idx, { logo_url: url })}
                     folder="team-logos"
-                    className="!gap-0 !p-0"
+                    className="!gap-0 !p-0 h-full w-full"
+                    rounded="rounded-md"
                   />
                 </div>
                 <Input
@@ -528,23 +529,14 @@ export function TournamentForm({
                               {team.originalIdx + 1}
                             </div>
                             
-                            <div className="relative group w-11 h-11">
-                              <div className="h-full w-full rounded-xl bg-muted/50 border border-border/60 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-                                {team.logo_url ? (
-                                  <img src={team.logo_url} alt="" className="h-full w-full object-contain p-1" />
-                                ) : (
-                                  <Users className="h-5 w-5 text-muted-foreground/30" />
-                                )}
-                              </div>
-                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/60 rounded-xl">
-                                <ImageUpload 
-                                  value={team.logo_url}
-                                  onChange={(url) => setTeam(team.originalIdx, { logo_url: url })}
-                                  folder="team-logos"
-                                  className="!gap-0 !p-0"
-                                  rounded="rounded-xl"
-                                />
-                              </div>
+                            <div className="relative group w-11 h-11 bg-background border border-border/60 rounded-xl overflow-hidden">
+                              <ImageUpload 
+                                value={team.logo_url}
+                                onChange={(url) => setTeam(team.originalIdx, { logo_url: url })}
+                                folder="team-logos"
+                                className="!gap-0 !p-0 h-full w-full"
+                                rounded="rounded-xl"
+                              />
                             </div>
 
                             <div className="group/name relative">
