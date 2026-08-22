@@ -474,6 +474,7 @@ export function TournamentForm({
           </div>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t border-border/40">
           <div className="col-span-full">
             <Field label="Format">
               <Select value={values.format} onValueChange={(v) => set("format", v)}>
@@ -578,7 +579,6 @@ export function TournamentForm({
                   }}
                 />
               </Field>
-
 
               <Field
                 label="Qualifiers from Each Group"
