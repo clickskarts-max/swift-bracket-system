@@ -215,6 +215,7 @@ function statusMarker(
   all: ReturnType<typeof computeStandings>,
   slots: number,
   winPoints: number,
+  lossPoints: number,
   show: boolean,
 ): "x" | "o" | null {
   if (!show || slots <= 0) return null;
@@ -224,8 +225,7 @@ function statusMarker(
   const others = all.filter((r) => r.team.id !== row.team.id);
   
   // For clinch/elimination logic, use the same win/loss points as the table
-  const winPts = winPoints;
-  const canBeatMin = others.filter((r) => r.points + r.remaining * winPts > minPts).length;
+  const canBeatMin = others.filter((r) => r.points + r.remaining * winPoints > minPts).length;
   if (canBeatMin < slots) return "x";
   const alreadyAboveMyMax = others.filter((r) => r.points > maxPts).length;
   if (alreadyAboveMyMax >= slots) return "o";
@@ -320,7 +320,7 @@ export function StandingsTable({
                     color={r.team.jersey_color ?? null}
                   />
                   {(() => {
-                    const mark = statusMarker(r, rows, slots, winPoints, showMarkers);
+                    const mark = statusMarker(r, rows, slots, winPoints, lossPoints, showMarkers);
                     if (!mark) return null;
                     return (
                       <span className={mark === "x" ? "text-success" : "text-destructive"}>
