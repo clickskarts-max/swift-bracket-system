@@ -27,7 +27,7 @@ function Index() {
       {/* Hero Section */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[90vh] px-6 text-center">
         <div className="animate-in fade-in slide-in-from-top-8 duration-1000">
-          <BrandWordmark className="h-16 mb-8" />
+          <BrandWordmark />
           
           <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter mb-6 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent uppercase">
             Manage Your <br />
