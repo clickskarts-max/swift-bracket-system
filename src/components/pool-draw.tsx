@@ -10,9 +10,11 @@ import {
   Zap, 
   ArrowRight,
   ChevronRight,
-  ListOrdered
+  ListOrdered,
+  Loader2
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { calculateGroupCapacities } from "@/lib/formats";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
