@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/data-bits";
 import { PasswordInput } from "@/components/password-input";
-import { PageHeader } from "@/components/app-shell";
 import { authRedirect, RESET_PASSWORD_PATH } from "@/lib/app-url";
 import type { User } from "@supabase/supabase-js";
 
@@ -130,6 +129,3 @@ export function PasswordSecurity({ user }: { user: User | null }) {
   );
 }
 
-export function SettingsSectionHeader({ title }: { title: string }) {
-  return <PageHeader title={title} />;
-}
