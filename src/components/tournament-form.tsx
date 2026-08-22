@@ -871,7 +871,8 @@ export function TournamentForm({
   );
 
   const renderStep2 = () => {
-    const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
+    if (isGroupKnockout) return renderCombinedStep2();
+    
     const teams = values.teams || [];
 
     return (
@@ -885,22 +886,21 @@ export function TournamentForm({
           </div>
           
           <div className="space-y-4">
-            <div className="hidden grid-cols-[80px_1fr_150px] gap-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:grid">
+            <div className="hidden grid-cols-[80px_1fr] gap-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:grid">
               <div>Logo</div>
               <div>Team Name</div>
-              <div>{values.format === "group_knockout" ? "Group" : ""}</div>
             </div>
 
             <div className="space-y-3">
               {teams.map((team, idx) => (
-                <div key={idx} className="flex flex-col gap-4 rounded-lg border border-border p-3 sm:grid sm:grid-cols-[80px_1fr_150px] sm:items-center">
+                <div key={idx} className="flex flex-col gap-4 rounded-lg border border-border p-3 sm:grid sm:grid-cols-[80px_1fr] sm:items-center">
                   <div className="flex justify-center sm:justify-start">
-                    <div className="relative group">
-                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-muted border border-border flex items-center justify-center">
+                    <div className="relative group w-14 h-14">
+                      <div className="h-full w-full shrink-0 overflow-hidden rounded-lg bg-muted border border-border flex items-center justify-center">
                         {team.logo_url ? (
                           <img src={team.logo_url} alt="" className="h-full w-full object-contain" />
                         ) : (
-                          <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                          <Users className="h-6 w-6 text-muted-foreground" />
                         )}
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
@@ -916,7 +916,7 @@ export function TournamentForm({
                   </div>
 
                   <div className="flex-1">
-                    <Label className="mb-1.5 block text-xs sm:hidden">Team Name</Label>
+                    <div className="mb-1.5 block text-xs sm:hidden text-muted-foreground font-semibold uppercase">Team Name</div>
                     <Input
                       value={team.name}
                       onChange={(e) => setTeam(idx, { name: e.target.value })}
@@ -924,28 +924,6 @@ export function TournamentForm({
                       className="w-full"
                     />
                   </div>
-
-                  {values.format === "group_knockout" && (
-                    <div>
-                      <Label className="mb-1.5 block text-xs sm:hidden">Group</Label>
-                      <Select
-                        value={team.group_label || "none"}
-                        onValueChange={(v) => setTeam(idx, { group_label: v === "none" ? null : v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="No group" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">No group</SelectItem>
-                          {groups.map((g) => (
-                            <SelectItem key={g} value={g}>
-                              Group {g}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
