@@ -429,12 +429,13 @@ export function TournamentForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(values.teams || []).map((team, idx) => (
               <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20">
-                <div className="w-10 h-10 shrink-0">
+                <div className="w-12 h-12 shrink-0 bg-background rounded-lg border border-border/60 p-1">
                   <ImageUpload 
                     value={team.logo_url}
                     onChange={(url) => setTeam(idx, { logo_url: url })}
                     folder="team-logos"
-                    className="!gap-0 !p-0"
+                    className="!gap-0 !p-0 h-full w-full"
+                    rounded="rounded-md"
                   />
                 </div>
                 <Input

@@ -61,9 +61,10 @@ export function ImageUpload({
     <div className={cn("flex items-center gap-3", className)}>
       <div
         className={cn(
-          "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40",
+          "flex h-full w-full shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40 cursor-pointer hover:bg-muted/60 transition-colors",
           rounded,
         )}
+        onClick={() => inputRef.current?.click()}
       >
         {value ? (
           <img src={value} alt="" className="h-full w-full object-cover" />
@@ -71,25 +72,29 @@ export function ImageUpload({
           <ImagePlus className="h-5 w-5 text-muted-foreground" />
         )}
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={busy}
-          onClick={() => inputRef.current?.click()}
-        >
-          {busy ? (
-            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <ImagePlus className="mr-1.5 h-3.5 w-3.5" />
-          )}
-          {value ? "Replace" : "Upload"}
-        </Button>
-        {value && (
-          <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
-            <X className="mr-1.5 h-3.5 w-3.5" /> Remove
-          </Button>
+      <div className="flex flex-wrap gap-2 empty:hidden">
+        {className?.includes("!gap-0") ? null : (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() => inputRef.current?.click()}
+            >
+              {busy ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ImagePlus className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              {value ? "Replace" : "Upload"}
+            </Button>
+            {value && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
+                <X className="mr-1.5 h-3.5 w-3.5" /> Remove
+              </Button>
+            )}
+          </>
         )}
       </div>
       <input
