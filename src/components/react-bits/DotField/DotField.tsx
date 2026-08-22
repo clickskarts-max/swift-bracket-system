@@ -4,6 +4,33 @@ import './DotField.css';
 
 const TWO_PI = Math.PI * 2;
 
+interface Dot {
+  ax: number;
+  ay: number;
+  sx: number;
+  sy: number;
+  vx: number;
+  vy: number;
+  x: number;
+  y: number;
+}
+
+interface DotFieldProps {
+  dotRadius?: number;
+  dotSpacing?: number;
+  cursorRadius?: number;
+  cursorForce?: number;
+  bulgeOnly?: boolean;
+  bulgeStrength?: number;
+  glowRadius?: number;
+  sparkle?: boolean;
+  waveAmplitude?: number;
+  gradientFrom?: string;
+  gradientTo?: string;
+  glowColor?: string;
+  [key: string]: any;
+}
+
 const DotField = memo(({
   dotRadius = 1.5,
   dotSpacing = 14,
@@ -18,19 +45,18 @@ const DotField = memo(({
   gradientTo = 'rgba(180, 151, 207, 0.25)',
   glowColor = '#120F17',
   ...rest
-}) => {
-  const canvasRef = useRef(null);
-  const svgRef = useRef(null);
-  const glowRef = useRef(null);
-  const dotsRef = useRef([]);
+}: DotFieldProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const glowRef = useRef<SVGCircleElement>(null);
+  const dotsRef = useRef<Dot[]>([]);
   const mouseRef = useRef({ x: -9999, y: -9999, prevX: -9999, prevY: -9999, speed: 0 });
-  const rafRef = useRef(null);
+  const rafRef = useRef<number>(0);
   const sizeRef = useRef({ w: 0, h: 0, offsetX: 0, offsetY: 0 });
   const glowOpacity = useRef(0);
   const engagement = useRef(0);
-  const propsRef = useRef({});
+  const propsRef = useRef<any>({});
   propsRef.current = { dotRadius, dotSpacing, cursorRadius, cursorForce, bulgeOnly, bulgeStrength, sparkle, waveAmplitude, gradientFrom, gradientTo };
-  const rebuildRef = useRef(null);
+  const rebuildRef = useRef<(() => void) | null>(null);
   const glowIdRef = useRef(`dot-field-glow-${Math.random().toString(36).slice(2, 9)}`);
 
   useEffect(() => {
@@ -38,8 +64,9 @@ const DotField = memo(({
     const glowEl = glowRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let resizeTimer;
+    let resizeTimer: any;
 
     function resize() {
       clearTimeout(resizeTimer);
@@ -47,6 +74,7 @@ const DotField = memo(({
     }
 
     function doResize() {
+      if (!canvas || !canvas.parentElement) return;
       const rect = canvas.parentElement.getBoundingClientRect();
       const w = rect.width;
       const h = rect.height;
@@ -67,7 +95,7 @@ const DotField = memo(({
       buildDots(w, h);
     }
 
-    function buildDots(w, h) {
+    function buildDots(w: number, h: number) {
       const p = propsRef.current;
       const step = p.dotRadius + p.dotSpacing;
       const cols = Math.floor(w / step);
@@ -87,7 +115,7 @@ const DotField = memo(({
       dotsRef.current = dots;
     }
 
-    function onMouseMove(e) {
+    function onMouseMove(e: MouseEvent) {
       const s = sizeRef.current;
       mouseRef.current.x = e.pageX - s.offsetX;
       mouseRef.current.y = e.pageY - s.offsetY;
@@ -125,9 +153,9 @@ const DotField = memo(({
       glowOpacity.current += (eng - glowOpacity.current) * 0.08;
 
       if (glowEl) {
-        glowEl.setAttribute('cx', m.x);
-        glowEl.setAttribute('cy', m.y);
-        glowEl.style.opacity = glowOpacity.current;
+        glowEl.setAttribute('cx', String(m.x));
+        glowEl.setAttribute('cy', String(m.y));
+        glowEl.style.opacity = String(glowOpacity.current);
       }
 
       ctx.clearRect(0, 0, w, h);
@@ -241,7 +269,6 @@ const DotField = memo(({
         }}
       />
       <svg
-        ref={svgRef}
         style={{
           position: 'absolute',
           inset: 0,
