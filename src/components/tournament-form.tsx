@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { 
   MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, 
-  Trash2, Trophy, ArrowRight, Lock, Unlock, Play, Search, Edit2, GripVertical, Check, ListOrdered
+  Zap, Trash2, Trophy, ArrowRight, Lock, Unlock, Play, Search, Edit2, GripVertical, Check, ListOrdered
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
