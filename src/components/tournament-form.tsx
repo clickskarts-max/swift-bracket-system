@@ -436,7 +436,7 @@ export function TournamentForm({
           <div className="flex flex-wrap items-center justify-between gap-4 p-5 border-b border-border/40 bg-muted/20">
             <div>
               <h2 className="font-display text-xl font-bold text-primary">Teams & Group Draw</h2>
-              <p className="text-sm text-muted-foreground">Add teams, upload logos, and assign them to groups.</p>
+              <p className="text-sm text-muted-foreground">Add teams, upload logos, and assign them to groups manually or through a draw.</p>
             </div>
             <div className="flex flex-col items-end gap-1">
                <div className="text-lg font-bold font-display px-3 py-1 rounded-md bg-background border border-border">
