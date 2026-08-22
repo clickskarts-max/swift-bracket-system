@@ -361,7 +361,6 @@ export function TournamentForm({
 
     if (step === 2 && isGroupKnockout) {
       // Step 2 is now the combined "Teams & Group Draw" for knockout
-      // Final validation for Group stage + knockout
       const teams = values.teams || [];
       const unassigned = teams.filter(t => !t.group_label);
       if (unassigned.length > 0) {
@@ -377,6 +376,8 @@ export function TournamentForm({
       submit();
       return;
     }
+
+    setStep((s) => s + 1);
 
     setStep((s) => s + 1);
     window.scrollTo(0, 0);
