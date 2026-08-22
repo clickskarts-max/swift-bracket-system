@@ -121,6 +121,7 @@ export function TournamentForm({
   pending?: boolean;
 }) {
   const [step, setStep] = useState(1);
+  const totalSteps = 3;
   const [showPoolDraw, setShowPoolDraw] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -367,12 +368,9 @@ export function TournamentForm({
         toast.error(`${unassigned.length} teams have not been assigned to a group.`);
         return;
       }
-    } else if (step === 3 && !isGroupKnockout) {
-      submit();
-      return;
     }
-    
-    if (step === 4 && isGroupKnockout) {
+
+    if (step === totalSteps) {
       submit();
       return;
     }
