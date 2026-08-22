@@ -121,7 +121,6 @@ export function TournamentForm({
   pending?: boolean;
 }) {
   const [step, setStep] = useState(1);
-  const totalSteps = 3;
   const [showPoolDraw, setShowPoolDraw] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -1151,7 +1150,7 @@ export function TournamentForm({
   );
 
 
-  const totalSteps = isGroupKnockout ? 4 : 3;
+  const totalSteps = 3;
   const currentDisplayStep = Math.min(step, totalSteps);
 
   return (
@@ -1185,21 +1184,6 @@ export function TournamentForm({
         {step === 1 && renderStep1()}
         {step === 2 && renderStep2()}
         {step === 3 && renderStep3()}
-        {step === 4 && isGroupKnockout && (
-          <div className="surface-card p-10 text-center space-y-4">
-             <Trophy className="h-16 w-16 text-primary mx-auto opacity-20" />
-             <div>
-               <h2 className="text-2xl font-display font-bold">Ready to Create</h2>
-               <p className="text-muted-foreground">Review your settings and finalize the tournament.</p>
-             </div>
-             <div className="flex justify-center gap-4 pt-4">
-               <Button variant="outline" onClick={back}>Back</Button>
-               <Button onClick={submit} disabled={pending} size="lg" className="px-10 font-bold">
-                 {pending ? "Creating..." : submitLabel}
-               </Button>
-             </div>
-          </div>
-        )}
       </div>
     </div>
   );
