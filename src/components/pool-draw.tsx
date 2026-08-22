@@ -193,7 +193,18 @@ export function PoolDraw({
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left: The Wheel */}
           <div className="flex-1 flex flex-col items-center justify-center p-6 border-r border-border/40 relative bg-muted/5">
-            {remainingTeams.length > 0 ? (
+            {isAllocating ? (
+              <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
+                <div className="relative">
+                  <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                  <Zap className="h-6 w-6 text-primary absolute inset-0 m-auto" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold font-display uppercase tracking-widest">Phase 1</h3>
+                  <p className="text-muted-foreground">Randomizing group capacities...</p>
+                </div>
+              </div>
+            ) : remainingTeams.length > 0 ? (
               <div className="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
                 {/* Pointer */}
                 <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-20 w-8 h-8 flex items-center justify-center">
@@ -216,7 +227,6 @@ export function PoolDraw({
                       const startAngle = i * segmentAngle;
                       const endAngle = (i + 1) * segmentAngle;
                       
-                      // Convert to radians for SVG path
                       const x1 = 50 + 50 * Math.cos((Math.PI * startAngle) / 180);
                       const y1 = 50 + 50 * Math.sin((Math.PI * startAngle) / 180);
                       const x2 = 50 + 50 * Math.cos((Math.PI * endAngle) / 180);
