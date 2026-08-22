@@ -1,5 +1,5 @@
 /**
- * Leia o arquivo instrucoes.md em anexo e siga as instruções contidas nele.
+ * Leia o arquivo instrucoes.md em anexo e siga as instruções. Analise também os demais arquivos anexados.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, ListOrdered, Share2, Trophy, Upload, Users } from "lucide-react";
