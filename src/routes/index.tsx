@@ -33,6 +33,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { data: org } = useBranding();
+  
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
       {/* Animated Background */}
@@ -41,9 +43,10 @@ function Index() {
           speed={0.03}
           columnCount={15}
           direction="up"
-          dotColor="rgba(255, 107, 26, 0.15)"
+          dotColor={org?.primary_color ? `${org.primary_color}26` : "rgba(255, 107, 26, 0.15)"}
         />
       </div>
+
 
       {/* Hero Section */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[90vh] px-6 text-center">
