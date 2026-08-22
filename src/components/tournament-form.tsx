@@ -993,8 +993,17 @@ export function TournamentForm({
                   </div>
                   <div>
                     <p className="text-muted-foreground">Groups</p>
-                    <p className="font-medium">
-                      {values.group_count} ({Math.floor(teamsPerGroup)} teams each)
+                    <p className="font-medium text-xs">
+                      {values.group_count} Total Groups
+                      {isUnevenGroups ? (
+                        <span className="block text-muted-foreground mt-1">
+                          ({remainder} groups of {baseSize + 1}, {values.group_count - remainder} groups of {baseSize})
+                        </span>
+                      ) : (
+                        <span className="block text-muted-foreground mt-1">
+                          ({baseSize} teams each)
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div>
