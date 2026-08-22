@@ -609,17 +609,18 @@ export function TournamentForm({
                                   
                                   const lockedCounts: Record<string, number> = {};
                                   const updatedTeams = [...(values.teams || [])];
-                                  if (updatedTeams[team.originalIdx]) {
+                                  const t = updatedTeams[team.originalIdx];
+                                  if (t) {
                                     updatedTeams[team.originalIdx] = { 
-                                      ...updatedTeams[team.originalIdx], 
+                                      ...t, 
                                       group_label: newGroup,
                                       is_locked: !!newGroup
                                     };
                                   }
                                   
-                                  updatedTeams.forEach(t => {
-                                    if (t.group_label) {
-                                      lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
+                                  updatedTeams.forEach(ut => {
+                                    if (ut.group_label) {
+                                      lockedCounts[ut.group_label] = (lockedCounts[ut.group_label] || 0) + 1;
                                     }
                                   });
                                   
