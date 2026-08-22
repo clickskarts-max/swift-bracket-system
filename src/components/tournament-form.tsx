@@ -1132,18 +1132,6 @@ export function TournamentForm({
           )}
         </div>
       </div>
-      <div className="surface-card space-y-4 p-5">
-        <h3 className="font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Additional Details
-        </h3>
-        <Field label="Description">
-          <Textarea
-            rows={4}
-            value={values.description ?? ""}
-            onChange={(e) => set("description", e.target.value || null)}
-            placeholder="Tell fans what this competition is about."
-          />
-        </Field>
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
             <p className="text-sm font-medium">Public tournament page</p>
