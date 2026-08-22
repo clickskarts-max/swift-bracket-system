@@ -351,6 +351,83 @@ export function TournamentForm({
     return `${size}-team bracket`;
   };
 
+  const renderStep4 = () => {
+    const teams = values.teams || [];
+    const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
+    
+    return (
+      <div className="space-y-6">
+        <div className="surface-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="font-display text-xl font-bold">Group Assignment</h2>
+              <p className="text-sm text-muted-foreground">Review and adjust team groups.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={shuffleGroups}>
+                <ChevronRight className="mr-1.5 h-4 w-4 rotate-90" /> Shuffle
+              </Button>
+              <Button size="sm" onClick={poolDraw}>
+                <ChevronRight className="mr-1.5 h-4 w-4" /> Pool Draw
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {groups.map((group) => {
+              const groupTeams = teams.filter(t => t.group_label === group || (!t.group_label && group === 'A'));
+              return (
+                <div key={group} className="rounded-lg border border-border/50 bg-muted/20 p-4">
+                  <h3 className="mb-4 font-display font-bold">Group {group}</h3>
+                  <div className="space-y-3">
+                    {groupTeams.length === 0 && (
+                      <p className="text-xs text-center py-4 text-muted-foreground italic">No teams assigned</p>
+                    )}
+                    {groupTeams.map((team, idx) => {
+                      const teamIndex = teams.findIndex(t => t.name === team.name);
+                      return (
+                        <div key={team.name} className="flex items-center justify-between gap-2 p-2 rounded-md bg-background border border-border/40">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="text-xs text-muted-foreground w-4">{idx + 1}.</span>
+                            <span className="text-sm font-medium truncate">{team.name}</span>
+                          </div>
+                          <Select 
+                            value={team.group_label || 'A'} 
+                            onValueChange={(v) => setTeam(teamIndex, { group_label: v })}
+                          >
+                            <SelectTrigger className="h-8 w-[100px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groups.map(g => (
+                                <SelectItem key={g} value={g} className="text-xs">
+                                  Group {g}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-4">
+          <Button variant="ghost" onClick={back}>
+            <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
+          </Button>
+          <Button onClick={next} disabled={pending}>
+            {pending ? "Creating..." : submitLabel}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
