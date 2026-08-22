@@ -112,68 +112,6 @@ const roundLabel = (teamsInRound: number, stage: string) => {
   return `Round of ${teamsInRound}`;
 };
 
-export function singleElimination(teams: TeamRef[], startNo = 1): MatchDraft[] {
-  if (teams.length < 2) return [];
-  let size = 1;
-  while (size < teams.length) size *= 2;
-  const seeded: (TeamRef | null)[] = Array.from({ length: size }, (_, i) => teams[i] ?? null);
-  const out: MatchDraft[] = [];
-  let no = startNo;
-  let roundIndex = 1;
-  let current: (TeamRef | string | null)[] = seeded;
-  while (current.length > 1) {
-    const next: (TeamRef | string | null)[] = [];
-    const label = roundLabel(current.length, "knockout");
-    for (let i = 0; i < current.length; i += 2) {
-      const a = current[i] ?? null;
-      const b = current[i + 1] ?? null;
-      if (a && !b) {
-        next.push(a);
-        continue;
-      }
-      const id = no++;
-      out.push(mk(id, "knockout", label, roundIndex, a as never, b as never));
-      next.push(`Winner M${id}`);
-    }
-    current = next;
-    roundIndex++;
-  }
-  return out;
-}
-
-export function doubleElimination(teams: TeamRef[], startNo = 1): MatchDraft[] {
-  const winners = singleElimination(teams, startNo);
-  if (!winners.length) return [];
-  const out = [...winners];
-  let no = startNo + winners.length;
-  // Losers bracket: pair losers of each winners-bracket round progressively.
-  const rounds = new Map<number, MatchDraft[]>();
-  winners.forEach((m) => rounds.set(m.round_index, [...(rounds.get(m.round_index) ?? []), m]));
-  let carry: string[] = [];
-  const roundKeys = [...rounds.keys()].sort((a, b) => a - b);
-  let lbRound = 1;
-  for (const key of roundKeys) {
-    const losers = (rounds.get(key) ?? []).map((m) => `Loser M${m.match_no}`);
-    const pool = [...carry, ...losers];
-    carry = [];
-    for (let i = 0; i < pool.length; i += 2) {
-      if (!pool[i + 1]) {
-        carry.push(pool[i]!);
-        continue;
-      }
-      const id = no++;
-      out.push(mk(id, "losers", `Losers Round ${lbRound}`, 100 + lbRound, pool[i]!, pool[i + 1]!));
-      carry.push(`Winner M${id}`);
-    }
-    lbRound++;
-  }
-  const grandFinalOpponent = carry[0] ?? "Losers Bracket Winner";
-  const wbFinal = winners[winners.length - 1]!;
-  out.push(
-    mk(no++, "final", "Grand Final", 200, `Winner M${wbFinal.match_no}`, grandFinalOpponent),
-  );
-  return out;
-}
 
 /**
  * Knockout stage after group play, following the reference format document.
