@@ -461,10 +461,5 @@ export function StandingsTab({
       <TieBreakProcedures tournament={tournament} />
     </div>
   );
-    <div className="space-y-4">
-      <StandingsTable teams={teams} matches={matches} tournament={tournament} />
-      <StandingsLegend tournament={tournament} />
-      <TieBreakProcedures tournament={tournament} />
-    </div>
-  );
+}
 }
