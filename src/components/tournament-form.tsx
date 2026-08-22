@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -393,6 +393,18 @@ export function TournamentForm({
   };
 
   const isLeague = values.format === "league";
+  const isGroupKnockout = values.format === "group_knockout";
+  const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
+  const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
+  const knockoutTeams = isGroupKnockout ? values.group_count * values.qualifiers_per_group : 0;
+
+  const knockoutRoundLabel = (size: number) => {
+    if (size === 2) return "Final";
+    if (size === 4) return "Semi-finals → Final";
+    if (size === 8) return "Quarter-finals → Semi-finals → Final";
+    if (size === 16) return "Round of 16 → Quarter-finals → Semi-finals → Final";
+    return `${size}-team bracket`;
+  };
   const isGroupKnockout = values.format === "group_knockout";
   const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
   const isUnevenGroups = teamsPerGroup > 0 && !Number.isInteger(teamsPerGroup);
