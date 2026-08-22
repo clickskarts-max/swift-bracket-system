@@ -155,23 +155,6 @@ function TieBreakProcedures({ tournament }: { tournament: Tournament | null }) {
         resolved top-to-bottom until the tie is broken.
       </p>
 
-      <div className="mt-4 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Classification Points
-        </p>
-        <ul className="list-inside list-disc text-sm text-muted-foreground">
-          <li><span className="font-semibold text-foreground">Win</span>: 2 Points</li>
-          {format === "league" ? (
-            <>
-              <li><span className="font-semibold text-foreground">Loss</span>: 1 Point</li>
-              <li><span className="font-semibold text-foreground">Loss by forfeit</span>: 0 Points</li>
-            </>
-          ) : (
-            <li><span className="font-semibold text-foreground">Loss</span>: 0 Points</li>
-          )}
-        </ul>
-      </div>
-
       {hasGroups ? (
         <div className="mt-3 space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
