@@ -137,7 +137,7 @@ function PublicTournament() {
       <div className="surface-card p-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
           <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {m.round_name || `M${m.match_no ?? "—"}`}
+            {m.match_no ? `M${m.match_no}` : m.round_name || "—"}
           </span>
           {venue && (
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
