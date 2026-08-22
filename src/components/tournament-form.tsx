@@ -529,23 +529,14 @@ export function TournamentForm({
                               {team.originalIdx + 1}
                             </div>
                             
-                            <div className="relative group w-11 h-11">
-                              <div className="h-full w-full rounded-xl bg-muted/50 border border-border/60 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-                                {team.logo_url ? (
-                                  <img src={team.logo_url} alt="" className="h-full w-full object-contain p-1" />
-                                ) : (
-                                  <Users className="h-5 w-5 text-muted-foreground/30" />
-                                )}
-                              </div>
-                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/60 rounded-xl">
-                                <ImageUpload 
-                                  value={team.logo_url}
-                                  onChange={(url) => setTeam(team.originalIdx, { logo_url: url })}
-                                  folder="team-logos"
-                                  className="!gap-0 !p-0"
-                                  rounded="rounded-xl"
-                                />
-                              </div>
+                            <div className="relative group w-11 h-11 bg-background border border-border/60 rounded-xl overflow-hidden">
+                              <ImageUpload 
+                                value={team.logo_url}
+                                onChange={(url) => setTeam(team.originalIdx, { logo_url: url })}
+                                folder="team-logos"
+                                className="!gap-0 !p-0 h-full w-full"
+                                rounded="rounded-xl"
+                              />
                             </div>
 
                             <div className="group/name relative">
