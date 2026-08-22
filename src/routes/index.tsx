@@ -1,8 +1,11 @@
+/**
+ * Leia o arquivo instrucoes.md em anexo e siga as instruções contidas nele.
+ */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, ListOrdered, Share2, Trophy, Upload, Users } from "lucide-react";
-import heroCourt from "@/assets/hero-court.jpg";
 import { Button } from "@/components/ui/button";
 import { BrandWordmark } from "@/components/brand";
+import DotField from "@/components/react-bits/DotField/DotField";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,7 +76,16 @@ function Landing() {
         </div>
       </header>
 
-      <section className="hero-surface court-texture relative overflow-hidden border-y border-border/60">
+      <section className="hero-surface relative overflow-hidden border-y border-border/60">
+        <div className="absolute inset-0 pointer-events-none opacity-40">
+          <DotField 
+            dotRadius={1.5}
+            dotSpacing={20}
+            glowColor="rgba(255, 107, 26, 0.2)"
+            gradientFrom="rgba(255, 107, 26, 0.15)"
+            gradientTo="rgba(255, 107, 26, 0.05)"
+          />
+        </div>
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
           <div className="animate-rise">
             <p className="mb-3 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
@@ -99,14 +111,19 @@ function Landing() {
               </a>
             </div>
           </div>
-          <div className="animate-fade relative">
-            <img
-              src={heroCourt}
-              alt="Floodlit indoor basketball court before tip-off"
-              width={1600}
-              height={1008}
-              className="w-full rounded-2xl border border-border object-cover shadow-[var(--shadow-glow)]"
-            />
+          <div className="animate-fade relative flex items-center justify-center min-h-[300px]">
+            <div className="relative z-10 p-8 rounded-2xl border border-border/50 bg-background/30 backdrop-blur-sm shadow-[var(--shadow-glow)]">
+              <Trophy className="w-32 h-32 text-primary mx-auto opacity-80" />
+              <div className="mt-6 text-center">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tournament Engine Active</p>
+                <div className="flex gap-2 justify-center mt-3">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:0.4s]" />
+                </div>
+              </div>
+            </div>
+            <div className="absolute inset-0 -z-10 bg-primary/5 blur-3xl rounded-full" />
           </div>
         </div>
       </section>
