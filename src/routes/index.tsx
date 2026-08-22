@@ -1,3 +1,6 @@
+/**
+ * Leia o arquivo instrucoes.md em anexo e siga as instruções contidas nele.
+ */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, ListOrdered, Share2, Trophy, Upload, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
