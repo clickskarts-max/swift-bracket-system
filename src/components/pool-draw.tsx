@@ -47,12 +47,31 @@ export function PoolDraw({
   onApply 
 }: PoolDrawProps) {
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isAllocating, setIsAllocating] = useState(false);
+  const [capacities, setCapacities] = useState<Record<string, number>>({});
   const [drawnTeams, setDrawnTeams] = useState<TeamValue[]>([]);
   const [remainingTeams, setRemainingTeams] = useState<TeamValue[]>([]);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
   const [lastDrawn, setLastDrawn] = useState<{ team: TeamValue, group: string } | null>(null);
   const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
+
+  const determineCapacities = useCallback(() => {
+    setIsAllocating(true);
+    // Determine locked assignments to respect them during allocation
+    const lockedCounts: Record<string, number> = {};
+    initialTeams.forEach(t => {
+      if (t.group_label) lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
+    });
+
+    const newCapacities = calculateGroupCapacities(teamCount, groupCount, lockedCounts);
+    
+    // Quick delay for effect
+    setTimeout(() => {
+      if (newCapacities) setCapacities(newCapacities);
+      setIsAllocating(false);
+    }, 1500);
+  }, [initialTeams, teamCount, groupCount]);
 
   // Initialize: Locked teams (those already assigned) are excluded from the wheel
   useEffect(() => {
