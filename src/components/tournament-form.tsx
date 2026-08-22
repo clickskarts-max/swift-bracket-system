@@ -378,8 +378,6 @@ export function TournamentForm({
     }
 
     setStep((s) => s + 1);
-
-    setStep((s) => s + 1);
     window.scrollTo(0, 0);
   };
 
