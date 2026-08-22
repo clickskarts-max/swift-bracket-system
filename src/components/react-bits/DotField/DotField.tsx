@@ -102,7 +102,7 @@ const DotField = memo(({
       const rows = Math.floor(h / step);
       const padX = (w % step) / 2;
       const padY = (h % step) / 2;
-      const dots = new Array(rows * cols);
+      const dots: Dot[] = new Array(rows * cols);
       let idx = 0;
 
       for (let row = 0; row < rows; row++) {
@@ -158,77 +158,80 @@ const DotField = memo(({
         glowEl.style.opacity = String(glowOpacity.current);
       }
 
-      ctx.clearRect(0, 0, w, h);
+      if (ctx) {
+        ctx.clearRect(0, 0, w, h);
 
-      const grad = ctx.createLinearGradient(0, 0, w, h);
-      grad.addColorStop(0, p.gradientFrom);
-      grad.addColorStop(1, p.gradientTo);
-      ctx.fillStyle = grad;
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, p.gradientFrom);
+        grad.addColorStop(1, p.gradientTo);
+        ctx.fillStyle = grad;
 
-      const cr = p.cursorRadius;
-      const crSq = cr * cr;
-      const rad = p.dotRadius / 2;
-      const isBulge = p.bulgeOnly;
+        const cr = p.cursorRadius;
+        const crSq = cr * cr;
+        const rad = p.dotRadius / 2;
+        const isBulge = p.bulgeOnly;
 
-      ctx.beginPath();
+        ctx.beginPath();
 
-      for (let i = 0; i < len; i++) {
-        const d = dots[i];
-        const dx = m.x - d.ax;
-        const dy = m.y - d.ay;
-        const distSq = dx * dx + dy * dy;
+        for (let i = 0; i < len; i++) {
+          const d = dots[i];
+          if (!d) continue;
+          const dx = m.x - d.ax;
+          const dy = m.y - d.ay;
+          const distSq = dx * dx + dy * dy;
 
-        if (distSq < crSq && eng > 0.01) {
-          const dist = Math.sqrt(distSq);
-          if (isBulge) {
-            const t = 1 - dist / cr;
-            const push = t * t * p.bulgeStrength * eng;
-            const angle = Math.atan2(dy, dx);
-            d.sx += (d.ax - Math.cos(angle) * push - d.sx) * 0.15;
-            d.sy += (d.ay - Math.sin(angle) * push - d.sy) * 0.15;
-          } else {
-            const angle = Math.atan2(dy, dx);
-            const move = (500 / dist) * (m.speed * p.cursorForce);
-            d.vx += Math.cos(angle) * -move;
-            d.vy += Math.sin(angle) * -move;
+          if (distSq < crSq && eng > 0.01) {
+            const dist = Math.sqrt(distSq);
+            if (isBulge) {
+              const tDist = 1 - dist / cr;
+              const push = tDist * tDist * p.bulgeStrength * eng;
+              const angle = Math.atan2(dy, dx);
+              d.sx += (d.ax - Math.cos(angle) * push - d.sx) * 0.15;
+              d.sy += (d.ay - Math.sin(angle) * push - d.sy) * 0.15;
+            } else {
+              const angle = Math.atan2(dy, dx);
+              const move = (500 / dist) * (m.speed * p.cursorForce);
+              d.vx += Math.cos(angle) * -move;
+              d.vy += Math.sin(angle) * -move;
+            }
+          } else if (isBulge) {
+            d.sx += (d.ax - d.sx) * 0.1;
+            d.sy += (d.ay - d.sy) * 0.1;
           }
-        } else if (isBulge) {
-          d.sx += (d.ax - d.sx) * 0.1;
-          d.sy += (d.ay - d.sy) * 0.1;
-        }
 
-        if (!isBulge) {
-          d.vx *= 0.9;
-          d.vy *= 0.9;
-          d.x = d.ax + d.vx;
-          d.y = d.ay + d.vy;
-          d.sx += (d.x - d.sx) * 0.1;
-          d.sy += (d.y - d.sy) * 0.1;
-        }
+          if (!isBulge) {
+            d.vx *= 0.9;
+            d.vy *= 0.9;
+            d.x = d.ax + d.vx;
+            d.y = d.ay + d.vy;
+            d.sx += (d.x - d.sx) * 0.1;
+            d.sy += (d.y - d.sy) * 0.1;
+          }
 
-        let drawX = d.sx;
-        let drawY = d.sy;
-        if (p.waveAmplitude > 0) {
-          drawY += Math.sin(d.ax * 0.03 + t) * p.waveAmplitude;
-          drawX += Math.cos(d.ay * 0.03 + t * 0.7) * p.waveAmplitude * 0.5;
-        }
+          let drawX = d.sx;
+          let drawY = d.sy;
+          if (p.waveAmplitude > 0) {
+            drawY += Math.sin(d.ax * 0.03 + t) * p.waveAmplitude;
+            drawX += Math.cos(d.ay * 0.03 + t * 0.7) * p.waveAmplitude * 0.5;
+          }
 
-        if (p.sparkle) {
-          const hash = ((i * 2654435761) ^ (frameCount >> 3)) >>> 0;
-          if ((hash % 100) < 3) {
-            ctx.moveTo(drawX + rad * 1.8, drawY);
-            ctx.arc(drawX, drawY, rad * 1.8, 0, TWO_PI);
+          if (p.sparkle) {
+            const hash = ((i * 2654435761) ^ (frameCount >> 3)) >>> 0;
+            if ((hash % 100) < 3) {
+              ctx.moveTo(drawX + rad * 1.8, drawY);
+              ctx.arc(drawX, drawY, rad * 1.8, 0, TWO_PI);
+            } else {
+              ctx.moveTo(drawX + rad, drawY);
+              ctx.arc(drawX, drawY, rad, 0, TWO_PI);
+            }
           } else {
             ctx.moveTo(drawX + rad, drawY);
             ctx.arc(drawX, drawY, rad, 0, TWO_PI);
           }
-        } else {
-          ctx.moveTo(drawX + rad, drawY);
-          ctx.arc(drawX, drawY, rad, 0, TWO_PI);
         }
-      }
 
-      ctx.fill();
+        ctx.fill();
+      }
 
       rafRef.current = requestAnimationFrame(tick);
     }
