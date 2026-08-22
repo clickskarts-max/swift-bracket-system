@@ -247,28 +247,24 @@ export function groupKnockout(
 
     if (g === 4) {
       const [a, b, c, d] = groupLabels;
-      // Exact mapping from spec:
-      // Quarter-final 1: A1 vs C2
+      // Quarter-finals
       const m1 = no++;
-      out.push(mk(m1, "knockout", "Quarterfinal", 1, W(a!, 1), W(c!, 2)));
-      // Quarter-final 2: C1 vs A2
+      out.push(mk(m1, "knockout", "Quarterfinal", 1, W(a!, 1), W(b!, 2))); // QF 1: A1 vs B2
       const m2 = no++;
-      out.push(mk(m2, "knockout", "Quarterfinal", 1, W(c!, 1), W(a!, 2)));
-      // Quarter-final 3: B1 vs A2 (Spec says A2 again)
+      out.push(mk(m2, "knockout", "Quarterfinal", 1, W(c!, 1), W(d!, 2))); // QF 2: C1 vs D2
       const m3 = no++;
-      out.push(mk(m3, "knockout", "Quarterfinal", 1, W(b!, 1), W(a!, 2)));
-      // Quarter-final 4: D1 vs B2
+      out.push(mk(m3, "knockout", "Quarterfinal", 1, W(b!, 1), W(a!, 2))); // QF 3: B1 vs A2
       const m4 = no++;
-      out.push(mk(m4, "knockout", "Quarterfinal", 1, W(d!, 1), W(b!, 2)));
+      out.push(mk(m4, "knockout", "Quarterfinal", 1, W(d!, 1), W(c!, 2))); // QF 4: D1 vs C2
 
       // Semi-finals
       const m5 = no++;
-      out.push(mk(m5, "knockout", "Semifinal", 2, `Winner M${m1}`, `Winner M${m2}`));
+      out.push(mk(m5, "knockout", "Semifinal", 2, `Winner M${m1}`, `Winner M${m2}`)); // SF1
       const m6 = no++;
-      out.push(mk(m6, "knockout", "Semifinal", 2, `Winner M${m3}`, `Winner M${m4}`));
+      out.push(mk(m6, "knockout", "Semifinal", 2, `Winner M${m3}`, `Winner M${m4}`)); // SF2
 
-      // Final: Winner Match 5 vs Runner Match 6 (Spec terminology)
-      out.push(mk(no++, "final", "Final", 3, `Winner M${m5}`, `Runner M${m6}`));
+      // Final
+      out.push(mk(no++, "final", "Final", 3, `Winner M${m5}`, `Winner M${m6}`));
       return out;
     }
 
