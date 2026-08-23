@@ -2,15 +2,22 @@ import { Trophy, ArrowRight, Layout, Star, Zap, ShieldCheck } from "lucide-react
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { usePublicTeams, useShowcaseTournament } from "@/lib/queries";
+import { MiniStandings } from "./mini-standings";
+import { MiniBracket } from "./mini-bracket";
+
 
 export function LandingFormats() {
+  const { data: tournament } = useShowcaseTournament();
+  const { data: teams = [] } = usePublicTeams(tournament?.id ?? "");
+
   const formats = [
     {
       title: "League",
       id: "01",
       desc: "Run a complete league competition with scheduled fixtures, recorded results and automatically calculated standings.",
       icon: Trophy,
-      visual: "Standings UI",
+      visual: <MiniStandings teams={teams} tournament={tournament} />,
       cta: "Configure League"
     },
     {
@@ -18,10 +25,11 @@ export function LandingFormats() {
       id: "02",
       desc: "Draw teams into groups, complete the group stage, qualify teams using configured rules and continue directly into knockout rounds.",
       icon: Layout,
-      visual: "Bracket UI",
+      visual: <MiniBracket teams={teams} tournament={tournament} />,
       cta: "Configure Format"
     }
   ];
+
 
   return (
     <section id="formats" className="py-24 bg-card border-y border-border/10 overflow-hidden">
@@ -55,12 +63,10 @@ export function LandingFormats() {
                 {f.desc}
               </p>
               
-              <div className="aspect-video bg-muted/5 rounded-xl border border-border/50 mb-8 flex items-center justify-center overflow-hidden">
-                 <div className="flex flex-col items-center gap-2 opacity-20">
-                    <Layout className="h-8 w-8" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">{f.visual}</span>
-                 </div>
+              <div className="aspect-video bg-muted/5 rounded-xl border border-border/50 mb-8 flex items-center justify-center overflow-hidden relative">
+                 {f.visual}
               </div>
+
               
               <Button variant="outline" className="h-10 px-6 text-xs font-bold uppercase tracking-widest rounded-lg w-full" asChild>
                 <Link to="/auth">{f.cta}</Link>
