@@ -42,7 +42,7 @@ export function BrandWordmark({ compact = false }: { compact?: boolean }) {
             />
           </>
         ) : (
-          <span className="font-display text-xl font-black tracking-tight uppercase italic text-primary">
+          <span className="font-display text-xl font-bold tracking-tight uppercase text-primary">
             {displayName}
           </span>
         )}
