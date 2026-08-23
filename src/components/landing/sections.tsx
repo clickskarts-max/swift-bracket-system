@@ -18,7 +18,7 @@ export function LandingWorkflow() {
     <section id="features" className="py-24 bg-background">
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">One Platform. Every Stage of Competition.</h2>
+          <h2 className="text-3xl md:text-[40px] font-extrabold mb-4">One Platform. Every Stage of Competition.</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
             From registration and scheduling to standings and championship progression, Ecluid keeps every stage connected.
           </p>
@@ -47,7 +47,7 @@ export function LandingWorkflow() {
 
         <div className="pt-24 border-t border-border/10">
           <div className="max-w-3xl mb-16">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">A Clear Path From Setup to Final</h2>
+            <h2 className="text-3xl md:text-[40px] font-extrabold mb-4">A Clear Path From Setup to Final</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Every stage of the competition stays connected, so organizers always know what comes next.
             </p>
@@ -92,7 +92,7 @@ export function LandingPoolDraw() {
           </div>
           <div className="w-full md:w-1/2">
              <span className="text-primary font-bold text-[12px] uppercase tracking-widest block mb-4">INTERACTIVE POOL DRAW</span>
-             <h2 className="text-3xl md:text-4xl font-extrabold mb-6">
+             <h2 className="text-3xl md:text-[40px] font-extrabold mb-6">
                Turn the Group Draw Into Part of the Event
              </h2>
              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
@@ -127,7 +127,7 @@ export function LandingWhiteLabel() {
     <section id="white-label" className="py-24 bg-background">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto text-center mb-16">
-           <h2 className="text-3xl md:text-4xl font-extrabold mb-6">
+           <h2 className="text-3xl md:text-[40px] font-extrabold mb-6">
              Your Competition. Your Identity.
            </h2>
            <p className="text-lg text-muted-foreground leading-relaxed">
@@ -160,7 +160,7 @@ export function LandingSecurity() {
     <section id="security" className="py-24 bg-card border-t border-border/10">
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Built for Match Day</h2>
+          <h2 className="text-3xl md:text-[40px] font-extrabold mb-4">Built for Match Day</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
             Fast updates, protected tournament data and responsive interfaces help organizers stay in control when competition is live.
           </p>

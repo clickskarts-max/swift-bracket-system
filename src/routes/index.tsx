@@ -59,7 +59,7 @@ function Index() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-3xl md:text-5xl font-extrabold mb-6"
+                className="text-3xl md:text-[56px] font-extrabold mb-6"
               >
                 Your Next Tournament Starts Here.
               </motion.h2>

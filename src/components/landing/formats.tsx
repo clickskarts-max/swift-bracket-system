@@ -27,7 +27,7 @@ export function LandingFormats() {
     <section id="formats" className="py-24 bg-card border-y border-border/10 overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Built Around the Formats You Run</h2>
+          <h2 className="text-3xl md:text-[40px] font-extrabold mb-4">Built Around the Formats You Run</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
             Choose the competition structure, then manage the tournament from setup through the final result.
           </p>
