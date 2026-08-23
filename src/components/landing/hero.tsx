@@ -104,7 +104,7 @@ export function LandingHero() {
         >
           {/* Section Copy for Preview */}
           <div className="text-center mb-12">
-            <span className="text-primary font-bold text-[10px] uppercase tracking-[0.2em] block mb-3">The Platform</span>
+            <span className="text-primary font-bold text-[10px] uppercase tracking-[0.2em] block mb-3 uppercase">THE PLATFORM</span>
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Your Entire Competition, In One View</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-sm leading-relaxed">
               Fixtures, results, standings, teams, venues and tournament progression stay connected in one organized workspace.
