@@ -1,10 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Trophy, ArrowRight } from "lucide-react";
+import { 
+  Trophy, 
+  ArrowRight, 
+  LayoutGrid, 
+  Users, 
+  CalendarDays, 
+  BarChart3, 
+  MapPin, 
+  Settings,
+  Check
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import DotField from "@/components/react-bits/DotField/DotField";
 import { useBranding } from "@/hooks/use-branding";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 export function LandingHero() {
   const { data: org } = useBranding();
