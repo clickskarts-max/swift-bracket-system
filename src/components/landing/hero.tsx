@@ -413,8 +413,6 @@ export function LandingHero() {
                 </main>
               </div>
             </div>
-              </div>
-            </div>
 
             {/* Floating Interaction Element */}
             <motion.div
