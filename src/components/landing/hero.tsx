@@ -16,6 +16,7 @@ import DotField from "@/components/react-bits/DotField/DotField";
 import { useBranding } from "@/hooks/use-branding";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export function LandingHero() {
   const { data: org } = useBranding();
