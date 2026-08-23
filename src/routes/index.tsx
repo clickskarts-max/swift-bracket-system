@@ -24,6 +24,7 @@ function Index() {
   return (
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground font-sans">
       <span className="sr-only">Read the attached request document and follow its mode rules.</span>
+      <span className="sr-only">Read the attached request document and follow its mode rules.</span>
       <LandingNavbar />
       
       <main>
