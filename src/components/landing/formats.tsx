@@ -2,65 +2,69 @@ import { Trophy, ArrowRight, Layout, Star, Zap, ShieldCheck } from "lucide-react
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 export function LandingFormats() {
   const formats = [
     {
       title: "League",
       id: "01",
-      desc: "Run complete seasonal competitions with automated standings and scheduling.",
+      desc: "Run a complete league competition with scheduled fixtures, recorded results and automatically calculated standings.",
       icon: Trophy,
-      visual: "Standings UI"
+      visual: "Standings UI",
+      cta: "Configure League"
     },
     {
-      title: "League-cum-Knockout",
+      title: "Group Stage + Knockout",
       id: "02",
-      desc: "The tournament standard. Group stage qualifiers advancing to playoff brackets.",
+      desc: "Draw teams into groups, complete the group stage, qualify teams using configured rules and continue directly into knockout rounds.",
       icon: Layout,
-      visual: "Bracket UI"
+      visual: "Bracket UI",
+      cta: "Configure Format"
     }
   ];
 
   return (
-    <section id="formats" className="py-32 bg-card border-y border-border/40 overflow-hidden">
+    <section id="formats" className="py-24 bg-card border-y border-border/10 overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-          <div className="max-w-2xl">
-            <span className="text-primary font-black text-sm uppercase tracking-widest block mb-4 italic">Competition Formats</span>
-            <h2 className="text-5xl md:text-8xl font-black font-display uppercase italic leading-[0.85]">
-              Built for <br /><span className="text-primary not-italic">The Professional</span>
-            </h2>
-          </div>
-          <div className="pb-4">
-             <Button variant="outline" className="h-14 px-8 text-sm font-bold uppercase tracking-widest rounded-xl" asChild>
-                <Link to="/auth">View All Formats <ArrowRight className="ml-2 h-4 w-4" /></Link>
-             </Button>
-          </div>
+        <div className="max-w-3xl mb-16">
+          <h2 className="text-3xl md:text-[40px] font-extrabold mb-4">Built Around the Formats You Run</h2>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Choose the competition structure, then manage the tournament from setup through the final result.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 gap-8">
           {formats.map((f, i) => (
             <motion.div 
               key={f.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="group relative"
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              className="group p-8 rounded-2xl border border-border/50 bg-background flex flex-col h-full hover:border-primary/20 transition-colors"
             >
-              <div className="mb-8 flex items-baseline gap-4">
-                <span className="text-4xl font-display font-black italic opacity-20 group-hover:opacity-100 group-hover:text-primary transition-all">{f.id}</span>
-                <h3 className="text-4xl font-bold uppercase italic tracking-tighter">{f.title}</h3>
+              <div className="mb-6 flex items-center justify-between">
+                <div className="h-12 w-12 rounded-lg bg-primary/5 flex items-center justify-center">
+                  <f.icon className="h-6 w-6 text-primary" />
+                </div>
+                <span className="text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">{f.id}</span>
               </div>
               
-              <div className="aspect-[16/9] bg-background/50 border border-border/50 rounded-[2.5rem] mb-8 overflow-hidden flex items-center justify-center group-hover:border-primary/30 transition-colors shadow-2xl">
-                 <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground opacity-30 italic">{f.visual} Visual Artwork</span>
-              </div>
-              
-              <p className="text-lg text-muted-foreground font-medium max-w-sm mb-6 leading-relaxed">
+              <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
+              <p className="text-base text-muted-foreground mb-8 leading-relaxed flex-grow">
                 {f.desc}
               </p>
+              
+              <div className="aspect-video bg-muted/5 rounded-xl border border-border/50 mb-8 flex items-center justify-center overflow-hidden">
+                 <div className="flex flex-col items-center gap-2 opacity-20">
+                    <Layout className="h-8 w-8" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{f.visual}</span>
+                 </div>
+              </div>
+              
+              <Button variant="outline" className="h-10 px-6 text-xs font-bold uppercase tracking-widest rounded-lg w-full" asChild>
+                <Link to="/auth">{f.cta}</Link>
+              </Button>
             </motion.div>
           ))}
         </div>

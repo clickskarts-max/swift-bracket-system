@@ -22,8 +22,9 @@ export function LandingNavbar() {
   }, []);
 
   const navLinks = [
-    { name: "Product", href: "#features" },
+    { name: "Platform", href: "#features" },
     { name: "Formats", href: "#formats" },
+    { name: "Pool Draw", href: "#pool-draw" },
     { name: "Branding", href: "#white-label" },
   ];
 
@@ -48,9 +49,9 @@ export function LandingNavbar() {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 py-8",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-6",
         isScrolled 
-          ? "bg-background/80 backdrop-blur-2xl border-b border-border/20 py-4" 
+          ? "bg-background/80 backdrop-blur-md border-b border-border/10 py-3" 
           : "bg-transparent"
       )}
     >
@@ -66,7 +67,7 @@ export function LandingNavbar() {
               key={link.name}
               href={link.href}
               onClick={(e) => scrollToSection(e, link.href)}
-              className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground hover:text-primary transition-colors italic"
+              className="text-[12px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
             >
               {link.name}
             </a>
@@ -75,16 +76,16 @@ export function LandingNavbar() {
 
         <div className="hidden md:flex items-center gap-6">
           {session ? (
-            <Button variant="outline" className="h-11 px-6 font-bold uppercase tracking-widest rounded-xl border-border/40" asChild>
+            <Button variant="outline" className="h-10 px-5 font-semibold uppercase tracking-widest rounded-lg border-border/40" asChild>
               <Link to="/dashboard">Dashboard</Link>
             </Button>
           ) : (
             <>
-              <Button variant="ghost" className="h-11 px-6 font-bold uppercase tracking-widest rounded-xl" asChild>
-                <Link to="/auth">Login</Link>
+              <Button variant="ghost" className="h-10 px-5 font-semibold uppercase tracking-widest rounded-lg" asChild>
+                <Link to="/auth">Sign In</Link>
               </Button>
-              <Button className="h-11 px-8 font-bold uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20" asChild>
-                <Link to="/auth">Create</Link>
+              <Button className="h-10 px-6 font-semibold uppercase tracking-widest rounded-lg" asChild>
+                <Link to="/auth">Create Tournament</Link>
               </Button>
             </>
           )}
@@ -108,7 +109,7 @@ export function LandingNavbar() {
                 key={link.name}
                 href={link.href}
                 onClick={(e) => scrollToSection(e, link.href)}
-                className="text-2xl font-black uppercase tracking-widest text-foreground italic border-b border-border/10 pb-4"
+                className="text-xl font-bold uppercase tracking-widest text-foreground border-b border-border/10 pb-4"
               >
                 {link.name}
               </a>

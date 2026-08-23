@@ -30,16 +30,16 @@ function Index() {
         <LandingHero />
         
         {/* Capability Ticker */}
-        <div className="bg-primary py-6 overflow-hidden border-y border-white/10">
+        <div className="bg-primary/5 py-4 overflow-hidden border-y border-border/10">
           <div className="flex whitespace-nowrap animate-marquee">
             {[...Array(10)].map((_, i) => (
               <div key={i} className="flex items-center gap-12 mx-6">
-                <span className="text-primary-foreground font-black text-xs uppercase tracking-[0.4em] italic">League Management</span>
-                <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground/30" />
-                <span className="text-primary-foreground font-black text-xs uppercase tracking-[0.4em] italic">Pool Draw</span>
-                <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground/30" />
-                <span className="text-primary-foreground font-black text-xs uppercase tracking-[0.4em] italic">Live Standings</span>
-                <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground/30" />
+                <span className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">League Management</span>
+                <div className="h-1 w-1 rounded-full bg-primary/20" />
+                <span className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">Pool Draw</span>
+                <div className="h-1 w-1 rounded-full bg-primary/20" />
+                <span className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">Live Standings</span>
+                <div className="h-1 w-1 rounded-full bg-primary/20" />
               </div>
             ))}
           </div>
@@ -51,28 +51,34 @@ function Index() {
         <LandingWhiteLabel />
         <LandingSecurity />
 
-        {/* Final Editorial CTA */}
-        <section className="py-48 relative overflow-hidden bg-background">
+        {/* Final CTA */}
+        <section className="py-32 relative overflow-hidden bg-background">
           <div className="container mx-auto px-6 relative z-10">
-            <div className="max-w-6xl mx-auto text-center">
+            <div className="max-w-4xl mx-auto p-12 rounded-3xl border border-border/50 bg-card shadow-2xl text-center">
               <motion.h2 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="text-6xl md:text-[140px] font-black font-display uppercase italic leading-[0.8] mb-16 tracking-tighter"
+                className="text-3xl md:text-[56px] font-extrabold mb-6"
               >
-                Your Next <br />
-                <span className="text-primary not-italic">Tournament</span> <br />
-                Starts Here
+                Your Next Tournament Starts Here.
               </motion.h2>
               
-              <Button size="lg" className="h-20 px-16 text-xl font-bold rounded-[1.5rem] shadow-[0_32px_64px_-16px_rgba(255,107,26,0.4)] group" asChild>
-                <Link to="/auth">
-                  Create Tournament
-                  <ArrowRight className="ml-4 h-6 w-6 transition-transform group-hover:translate-x-2" />
-                </Link>
-              </Button>
+              <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+                Bring teams, fixtures, standings, venues and knockout progression into one organized competition system.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button size="lg" className="h-12 px-10 text-base font-semibold rounded-lg shadow-lg shadow-primary/10 group" asChild>
+                  <Link to="/auth">
+                    Create Your Tournament
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" className="h-12 px-8 text-base font-semibold rounded-lg" asChild>
+                  <Link to="/auth">Explore Features</Link>
+                </Button>
+              </div>
             </div>
           </div>
           
@@ -81,36 +87,36 @@ function Index() {
         </section>
       </main>
 
-      <footer className="py-20 border-t border-border/40 bg-card">
+      <footer className="py-16 border-t border-border/10 bg-card">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="md:col-span-2">
-              <h3 className="font-display text-3xl font-black tracking-tighter uppercase italic text-primary mb-6">
+              <h3 className="font-display text-xl font-bold uppercase text-primary mb-4">
                 {org?.brand_name || org?.name || "Ecluid Basketball"}
               </h3>
-              <p className="text-lg text-muted-foreground font-medium max-w-sm leading-relaxed">
-                {org?.footer_text || `The professional standard for basketball tournament management and live presentation.`}
+              <p className="text-sm text-muted-foreground font-medium max-w-sm leading-relaxed">
+                {org?.footer_text || `Competition management software built for modern basketball organizers.`}
               </p>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">Platform</span>
-              <a href="#features" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Features</a>
-              <a href="#formats" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Formats</a>
-              <a href="#pool-draw" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Pool Draw</a>
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Platform</span>
+              <a href="#features" className="text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors">Features</a>
+              <a href="#formats" className="text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors">Formats</a>
+              <a href="#pool-draw" className="text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors">Pool Draw</a>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">Legal</span>
-              <a href="#" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Security</a>
-              <a href="#" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Privacy</a>
-              <a href="#" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Terms</a>
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Product</span>
+              <a href="#white-label" className="text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors">Branding</a>
+              <a href="#security" className="text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors">Security</a>
+              <Link to="/auth" className="text-xs font-semibold uppercase tracking-widest hover:text-primary transition-colors">Sign In</Link>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-border/20 gap-8">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
-              © {new Date().getFullYear()} All Rights Reserved
+          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border/10 gap-6">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/30">
+              © {new Date().getFullYear()} Ecluid Basketball. All rights reserved.
             </div>
             {org?.powered_by_enabled !== false && org && (
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Powered by Ecluid Basketball</span>

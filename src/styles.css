@@ -6,8 +6,8 @@
 @custom-variant light (&:is(.light *));
 
 @theme inline {
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   
   /* Transitions.dev Motion Tokens */
   --duration-fast: 150ms;
@@ -244,7 +244,6 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
   }
 
   @media (prefers-reduced-motion: reduce) {
