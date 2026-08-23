@@ -83,22 +83,239 @@ export function LandingHero() {
           </motion.p>
         </div>
 
-        {/* Product UI Composition */}
+        {/* Platform Interface Preview */}
         <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-20 max-w-5xl mx-auto relative"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-24 max-w-6xl mx-auto relative group"
         >
-          <div className="rounded-2xl bg-card border border-border/50 p-2 shadow-2xl">
-             <div className="aspect-[16/8] bg-muted/10 rounded-xl overflow-hidden border border-border/50 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4 opacity-40">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <Trophy className="h-6 w-6 text-primary" />
+          {/* Section Copy for Preview */}
+          <div className="text-center mb-12">
+            <span className="text-primary font-bold text-[10px] uppercase tracking-[0.2em] block mb-3">The Platform</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Your Entire Competition, In One View</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm leading-relaxed">
+              Fixtures, results, standings, teams, venues and tournament progression stay connected in one organized workspace.
+            </p>
+          </div>
+
+          {/* Browser Frame */}
+          <div className="rounded-2xl bg-card border border-border/50 p-1.5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] relative overflow-hidden ring-1 ring-white/5">
+            <div className="bg-background rounded-xl overflow-hidden border border-border/50 flex flex-col h-[640px]">
+              {/* App Header/Toolbar */}
+              <div className="h-12 border-b border-border/50 bg-secondary/30 flex items-center justify-between px-4 shrink-0">
+                <div className="flex items-center gap-6">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-border/50" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-border/50" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-border/50" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Platform Interface Preview</span>
+                  <div className="h-4 w-px bg-border/30" />
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                    <Trophy className="h-3 w-3 text-primary" />
+                    <span>U-19 Girls Basketball League 2083</span>
+                    <span className="px-1.5 py-0.5 rounded bg-success/10 text-success text-[9px] border border-success/20">Active</span>
+                  </div>
                 </div>
-             </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-[10px] font-medium text-muted-foreground hidden sm:block">12 Teams · 3 Venues · League</div>
+                  <Button size="sm" className="h-7 text-[10px] font-bold uppercase tracking-wider px-3 rounded-md">Manage</Button>
+                </div>
+              </div>
+
+              <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar Mock */}
+                <aside className="w-48 border-r border-border/50 bg-secondary/10 hidden md:flex flex-col p-3 shrink-0">
+                  <div className="space-y-6">
+                    <div>
+                      <div className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-3 px-2">Tournament</div>
+                      <div className="space-y-1">
+                        {[
+                          { label: 'Overview', icon: LayoutGrid },
+                          { label: 'Teams', icon: Users },
+                          { label: 'Fixtures', icon: CalendarDays },
+                          { label: 'Standings', icon: BarChart3 },
+                          { label: 'Venues', icon: MapPin }
+                        ].map((item) => (
+                          <div key={item.label} className={cn("px-2 py-1.5 rounded-md text-[11px] font-semibold flex items-center gap-2 transition-colors", item.label === 'Overview' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground cursor-pointer")}>
+                            <item.icon className="h-3.5 w-3.5" />
+                            {item.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mb-3 px-2">Competition</div>
+                      <div className="space-y-1">
+                        {['Group Stage', 'Knockout', 'Pool Draw'].map((item) => (
+                          <div key={item} className="px-2 py-1.5 rounded-md text-[11px] font-semibold text-muted-foreground flex items-center gap-2 hover:bg-secondary/50 hover:text-foreground cursor-pointer">
+                            <ArrowRight className="h-3 w-3 opacity-40" />
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 border-t border-border/20">
+                    <div className="px-2 py-1.5 rounded-md text-[11px] font-semibold text-muted-foreground flex items-center gap-2 hover:bg-secondary/50 hover:text-foreground cursor-pointer">
+                      <Settings className="h-3.5 w-3.5" />
+                      Settings
+                    </div>
+                  </div>
+                </aside>
+
+                {/* Content Area Mock */}
+                <main className="flex-1 overflow-y-auto bg-card/5 p-6">
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    {/* Header */}
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xl font-extrabold tracking-tight">Competition Overview</h3>
+                      <p className="text-xs text-muted-foreground font-medium">Track fixtures, standings and tournament progress from one place.</p>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {[
+                        { label: 'Teams', value: '12' },
+                        { label: 'Fixtures', value: '30' },
+                        { label: 'Completed', value: '18' },
+                        { label: 'Remaining', value: '12' },
+                      ].map((stat) => (
+                        <div key={stat.label} className="bg-background border border-border/50 rounded-xl p-3 shadow-sm ring-1 ring-white/5">
+                          <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{stat.label}</div>
+                          <div className="text-xl font-black text-foreground">{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid lg:grid-cols-[1fr_260px] gap-6">
+                      <div className="space-y-6">
+                        {/* Fixtures Mock */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Upcoming Fixtures</h4>
+                            <span className="text-[10px] font-bold text-primary cursor-pointer hover:underline">View Fixtures →</span>
+                          </div>
+                          {[
+                            { a: 'Falcons', b: 'Warriors', time: 'Today · 4:00 PM', venue: 'National Sports Council Court' },
+                            { a: 'Titans', b: 'Panthers', time: 'Today · 6:00 PM', venue: 'Court 2' },
+                            { a: 'Lions', b: 'Hawks', time: 'Tomorrow · 2:00 PM', venue: 'Court 1' },
+                          ].map((f, i) => (
+                            <div key={i} className="bg-background border border-border/50 rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm ring-1 ring-white/5">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className="w-6 h-6 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px] font-bold shrink-0">{f.a[0]}</div>
+                                  <span className="text-xs font-bold truncate">{f.a}</span>
+                                </div>
+                                <span className="text-[9px] font-black text-muted-foreground/30 italic shrink-0">VS</span>
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className="w-6 h-6 rounded bg-secondary/20 border border-border/50 flex items-center justify-center text-[8px] font-bold shrink-0">{f.b[0]}</div>
+                                  <span className="text-xs font-bold truncate">{f.b}</span>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <div className="text-[10px] font-bold text-foreground">{f.time}</div>
+                                <div className="text-[9px] text-muted-foreground font-medium">{f.venue}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Tournament Progress */}
+                        <div className="bg-background border border-border/50 rounded-xl p-4 shadow-sm ring-1 ring-white/5">
+                           <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Tournament Progress</h4>
+                              <span className="text-xs font-black text-primary">60%</span>
+                           </div>
+                           <div className="h-1.5 w-full bg-secondary/30 rounded-full overflow-hidden mb-2">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                whileInView={{ width: '60%' }}
+                                transition={{ duration: 1, delay: 1 }}
+                                className="h-full bg-primary" 
+                              />
+                           </div>
+                           <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">18 of 30 fixtures completed</div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Standing Preview Mock */}
+                        <div className="space-y-3">
+                           <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">League Standings</h4>
+                           <div className="bg-background border border-border/50 rounded-xl overflow-hidden shadow-sm ring-1 ring-white/5">
+                              <table className="w-full text-[10px]">
+                                 <thead>
+                                    <tr className="border-b border-border/50 bg-secondary/10">
+                                       <th className="text-left p-2 font-black text-muted-foreground/60">POS</th>
+                                       <th className="text-left p-2 font-black text-muted-foreground/60">TEAM</th>
+                                       <th className="text-right p-2 font-black text-muted-foreground/60">PTS</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody className="divide-y divide-border/30">
+                                    {[
+                                       { pos: 1, team: 'Falcons', pts: 11 },
+                                       { pos: 2, team: 'Warriors', pts: 10 },
+                                       { pos: 3, team: 'Titans', pts: 10 },
+                                       { pos: 4, team: 'Panthers', pts: 9 },
+                                    ].map((row) => (
+                                       <tr key={row.pos} className="hover:bg-secondary/20 transition-colors">
+                                          <td className="p-2 font-black text-primary">{row.pos}</td>
+                                          <td className="p-2 font-bold">{row.team}</td>
+                                          <td className="p-2 text-right font-black">{row.pts}</td>
+                                       </tr>
+                                    ))}
+                                 </tbody>
+                              </table>
+                              <div className="p-2 border-t border-border/50 bg-secondary/5 text-center">
+                                 <span className="text-[9px] font-black uppercase tracking-wider text-primary cursor-pointer hover:underline">Full Standings →</span>
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Latest Result */}
+                        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                           <div className="absolute top-0 right-0 p-2">
+                              <span className="text-[8px] font-black uppercase tracking-tighter text-primary/40">Latest Result</span>
+                           </div>
+                           <div className="text-center space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                 <span className="text-[10px] font-bold">Falcons</span>
+                                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 rounded border border-primary/20 font-black text-sm tabular-nums">
+                                    <span className="text-success">78</span>
+                                    <span className="text-muted-foreground/40 text-xs">-</span>
+                                    <span className="text-destructive">71</span>
+                                 </div>
+                                 <span className="text-[10px] font-bold">Warriors</span>
+                              </div>
+                              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Final Score</div>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              </div>
+            </div>
+
+            {/* Floating Interaction Element */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.5, duration: 0.5 }}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground p-3 rounded-xl shadow-2xl hidden xl:block ring-1 ring-white/20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Check className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">Match Updated</div>
+                  <div className="text-[11px] font-bold opacity-90">Falcons 78–71 Warriors</div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
       </div>
