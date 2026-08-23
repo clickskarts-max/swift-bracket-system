@@ -13,7 +13,7 @@ export function LandingHero() {
   const primaryColor = org?.primary_color || "#ff6b1a";
 
   return (
-    <section className="relative min-h-[95vh] flex items-center pt-20 overflow-hidden">
+    <section className="relative min-h-[95vh] flex items-center pt-24 pb-12 overflow-hidden">
       {/* DotField Background */}
       <div className="absolute inset-0 z-0 opacity-40">
         <DotField
@@ -39,9 +39,9 @@ export function LandingHero() {
             Basketball Tournament Management
           </Badge>
           
-          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tight leading-[1.1] mb-6 uppercase italic">
+          <h1 className="font-display text-5xl md:text-8xl font-black tracking-tight leading-[1] mb-8 uppercase italic">
             Run Basketball <br />
-            <span className="text-primary not-italic">Tournaments</span> <br />
+            <span className="text-primary not-italic inline-block py-1">Tournaments</span> <br />
             Without the Chaos
           </h1>
           
@@ -51,13 +51,13 @@ export function LandingHero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="h-14 px-10 text-lg font-bold rounded-2xl shadow-2xl shadow-primary/20 group" asChild>
+            <Button size="lg" className="h-16 px-12 text-lg font-bold rounded-2xl shadow-2xl shadow-primary/20 group relative overflow-hidden" asChild>
               <Link to={session ? "/dashboard" : "/auth"}>
                 {session ? "Create Tournament" : "Get Started"}
                 <Trophy className="ml-2 h-5 w-5 transition-transform group-hover:scale-110 group-hover:rotate-12" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold rounded-2xl bg-background/50 backdrop-blur-sm border-border/40 hover:bg-muted/50 transition-all" asChild>
+            <Button size="lg" variant="outline" className="h-16 px-12 text-lg font-bold rounded-2xl bg-background/50 backdrop-blur-sm border-border/40 hover:bg-muted/50 transition-all shadow-lg" asChild>
               <a href="#features">
                 Explore Features
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -84,7 +84,7 @@ export function LandingHero() {
           transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="relative hidden lg:block"
         >
-          <div className="relative z-10 bg-background/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-6 aspect-[4/3] flex flex-col gap-6 transform lg:rotate-2">
+          <div className="relative z-10 bg-background/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden p-8 aspect-[4/3.2] flex flex-col gap-8 transform lg:rotate-1">
             {/* Mock UI: Standings Card */}
             <div className="bg-background/80 border border-border/50 rounded-2xl p-4 shadow-lg animate-in slide-in-from-right-8 duration-700 ease-transitions">
               <div className="flex items-center justify-between mb-3">

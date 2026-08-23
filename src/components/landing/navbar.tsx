@@ -52,7 +52,7 @@ export function LandingNavbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
         isScrolled 
-          ? "bg-background/80 backdrop-blur-lg border-b border-border/40 py-3" 
+          ? "bg-background/85 backdrop-blur-xl border-b border-border/40 py-3 shadow-sm" 
           : "bg-transparent"
       )}
     >
