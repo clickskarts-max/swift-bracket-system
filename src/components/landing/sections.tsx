@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { Check, ShieldCheck, Globe, Zap, Users, Smartphone, Trophy, Layout, Settings, FileText, BarChart3, MapPin, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePublicTeams, useShowcaseTournament } from "@/lib/queries";
+import { MiniPoolDraw } from "./mini-pool-draw";
+
 
 export function LandingWorkflow() {
   const steps = [
@@ -76,20 +79,19 @@ export function LandingWorkflow() {
 }
 
 export function LandingPoolDraw() {
+  const { data: tournament } = useShowcaseTournament();
+  const { data: teams = [] } = usePublicTeams(tournament?.id ?? "");
+
   return (
     <section id="pool-draw" className="py-24 bg-card border-y border-border/10">
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row gap-16 items-center">
           <div className="w-full md:w-1/2">
-             <div className="aspect-square max-w-md mx-auto bg-muted/5 rounded-2xl border border-border/50 shadow-sm overflow-hidden flex items-center justify-center relative">
-                <div className="h-48 w-48 rounded-full border-2 border-dashed border-primary/20 animate-spin-slow flex items-center justify-center">
-                   <Zap className="h-12 w-12 text-primary/30" />
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Interactive Draw</span>
-                </div>
+             <div className="aspect-square max-w-md mx-auto bg-muted/5 rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex items-center justify-center relative bg-background/50 backdrop-blur-sm">
+                <MiniPoolDraw teams={teams} tournament={tournament} />
              </div>
           </div>
+
           <div className="w-full md:w-1/2">
              <span className="text-primary font-bold text-[12px] uppercase tracking-widest block mb-4">INTERACTIVE POOL DRAW</span>
              <h2 className="text-3xl md:text-[40px] font-extrabold mb-6">
