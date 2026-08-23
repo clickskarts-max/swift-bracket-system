@@ -44,9 +44,9 @@ export function MiniPoolDraw({ teams, tournament }: { teams: any[]; tournament: 
         particleCount: 50,
         spread: 60,
         origin: { y: 0.7 },
-        colors: ['#ff6b1a', '#ffffff'],
-        scale: 0.8
+        colors: ['#ff6b1a', '#ffffff']
       });
+
     }, 3500);
   }, [isSpinning, wheelTeams, rotation]);
 
@@ -75,6 +75,8 @@ export function MiniPoolDraw({ teams, tournament }: { teams: any[]; tournament: 
       const timer = setTimeout(spin, 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
+
   }, [isVisible, isSpinning, wheelTeams.length, spin]);
 
   const groupLabels = ["A", "B", "C"];
