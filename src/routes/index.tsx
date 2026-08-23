@@ -30,7 +30,7 @@ function Index() {
         <LandingHero />
         
         {/* Capability Strip */}
-        <div className="bg-muted/50 border-y border-border/40 py-8 overflow-hidden">
+        <div className="bg-muted/30 border-y border-border/20 py-10 overflow-hidden">
           <div className="container mx-auto px-6">
             <div className="flex flex-wrap justify-center md:justify-between items-center gap-8 opacity-60">
               {[
@@ -60,13 +60,13 @@ function Index() {
         {/* Final CTA */}
         <section className="py-24 relative overflow-hidden bg-background">
           <div className="container mx-auto px-6 relative z-10">
-            <div className="max-w-4xl mx-auto rounded-[3rem] bg-gradient-to-b from-primary to-primary/80 p-12 md:p-20 text-center text-primary-foreground shadow-2xl shadow-primary/20">
+            <div className="max-w-4xl mx-auto rounded-[4rem] bg-gradient-to-br from-primary to-primary-glow p-12 md:p-24 text-center text-primary-foreground shadow-[0_32px_64px_-16px_rgba(255,107,26,0.3)] relative overflow-hidden">
               <h2 className="text-4xl md:text-6xl font-black font-display uppercase italic mb-8">Ready to Start Your <br />Next Tournament?</h2>
               <p className="text-xl text-primary-foreground/90 mb-12 max-w-2xl mx-auto font-medium">
                 Join organizers globally using Ecluid Basketball to run professional, 
                 high-performance basketball competitions.
               </p>
-              <Button size="lg" variant="secondary" className="h-16 px-12 text-xl font-bold rounded-2xl group shadow-xl" asChild>
+              <Button size="lg" variant="secondary" className="h-16 px-16 text-xl font-bold rounded-[1.25rem] group shadow-2xl hover:-translate-y-1 transition-all" asChild>
                 <Link to="/auth">
                   Get Started for Free
                   <Trophy className="ml-3 h-6 w-6 transition-transform group-hover:scale-110 group-hover:rotate-12" />

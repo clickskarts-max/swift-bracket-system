@@ -94,7 +94,7 @@ export function LandingFeatures() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "group relative p-8 rounded-3xl bg-background border border-border/40 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 ease-transitions",
+                "group relative p-10 rounded-[2rem] bg-card border border-border/30 hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 ease-transitions",
                 feature.size === "large" ? "lg:col-span-2" : ""
               )}
             >

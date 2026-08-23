@@ -113,7 +113,7 @@ export function LandingWhiteLabel() {
   return (
     <section id="white-label" className="py-24 bg-primary text-primary-foreground overflow-hidden">
       <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
-        <div className="relative z-10">
+        <div className="relative z-10 p-12 md:p-20">
           <h2 className="text-4xl md:text-5xl font-black font-display uppercase italic mb-6 leading-tight">
             Your League, <span className="text-background px-2 not-italic">Your Brand</span>
           </h2>
