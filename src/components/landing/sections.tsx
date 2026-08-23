@@ -162,7 +162,10 @@ export function LandingSecurity() {
         <div className="max-w-3xl mb-16">
           <h2 className="text-3xl md:text-[40px] font-extrabold mb-4">Built for Match Day</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Fast updates, protected tournament data and responsive interfaces help organizers stay in control when competition is live.
+            Fixtures, results, standings, teams, venues and tournament progression stay connected in one organized workspace.
+          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed mt-4">
+            Built to give organizers a clear view of what has happened, what is live and what comes next.
           </p>
         </div>
 
