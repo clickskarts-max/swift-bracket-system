@@ -1,5 +1,8 @@
+"use client";
+
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -12,7 +15,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
+      "relative inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
       className,
     )}
     {...props}
@@ -23,16 +26,35 @@ TabsList.displayName = TabsPrimitive.List.displayName;
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, children, ...props }, ref) => {
+  const isActive = props["data-state"] === "active";
+  
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed data-[state=active]:text-foreground z-10",
+        className,
+      )}
+      {...props}
+    >
+      {isActive && (
+        <motion.div
+          layoutId="active-tab"
+          className="absolute inset-0 bg-background rounded-md shadow-sm z-[-1]"
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 35,
+            mass: 1,
+            // Transitions.dev inspired spring
+          }}
+        />
+      )}
+      {children}
+    </TabsPrimitive.Trigger>
+  );
+});
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = React.forwardRef<
