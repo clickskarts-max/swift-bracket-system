@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Check, ShieldCheck, Globe, Zap, Users, Smartphone, Trophy, Layout, Settings, FileText, BarChart3, MapPin, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function LandingWorkflow() {
   const steps = [
