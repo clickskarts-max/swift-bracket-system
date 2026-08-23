@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -27,11 +27,38 @@ const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => {
-  const isActive = props["data-state"] === "active";
+  // Radix UI passes data-state="active" to the trigger
+  const [isActive, setIsActive] = React.useState(false);
   
+  // We use an observer to track the data-state attribute since Radix doesn't expose it via props
+  const localRef = React.useRef<HTMLButtonElement>(null);
+  
+  React.useLayoutEffect(() => {
+    const el = localRef.current;
+    if (!el) return;
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-state') {
+          setIsActive(el.getAttribute('data-state') === 'active');
+        }
+      });
+    });
+    
+    observer.observe(el, { attributes: true });
+    setIsActive(el.getAttribute('data-state') === 'active');
+    
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <TabsPrimitive.Trigger
-      ref={ref}
+      ref={(node) => {
+        // Handle both refs
+        (localRef as any).current = node;
+        if (typeof ref === 'function') ref(node);
+        else if (ref) (ref as any).current = node;
+      }}
       className={cn(
         "relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed data-[state=active]:text-foreground z-10",
         className,
@@ -47,11 +74,10 @@ const TabsTrigger = React.forwardRef<
             stiffness: 500,
             damping: 35,
             mass: 1,
-            // Transitions.dev inspired spring
           }}
         />
       )}
-      {children}
+      <span className="relative z-10">{children}</span>
     </TabsPrimitive.Trigger>
   );
 });
