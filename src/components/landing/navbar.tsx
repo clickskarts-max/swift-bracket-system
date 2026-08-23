@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X, Trophy, LogIn } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandWordmark } from "@/components/brand";
 import { useBranding } from "@/hooks/use-branding";
@@ -22,11 +22,9 @@ export function LandingNavbar() {
   }, []);
 
   const navLinks = [
-    { name: "Features", href: "#features" },
+    { name: "Product", href: "#features" },
     { name: "Formats", href: "#formats" },
-    { name: "Pool Draw", href: "#pool-draw" },
-    { name: "White Label", href: "#white-label" },
-    { name: "Security", href: "#security" },
+    { name: "Branding", href: "#white-label" },
   ];
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -50,9 +48,9 @@ export function LandingNavbar() {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 py-8",
         isScrolled 
-          ? "bg-background/85 backdrop-blur-xl border-b border-border/40 py-3 shadow-sm" 
+          ? "bg-background/80 backdrop-blur-2xl border-b border-border/20 py-4" 
           : "bg-transparent"
       )}
     >
@@ -62,31 +60,31 @@ export function LandingNavbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-12">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               onClick={(e) => scrollToSection(e, link.href)}
-              className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+              className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground hover:text-primary transition-colors italic"
             >
               {link.name}
             </a>
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-6">
           {session ? (
-            <Button variant="outline" className="font-bold uppercase tracking-widest rounded-xl" asChild>
+            <Button variant="outline" className="h-11 px-6 font-bold uppercase tracking-widest rounded-xl border-border/40" asChild>
               <Link to="/dashboard">Dashboard</Link>
             </Button>
           ) : (
             <>
-              <Button variant="ghost" className="font-bold uppercase tracking-widest rounded-xl" asChild>
-                <Link to="/auth">Sign In</Link>
+              <Button variant="ghost" className="h-11 px-6 font-bold uppercase tracking-widest rounded-xl" asChild>
+                <Link to="/auth">Login</Link>
               </Button>
-              <Button className="font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20" asChild>
-                <Link to="/auth">Get Started</Link>
+              <Button className="h-11 px-8 font-bold uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20" asChild>
+                <Link to="/auth">Create</Link>
               </Button>
             </>
           )}
@@ -103,33 +101,22 @@ export function LandingNavbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-background border-b border-border p-6 md:hidden animate-in slide-in-from-top-4 duration-300 ease-transitions">
-          <div className="flex flex-col gap-6">
+        <div className="absolute top-full left-0 right-0 bg-background/95 backdrop-blur-3xl border-b border-border/20 p-8 md:hidden animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex flex-col gap-8">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => scrollToSection(e, link.href)}
-                className="text-lg font-bold uppercase tracking-widest text-foreground border-b border-border/40 pb-2"
+                className="text-2xl font-black uppercase tracking-widest text-foreground italic border-b border-border/10 pb-4"
               >
                 {link.name}
               </a>
             ))}
             <div className="flex flex-col gap-4 pt-4">
-              {session ? (
-                <Button className="w-full font-bold uppercase tracking-widest rounded-xl" asChild>
-                  <Link to="/dashboard">Dashboard</Link>
-                </Button>
-              ) : (
-                <>
-                  <Button variant="outline" className="w-full font-bold uppercase tracking-widest rounded-xl" asChild>
-                    <Link to="/auth">Sign In</Link>
-                  </Button>
-                  <Button className="w-full font-bold uppercase tracking-widest rounded-xl" asChild>
-                    <Link to="/auth">Get Started</Link>
-                  </Button>
-                </>
-              )}
+              <Button size="lg" className="w-full font-bold uppercase tracking-widest rounded-2xl h-16" asChild>
+                <Link to="/auth">Get Started</Link>
+              </Button>
             </div>
           </div>
         </div>
