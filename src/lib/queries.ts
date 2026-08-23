@@ -166,7 +166,21 @@ export const usePublicSponsors = (tournamentId: string) =>
     enabled: !!tournamentId,
   });
 
+export const useShowcaseTournament = () =>
+  useQuery({
+    queryKey: ["showcase-tournament"],
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("tournaments")
+          .select("*")
+          .eq("id", "b524ae7e-553a-4125-bf6e-c50c46b8c1ba")
+          .maybeSingle(),
+      ) as Tournament | null,
+  });
+
 type TableName =
+
   | "tournaments"
   | "teams"
   | "players"
