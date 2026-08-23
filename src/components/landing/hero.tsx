@@ -181,130 +181,235 @@ export function LandingHero() {
                   <div className="max-w-4xl mx-auto space-y-6">
                     {/* Header */}
                     <div className="flex flex-col gap-1">
-                      <h3 className="text-xl font-extrabold tracking-tight">Competition Overview</h3>
+                      <h3 className="text-xl font-extrabold tracking-tight text-foreground">Competition Overview</h3>
                       <p className="text-xs text-muted-foreground font-medium">Track fixtures, standings and tournament progress from one place.</p>
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {[
-                        { label: 'Teams', value: '12' },
-                        { label: 'Fixtures', value: '30' },
-                        { label: 'Completed', value: '18' },
-                        { label: 'Remaining', value: '12' },
-                      ].map((stat) => (
-                        <div key={stat.label} className="bg-background border border-border/50 rounded-xl p-3 shadow-sm ring-1 ring-white/5">
-                          <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{stat.label}</div>
-                          <div className="text-xl font-black text-foreground">{stat.value}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="grid lg:grid-cols-[1fr_260px] gap-6">
-                      <div className="space-y-6">
-                        {/* Fixtures Mock */}
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Upcoming Fixtures</h4>
-                            <span className="text-[10px] font-bold text-primary cursor-pointer hover:underline">View Fixtures →</span>
-                          </div>
+                    <Tabs defaultValue="overview" className="w-full">
+                      <TabsList className="bg-secondary/20 p-1 mb-6 border border-border/50 h-9">
+                        <TabsTrigger value="overview" className="text-[10px] font-bold px-4 h-7">Overview</TabsTrigger>
+                        <TabsTrigger value="fixtures" className="text-[10px] font-bold px-4 h-7">Fixtures</TabsTrigger>
+                        <TabsTrigger value="standings" className="text-[10px] font-bold px-4 h-7">Standings</TabsTrigger>
+                        <TabsTrigger value="knockout" className="text-[10px] font-bold px-4 h-7">Knockout</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="overview" className="mt-0 space-y-6 animate-in fade-in duration-500">
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           {[
-                            { a: 'Falcons', b: 'Warriors', time: 'Today · 4:00 PM', venue: 'National Sports Council Court' },
-                            { a: 'Titans', b: 'Panthers', time: 'Today · 6:00 PM', venue: 'Court 2' },
-                            { a: 'Lions', b: 'Hawks', time: 'Tomorrow · 2:00 PM', venue: 'Court 1' },
-                          ].map((f, i) => (
-                            <div key={i} className="bg-background border border-border/50 rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm ring-1 ring-white/5">
-                              <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <div className="w-6 h-6 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px] font-bold shrink-0">{f.a[0]}</div>
-                                  <span className="text-xs font-bold truncate">{f.a}</span>
-                                </div>
-                                <span className="text-[9px] font-black text-muted-foreground/30 italic shrink-0">VS</span>
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <div className="w-6 h-6 rounded bg-secondary/20 border border-border/50 flex items-center justify-center text-[8px] font-bold shrink-0">{f.b[0]}</div>
-                                  <span className="text-xs font-bold truncate">{f.b}</span>
-                                </div>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <div className="text-[10px] font-bold text-foreground">{f.time}</div>
-                                <div className="text-[9px] text-muted-foreground font-medium">{f.venue}</div>
-                              </div>
+                            { label: 'Teams', value: '12' },
+                            { label: 'Fixtures', value: '30' },
+                            { label: 'Completed', value: '18' },
+                            { label: 'Remaining', value: '12' },
+                          ].map((stat) => (
+                            <div key={stat.label} className="bg-background border border-border/50 rounded-xl p-3 shadow-sm ring-1 ring-white/5">
+                              <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{stat.label}</div>
+                              <div className="text-xl font-black text-foreground tabular-nums">{stat.value}</div>
                             </div>
                           ))}
                         </div>
 
-                        {/* Tournament Progress */}
-                        <div className="bg-background border border-border/50 rounded-xl p-4 shadow-sm ring-1 ring-white/5">
-                           <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Tournament Progress</h4>
-                              <span className="text-xs font-black text-primary">60%</span>
-                           </div>
-                           <div className="h-1.5 w-full bg-secondary/30 rounded-full overflow-hidden mb-2">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                whileInView={{ width: '60%' }}
-                                transition={{ duration: 1, delay: 1 }}
-                                className="h-full bg-primary" 
-                              />
-                           </div>
-                           <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">18 of 30 fixtures completed</div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        {/* Standing Preview Mock */}
-                        <div className="space-y-3">
-                           <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">League Standings</h4>
-                           <div className="bg-background border border-border/50 rounded-xl overflow-hidden shadow-sm ring-1 ring-white/5">
-                              <table className="w-full text-[10px]">
-                                 <thead>
-                                    <tr className="border-b border-border/50 bg-secondary/10">
-                                       <th className="text-left p-2 font-black text-muted-foreground/60">POS</th>
-                                       <th className="text-left p-2 font-black text-muted-foreground/60">TEAM</th>
-                                       <th className="text-right p-2 font-black text-muted-foreground/60">PTS</th>
-                                    </tr>
-                                 </thead>
-                                 <tbody className="divide-y divide-border/30">
-                                    {[
-                                       { pos: 1, team: 'Falcons', pts: 11 },
-                                       { pos: 2, team: 'Warriors', pts: 10 },
-                                       { pos: 3, team: 'Titans', pts: 10 },
-                                       { pos: 4, team: 'Panthers', pts: 9 },
-                                    ].map((row) => (
-                                       <tr key={row.pos} className="hover:bg-secondary/20 transition-colors">
-                                          <td className="p-2 font-black text-primary">{row.pos}</td>
-                                          <td className="p-2 font-bold">{row.team}</td>
-                                          <td className="p-2 text-right font-black">{row.pts}</td>
-                                       </tr>
-                                    ))}
-                                 </tbody>
-                              </table>
-                              <div className="p-2 border-t border-border/50 bg-secondary/5 text-center">
-                                 <span className="text-[9px] font-black uppercase tracking-wider text-primary cursor-pointer hover:underline">Full Standings →</span>
+                        <div className="grid lg:grid-cols-[1fr_260px] gap-6">
+                          <div className="space-y-6">
+                            {/* Upcoming Fixtures Mock */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Upcoming Fixtures</h4>
+                                <span className="text-[10px] font-bold text-primary cursor-pointer hover:underline">View Fixtures →</span>
                               </div>
-                           </div>
-                        </div>
+                              {[
+                                { a: 'Falcons', b: 'Warriors', time: 'Today · 4:00 PM', venue: 'National Sports Council Court' },
+                                { a: 'Titans', b: 'Panthers', time: 'Today · 6:00 PM', venue: 'Court 2' },
+                                { a: 'Lions', b: 'Hawks', time: 'Tomorrow · 2:00 PM', venue: 'Court 1' },
+                              ].map((f, i) => (
+                                <div key={i} className="bg-background border border-border/50 rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm ring-1 ring-white/5">
+                                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <div className="w-6 h-6 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-[8px] font-bold shrink-0">{f.a[0]}</div>
+                                      <span className="text-xs font-bold truncate">{f.a}</span>
+                                    </div>
+                                    <span className="text-[9px] font-black text-muted-foreground/30 italic shrink-0">VS</span>
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <div className="w-6 h-6 rounded bg-secondary/20 border border-border/50 flex items-center justify-center text-[8px] font-bold shrink-0">{f.b[0]}</div>
+                                      <span className="text-xs font-bold truncate">{f.b}</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <div className="text-[10px] font-bold text-foreground">{f.time}</div>
+                                    <div className="text-[9px] text-muted-foreground font-medium truncate max-w-[120px]">{f.venue}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
 
-                        {/* Latest Result */}
-                        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 shadow-sm relative overflow-hidden">
-                           <div className="absolute top-0 right-0 p-2">
-                              <span className="text-[8px] font-black uppercase tracking-tighter text-primary/40">Latest Result</span>
-                           </div>
-                           <div className="text-center space-y-2">
-                              <div className="flex items-center justify-between gap-2">
-                                 <span className="text-[10px] font-bold">Falcons</span>
-                                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 rounded border border-primary/20 font-black text-sm tabular-nums">
-                                    <span className="text-success">78</span>
-                                    <span className="text-muted-foreground/40 text-xs">-</span>
-                                    <span className="text-destructive">71</span>
+                          <div className="space-y-6">
+                            {/* Standings Summary */}
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">League Standings</h4>
+                              <div className="bg-background border border-border/50 rounded-xl overflow-hidden shadow-sm ring-1 ring-white/5">
+                                  <table className="w-full text-[10px]">
+                                    <thead>
+                                        <tr className="border-b border-border/50 bg-secondary/10">
+                                          <th className="text-left p-2 font-black text-muted-foreground/60">POS</th>
+                                          <th className="text-left p-2 font-black text-muted-foreground/60">TEAM</th>
+                                          <th className="text-right p-2 font-black text-muted-foreground/60">PTS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/30">
+                                        {[
+                                          { pos: 1, team: 'Falcons', pts: 11 },
+                                          { pos: 2, team: 'Warriors', pts: 10 },
+                                          { pos: 3, team: 'Titans', pts: 10 },
+                                          { pos: 4, team: 'Panthers', pts: 9 },
+                                        ].map((row) => (
+                                          <tr key={row.pos} className="hover:bg-secondary/20 transition-colors">
+                                              <td className="p-2 font-black text-primary tabular-nums">{row.pos}</td>
+                                              <td className="p-2 font-bold">{row.team}</td>
+                                              <td className="p-2 text-right font-black tabular-nums">{row.pts}</td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                  <div className="p-2 border-t border-border/50 bg-secondary/5 text-center">
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-primary cursor-pointer hover:underline">Full Standings →</span>
+                                  </div>
+                              </div>
+                            </div>
+
+                            {/* Tournament Progress */}
+                            <div className="bg-background border border-border/50 rounded-xl p-4 shadow-sm ring-1 ring-white/5">
+                              <div className="flex items-center justify-between mb-3">
+                                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Progress</h4>
+                                  <span className="text-xs font-black text-primary tabular-nums">60%</span>
+                              </div>
+                              <div className="h-1.5 w-full bg-secondary/30 rounded-full overflow-hidden mb-2">
+                                  <motion.div 
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: '60%' }}
+                                    transition={{ duration: 1, delay: 1 }}
+                                    className="h-full bg-primary" 
+                                  />
+                              </div>
+                              <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">18 of 30 fixtures completed</div>
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="fixtures" className="mt-0 space-y-4 animate-in fade-in duration-500">
+                        <div className="flex items-center justify-between">
+                           <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Match Management</h4>
+                           <Button size="sm" variant="outline" className="h-7 text-[9px] uppercase tracking-widest font-black">Generate Schedule</Button>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                           {[
+                              { a: 'Hawks', b: 'Lions', score: '72 - 68', status: 'Final' },
+                              { a: 'Eagles', b: 'Wolves', score: '88 - 92', status: 'Final' },
+                              { a: 'Tigers', b: 'Bears', score: '65 - 65', status: 'Live' },
+                              { a: 'Sharks', b: 'Cobras', score: null, status: 'Upcoming' },
+                           ].map((m, i) => (
+                              <div key={i} className="bg-background border border-border/50 rounded-xl p-4 shadow-sm ring-1 ring-white/5 flex flex-col gap-3">
+                                 <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">
+                                    <span>Match #{100 + i}</span>
+                                    <span className={cn("px-1.5 py-0.5 rounded", m.status === 'Live' ? "bg-success/10 text-success border border-success/20" : "bg-secondary/20 text-muted-foreground")}>{m.status}</span>
                                  </div>
-                                 <span className="text-[10px] font-bold">Warriors</span>
+                                 <div className="flex items-center justify-between">
+                                    <span className="text-xs font-bold">{m.a}</span>
+                                    <span className="text-sm font-black tabular-nums">{m.score || 'vs'}</span>
+                                    <span className="text-xs font-bold">{m.b}</span>
+                                 </div>
+                                 <div className="flex gap-2 mt-1">
+                                    <Button size="sm" variant="secondary" className="h-6 flex-1 text-[8px] uppercase tracking-widest font-black">Edit</Button>
+                                    <Button size="sm" variant="outline" className="h-6 flex-1 text-[8px] uppercase tracking-widest font-black">Score</Button>
+                                 </div>
                               </div>
-                              <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Final Score</div>
-                           </div>
+                           ))}
                         </div>
-                      </div>
-                    </div>
+                      </TabsContent>
+
+                      <TabsContent value="standings" className="mt-0 animate-in fade-in duration-500">
+                         <div className="bg-background border border-border/50 rounded-xl overflow-hidden shadow-sm ring-1 ring-white/5">
+                            <table className="w-full text-[11px]">
+                               <thead>
+                                  <tr className="border-b border-border/50 bg-secondary/10">
+                                     <th className="text-left p-3 font-black text-muted-foreground/60">POS</th>
+                                     <th className="text-left p-3 font-black text-muted-foreground/60">TEAM</th>
+                                     <th className="text-center p-3 font-black text-muted-foreground/60">P</th>
+                                     <th className="text-center p-3 font-black text-muted-foreground/60">W</th>
+                                     <th className="text-center p-3 font-black text-muted-foreground/60">L</th>
+                                     <th className="text-right p-3 font-black text-muted-foreground/60">PTS</th>
+                                  </tr>
+                               </thead>
+                               <tbody className="divide-y divide-border/30">
+                                  {[
+                                     { pos: 1, team: 'Falcons', p: 6, w: 5, l: 1, pts: 11 },
+                                     { pos: 2, team: 'Warriors', p: 6, w: 4, l: 2, pts: 10 },
+                                     { pos: 3, team: 'Titans', p: 6, w: 4, l: 2, pts: 10 },
+                                     { pos: 4, team: 'Panthers', p: 6, w: 3, l: 3, pts: 9 },
+                                     { pos: 5, team: 'Hawks', p: 6, w: 2, l: 4, pts: 8 },
+                                     { pos: 6, team: 'Lions', p: 6, w: 2, l: 4, pts: 8 },
+                                  ].map((row) => (
+                                     <tr key={row.pos} className="hover:bg-secondary/20 transition-colors">
+                                        <td className="p-3 font-black text-primary tabular-nums">{row.pos}</td>
+                                        <td className="p-3 font-bold">{row.team}</td>
+                                        <td className="p-3 text-center tabular-nums">{row.p}</td>
+                                        <td className="p-3 text-center tabular-nums">{row.w}</td>
+                                        <td className="p-3 text-center tabular-nums">{row.l}</td>
+                                        <td className="p-3 text-right font-black tabular-nums">{row.pts}</td>
+                                     </tr>
+                                  ))}
+                               </tbody>
+                            </table>
+                         </div>
+                      </TabsContent>
+
+                      <TabsContent value="knockout" className="mt-0 animate-in fade-in duration-500">
+                         <div className="flex flex-col items-center py-8">
+                            <div className="flex gap-8">
+                               {/* Semi-finals */}
+                               <div className="flex flex-col justify-around gap-8">
+                                  {[
+                                     { a: 'Falcons', b: 'Panthers', scoreA: 78, scoreB: 71 },
+                                     { a: 'Warriors', b: 'Titans', scoreA: 82, scoreB: 85 },
+                                  ].map((m, i) => (
+                                     <div key={i} className="bg-background border border-border/50 rounded-lg overflow-hidden shadow-sm w-40 divide-y divide-border/30">
+                                        <div className="px-3 py-2 flex items-center justify-between">
+                                           <span className={cn("text-xs font-bold", m.scoreA > m.scoreB && "text-primary")}>{m.a}</span>
+                                           <span className="text-[11px] font-black tabular-nums">{m.scoreA}</span>
+                                        </div>
+                                        <div className="px-3 py-2 flex items-center justify-between">
+                                           <span className={cn("text-xs font-bold", m.scoreB > m.scoreA && "text-primary")}>{m.b}</span>
+                                           <span className="text-[11px] font-black tabular-nums">{m.scoreB}</span>
+                                        </div>
+                                     </div>
+                                  ))}
+                               </div>
+                               {/* Bracket Lines */}
+                               <div className="flex flex-col justify-center gap-16">
+                                  <div className="w-8 h-px bg-border/50" />
+                                  <div className="w-8 h-px bg-border/50" />
+                                </div>
+                               {/* Final */}
+                               <div className="flex flex-col justify-center">
+                                  <div className="bg-primary/5 border border-primary/40 rounded-lg overflow-hidden shadow-lg w-40 divide-y divide-border/30 ring-1 ring-primary/20">
+                                     <div className="bg-primary/10 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-primary text-center">Grand Final</div>
+                                     <div className="px-3 py-2 flex items-center justify-between">
+                                        <span className="text-xs font-bold">Falcons</span>
+                                        <span className="text-[11px] font-black opacity-30">--</span>
+                                     </div>
+                                     <div className="px-3 py-2 flex items-center justify-between">
+                                        <span className="text-xs font-bold">Titans</span>
+                                        <span className="text-[11px] font-black opacity-30">--</span>
+                                     </div>
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </main>
                   </div>
                 </main>
               </div>
