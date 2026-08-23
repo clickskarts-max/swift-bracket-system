@@ -73,7 +73,7 @@ export function LandingFeatures() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <h2 className="text-4xl md:text-5xl font-black font-display uppercase italic mb-6">
               Everything You Need to <span className="text-primary not-italic">Run the Game</span>
@@ -92,9 +92,9 @@ export function LandingFeatures() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "group relative p-8 rounded-3xl bg-background border border-border/40 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5",
+                "group relative p-8 rounded-3xl bg-background border border-border/40 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 ease-transitions",
                 feature.size === "large" ? "lg:col-span-2" : ""
               )}
             >

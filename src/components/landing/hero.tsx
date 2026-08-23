@@ -32,7 +32,7 @@ export function LandingHero() {
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-2xl text-left"
         >
           <Badge variant="outline" className="mb-6 px-4 py-1.5 rounded-full border-primary/30 bg-primary/5 text-primary text-xs font-bold uppercase tracking-widest animate-pulse">
@@ -81,12 +81,12 @@ export function LandingHero() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="relative hidden lg:block"
         >
           <div className="relative z-10 bg-background/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden p-6 aspect-[4/3] flex flex-col gap-6 transform lg:rotate-2">
             {/* Mock UI: Standings Card */}
-            <div className="bg-background/80 border border-border/50 rounded-2xl p-4 shadow-lg animate-in slide-in-from-right-8 duration-700">
+            <div className="bg-background/80 border border-border/50 rounded-2xl p-4 shadow-lg animate-in slide-in-from-right-8 duration-700 ease-transitions">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-xs font-black uppercase tracking-tighter text-primary">Live Standings</h4>
                 <Badge variant="outline" className="text-[9px] h-4 bg-green-500/10 text-green-500 border-green-500/20">Active</Badge>
@@ -109,7 +109,7 @@ export function LandingHero() {
             </div>
 
             {/* Mock UI: Fixture Card */}
-            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 shadow-xl transform lg:-translate-x-12 translate-y-4 animate-in slide-in-from-left-8 duration-700 delay-300">
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 shadow-xl transform lg:-translate-x-12 translate-y-4 animate-in slide-in-from-left-8 duration-700 delay-300 ease-transitions">
               <div className="text-center mb-4">
                 <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">Championship Finals</span>
               </div>
@@ -131,7 +131,7 @@ export function LandingHero() {
             </div>
 
             {/* Mock UI: Group Pool Draw */}
-            <div className="bg-background/80 border border-border/50 rounded-2xl p-4 shadow-lg transform lg:translate-x-8 lg:translate-y-8 animate-in slide-in-from-bottom-8 duration-700 delay-500">
+            <div className="bg-background/80 border border-border/50 rounded-2xl p-4 shadow-lg transform lg:translate-x-8 lg:translate-y-8 animate-in slide-in-from-bottom-8 duration-700 delay-500 ease-transitions">
               <div className="flex items-center gap-2 mb-3">
                 <ListOrdered className="h-4 w-4 text-primary" />
                 <h4 className="text-xs font-black uppercase tracking-tighter">Pool Draw Result</h4>
