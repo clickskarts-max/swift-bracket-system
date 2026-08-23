@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function StatCard({
   label,
@@ -141,13 +142,36 @@ export function ScoreLine({
     if (!has || !final || mine == null || other == null || mine === other) return "text-foreground";
     return mine > other ? "text-success" : "text-destructive";
   };
+  
   return (
     <span
-      className={cn("font-display text-2xl font-extrabold tabular-nums sm:text-3xl", className)}
+      className={cn("font-display text-2xl font-extrabold tabular-nums sm:text-3xl inline-flex items-center", className)}
     >
-      <span className={tone(scoreA, scoreB)}>{scoreA ?? "–"}</span>
+      <AnimatePresence mode="popLayout">
+        <motion.span 
+          key={scoreA}
+          initial={{ y: 5, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -5, opacity: 0 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className={tone(scoreA, scoreB)}
+        >
+          {scoreA ?? "–"}
+        </motion.span>
+      </AnimatePresence>
       <span className="mx-1.5 text-muted-foreground">:</span>
-      <span className={tone(scoreB, scoreA)}>{scoreB ?? "–"}</span>
+      <AnimatePresence mode="popLayout">
+        <motion.span 
+          key={scoreB}
+          initial={{ y: 5, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -5, opacity: 0 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className={tone(scoreB, scoreA)}
+        >
+          {scoreB ?? "–"}
+        </motion.span>
+      </AnimatePresence>
     </span>
   );
 }
