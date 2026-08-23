@@ -34,8 +34,8 @@ export function LandingFormats() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: i * 0.2 }}
-            className="group p-8 rounded-3xl bg-muted/20 border border-border/50 hover:border-primary/50 transition-all duration-300"
+            transition={{ delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="group p-8 rounded-3xl bg-muted/20 border border-border/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 ease-transitions shadow-sm hover:shadow-xl hover:shadow-primary/5"
           >
             <f.icon className={cn("h-10 w-10 mb-6", f.color)} />
             <h3 className="text-2xl font-bold mb-4 uppercase italic">{f.title}</h3>
