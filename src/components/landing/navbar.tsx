@@ -103,7 +103,7 @@ export function LandingNavbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-background border-b border-border p-6 md:hidden animate-in slide-in-from-top-4 duration-300">
+        <div className="absolute top-full left-0 right-0 bg-background border-b border-border p-6 md:hidden animate-in slide-in-from-top-4 duration-300 ease-transitions">
           <div className="flex flex-col gap-6">
             {navLinks.map((link) => (
               <a

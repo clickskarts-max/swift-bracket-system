@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2, X, Upload } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,15 +62,40 @@ export function ImageUpload({
     <div className={cn("flex items-center gap-3", className)}>
       <div
         className={cn(
-          "flex h-full w-full shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40 cursor-pointer hover:bg-muted/60 transition-colors",
+          "relative group flex h-full w-full shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40 cursor-pointer hover:border-primary/40 transition-all duration-300 ease-transitions",
           rounded,
         )}
         onClick={() => inputRef.current?.click()}
       >
-        {value ? (
-          <img src={value} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <ImagePlus className="h-5 w-5 text-muted-foreground" />
+        <AnimatePresence mode="wait">
+          {value ? (
+            <motion.img 
+              key="image"
+              src={value} 
+              alt="" 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full w-full object-cover" 
+            />
+          ) : (
+            <motion.div
+              key="placeholder"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-2"
+            >
+              <ImagePlus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {busy && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
         )}
       </div>
       <div className="flex flex-wrap gap-2 empty:hidden">

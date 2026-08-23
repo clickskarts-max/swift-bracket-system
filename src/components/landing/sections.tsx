@@ -30,10 +30,10 @@ export function LandingWorkflow() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               className="relative flex flex-col items-center text-center group"
             >
-              <div className="h-12 w-12 rounded-full border-2 border-primary/20 bg-background flex items-center justify-center mb-4 group-hover:border-primary transition-colors z-10">
+              <div className="h-12 w-12 rounded-full border-2 border-primary/20 bg-background flex items-center justify-center mb-4 group-hover:border-primary transition-all duration-300 ease-transitions z-10">
                 <span className="text-sm font-black text-primary">{step.number}</span>
               </div>
               <h3 className="text-sm font-bold uppercase tracking-tight mb-1 italic">{step.title}</h3>
