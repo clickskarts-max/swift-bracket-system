@@ -410,8 +410,8 @@ export function LandingHero() {
                     </Tabs>
                   </div>
                 </main>
-                  </div>
-                </main>
+              </div>
+            </div>
               </div>
             </div>
 
