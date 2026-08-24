@@ -345,13 +345,19 @@ function AdvertisingPage() {
 
       <CampaignDialog 
         open={isCampaignDialogOpen} 
-        onOpenChange={setIsCampaignDialogOpen} 
+        onOpenChange={(open) => {
+          setIsCampaignDialogOpen(open);
+          if (!open) setSelectedCampaign(null);
+        }} 
         campaign={selectedCampaign}
       />
       {selectedCampaign && (
         <CampaignDetailDrawer
           open={isDetailOpen}
-          onOpenChange={setIsDetailOpen}
+          onOpenChange={(open) => {
+            setIsDetailOpen(open);
+            if (!open) setSelectedCampaign(null);
+          }}
           campaign={selectedCampaign}
         />
       )}
