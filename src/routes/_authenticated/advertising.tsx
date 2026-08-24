@@ -29,6 +29,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/advertising")({
   component: AdvertisingPage,
@@ -50,8 +51,8 @@ function AdvertisingPage() {
     });
   };
 
-  const handleIntensityChange = (value: 'low' | 'balanced' | 'high') => {
-    updateSettings.mutate({ auto_placement_intensity: value }, {
+  const handleIntensityChange = (value: string) => {
+    updateSettings.mutate({ auto_placement_intensity: value as 'low' | 'balanced' | 'high' }, {
       onSuccess: () => toast.success("Placement intensity updated"),
     });
   };
@@ -169,7 +170,7 @@ function AdvertisingPage() {
                   </p>
                 </div>
                 <Switch 
-                  checked={settings?.auto_placement_enabled} 
+                  checked={settings?.auto_placement_enabled ?? true} 
                   onCheckedChange={handleToggleAutoPlacement}
                 />
               </div>
@@ -177,7 +178,7 @@ function AdvertisingPage() {
               <div className="space-y-3">
                 <Label>Auto Placement Intensity</Label>
                 <Select 
-                  value={settings?.auto_placement_intensity} 
+                  value={settings?.auto_placement_intensity ?? 'balanced'} 
                   onValueChange={handleIntensityChange}
                 >
                   <SelectTrigger>
@@ -248,5 +249,3 @@ function Badge({ children, variant, className }: { children: React.ReactNode, va
     </span>
   );
 }
-
-import { cn } from "@/lib/utils";

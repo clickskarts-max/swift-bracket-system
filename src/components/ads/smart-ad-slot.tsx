@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 
 interface SmartAdSlotProps {
   placement: string;
-  tournamentId?: string;
-  className?: string;
-  isAuto?: boolean;
+  tournamentId?: string | undefined;
+  className?: string | undefined;
+  isAuto?: boolean | undefined;
 }
 
 export function SmartAdSlot({ placement, tournamentId, className, isAuto = false }: SmartAdSlotProps) {
