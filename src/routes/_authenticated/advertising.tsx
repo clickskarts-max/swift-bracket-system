@@ -350,11 +350,13 @@ function AdvertisingPage() {
         onOpenChange={setIsCampaignDialogOpen} 
         campaign={selectedCampaign}
       />
-      <CreativeDialog 
-        open={isCreativeDialogOpen} 
-        onOpenChange={setIsCreativeDialogOpen}
-        campaigns={campaigns}
-      />
+      {selectedCampaign && (
+        <CampaignDetailDrawer
+          open={isDetailOpen}
+          onOpenChange={setIsDetailOpen}
+          campaign={selectedCampaign}
+        />
+      )}
     </div>
   );
 }
