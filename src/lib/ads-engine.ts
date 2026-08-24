@@ -136,9 +136,9 @@ export class SmartPlacementEngine {
     
     for (const creative of topTier) {
       random -= (creative.weight || 10);
-      if (random <= 0) return creative;
+      if (random <= 0) return creative as AdCreative;
     }
 
-    return topTier[0];
+    return topTier[0] as AdCreative;
   }
 }
