@@ -78,11 +78,14 @@ export const useAdCampaigns = () =>
     queryFn: async () => {
       const { data, error } = await (supabase
         .from("ad_campaigns" as any)
-        .select("*, ad_creatives(*)")
+        .select("*, ad_creatives(*), ad_campaign_tournaments(tournament_id)")
         .order("created_at", { ascending: false }) as any);
       
       if (error) throw error;
-      return data as (AdCampaign & { ad_creatives: AdCreative[] })[];
+      return data as (AdCampaign & {
+        ad_creatives: AdCreative[];
+        ad_campaign_tournaments?: { tournament_id: string }[];
+      })[];
     },
   });
 
