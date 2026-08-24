@@ -53,8 +53,8 @@ export interface AdAnalytic {
 }
 
 export interface AdSettings {
-  id: string;
-  owner_id: string;
+  id?: string;
+  owner_id?: string;
   auto_placement_enabled: boolean;
   auto_placement_intensity: 'low' | 'balanced' | 'high';
   public_ads_enabled: boolean;
