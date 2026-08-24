@@ -20,7 +20,6 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTournamentsIdRouteImport } from './routes/_authenticated/tournaments.$id'
 import { Route as AuthenticatedTournamentsNewRouteImport } from './routes/_authenticated/tournaments.new'
 import { Route as PublicTournamentSlugRouteImport } from './routes/public.tournament.$slug'
-import { Route as AuthenticatedAdvertisingCampaignRouteImport } from './routes/_authenticated/advertising.campaign.'
 import { Route as AuthenticatedAdvertisingCampaignIdRouteImport } from './routes/_authenticated/advertising.campaign.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -80,12 +79,6 @@ const PublicTournamentSlugRoute = PublicTournamentSlugRouteImport.update({
   path: '/public/tournament/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdvertisingCampaignRoute =
-  AuthenticatedAdvertisingCampaignRouteImport.update({
-    id: '/campaign/',
-    path: '/campaign/',
-    getParentRoute: () => AuthenticatedAdvertisingRoute,
-  } as any)
 const AuthenticatedAdvertisingCampaignIdRoute =
   AuthenticatedAdvertisingCampaignIdRouteImport.update({
     id: '/campaign/$id',
@@ -104,7 +97,6 @@ export interface FileRoutesByFullPath {
   '/tournaments/$id': typeof AuthenticatedTournamentsIdRoute
   '/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
-  '/advertising/campaign/': typeof AuthenticatedAdvertisingCampaignRoute
   '/advertising/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
 }
 export interface FileRoutesByTo {
@@ -118,7 +110,6 @@ export interface FileRoutesByTo {
   '/tournaments/$id': typeof AuthenticatedTournamentsIdRoute
   '/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
-  '/advertising/campaign': typeof AuthenticatedAdvertisingCampaignRoute
   '/advertising/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
 }
 export interface FileRoutesById {
@@ -134,7 +125,6 @@ export interface FileRoutesById {
   '/_authenticated/tournaments/$id': typeof AuthenticatedTournamentsIdRoute
   '/_authenticated/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
-  '/_authenticated/advertising/campaign/': typeof AuthenticatedAdvertisingCampaignRoute
   '/_authenticated/advertising/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
 }
 export interface FileRouteTypes {
@@ -150,7 +140,6 @@ export interface FileRouteTypes {
     | '/tournaments/$id'
     | '/tournaments/new'
     | '/public/tournament/$slug'
-    | '/advertising/campaign/'
     | '/advertising/campaign/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -164,7 +153,6 @@ export interface FileRouteTypes {
     | '/tournaments/$id'
     | '/tournaments/new'
     | '/public/tournament/$slug'
-    | '/advertising/campaign'
     | '/advertising/campaign/$id'
   id:
     | '__root__'
@@ -179,7 +167,6 @@ export interface FileRouteTypes {
     | '/_authenticated/tournaments/$id'
     | '/_authenticated/tournaments/new'
     | '/public/tournament/$slug'
-    | '/_authenticated/advertising/campaign/'
     | '/_authenticated/advertising/campaign/$id'
   fileRoutesById: FileRoutesById
 }
@@ -270,13 +257,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicTournamentSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/advertising/campaign/': {
-      id: '/_authenticated/advertising/campaign/'
-      path: '/campaign'
-      fullPath: '/advertising/campaign/'
-      preLoaderRoute: typeof AuthenticatedAdvertisingCampaignRouteImport
-      parentRoute: typeof AuthenticatedAdvertisingRoute
-    }
     '/_authenticated/advertising/campaign/$id': {
       id: '/_authenticated/advertising/campaign/$id'
       path: '/campaign/$id'
@@ -288,14 +268,11 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdvertisingRouteChildren {
-  AuthenticatedAdvertisingCampaignRoute: typeof AuthenticatedAdvertisingCampaignRoute
   AuthenticatedAdvertisingCampaignIdRoute: typeof AuthenticatedAdvertisingCampaignIdRoute
 }
 
 const AuthenticatedAdvertisingRouteChildren: AuthenticatedAdvertisingRouteChildren =
   {
-    AuthenticatedAdvertisingCampaignRoute:
-      AuthenticatedAdvertisingCampaignRoute,
     AuthenticatedAdvertisingCampaignIdRoute:
       AuthenticatedAdvertisingCampaignIdRoute,
   }
