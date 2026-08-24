@@ -259,14 +259,3 @@ function AdvertisingPage() {
   );
 }
 
-function Badge({ children, variant, className }: { children: React.ReactNode, variant: 'default' | 'outline', className?: string }) {
-  return (
-    <span className={cn(
-      "inline-flex items-center rounded-full px-2 py-0.5 font-medium",
-      variant === 'default' ? "bg-primary/20 text-primary" : "border border-border text-muted-foreground",
-      className
-    )}>
-      {children}
-    </span>
-  );
-}
