@@ -13,12 +13,14 @@ export function ImageUpload({
   value,
   onChange,
   folder,
+  bucket = "media",
   className,
   rounded = "rounded-xl",
 }: {
   value: string | null;
   onChange: (url: string | null) => void;
   folder: string;
+  bucket?: string;
   className?: string;
   rounded?: string;
 }) {
