@@ -94,7 +94,7 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
     return formats;
   }, [campaign.ad_creatives]);
 
-  const content = (
+  return (
     <div className={inline ? "" : "max-h-[90vh] overflow-y-auto"}>
       {!inline && (
         <DialogHeader className="border-b pb-4">
