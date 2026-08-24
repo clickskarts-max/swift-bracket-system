@@ -4,7 +4,9 @@ import {
   AdCampaign, 
   AdCreative, 
   useUpdateAdCampaign,
-  useDeleteAdCampaign
+  useDeleteAdCampaign,
+  useCampaignInventory,
+  useCampaignPerformance
 } from "@/lib/ads.functions";
 import { useState, useMemo } from "react";
 import { 
@@ -34,10 +36,15 @@ import { StatCard, StatusPill } from "@/components/data-bits";
 import { toast } from "sonner";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { TournamentTargeting, targetingSummary } from "@/components/ads/tournament-targeting";
+import { InventoryManagement } from "@/components/ads/inventory-management";
+import { SponsorCreatives } from "@/components/ads/sponsor-creatives";
+import { INVENTORY_BY_KEY } from "@/lib/ad-inventory";
 
 export const Route = createFileRoute("/_authenticated/advertising_/campaign/$id")({
   component: CampaignWorkspace,
 });
+
+const TABS = ["overview", "creatives", "inventory", "targeting", "performance", "settings"] as const;
 
 function CampaignWorkspace() {
   const { id } = Route.useParams();
@@ -45,13 +52,25 @@ function CampaignWorkspace() {
   const { data: campaigns = [], isLoading } = useAdCampaigns();
   const updateCampaign = useUpdateAdCampaign();
   const deleteCampaign = useDeleteAdCampaign();
+  const { data: inventoryRows = [] } = useCampaignInventory(id);
+  const { data: perf = [] } = useCampaignPerformance(id);
   
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   const campaign = useMemo(() => 
     campaigns.find(c => c.id === id), 
     [campaigns, id]
   );
+
+  const totals = useMemo(
+    () =>
+      perf.reduce(
+        (acc, r) => ({ impressions: acc.impressions + r.impressions, clicks: acc.clicks + r.clicks }),
+        { impressions: 0, clicks: 0 },
+      ),
+    [perf],
+  );
+
 
   if (isLoading) {
     return (
@@ -104,9 +123,10 @@ function CampaignWorkspace() {
   const readiness = {
     details: true,
     creatives: campaign.ad_creatives.length > 0,
-    placements: true, // Placeholder for now
+    inventory: inventoryRows.length > 0,
     targeting: (campaign.tournament_targeting_mode ?? 'all') !== 'selected' || (campaign.ad_campaign_tournaments?.length ?? 0) > 0,
   };
+
 
   const isReady = Object.values(readiness).every(Boolean);
 
@@ -155,7 +175,7 @@ function CampaignWorkspace() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent space-x-6">
-          {["overview", "creatives", "placements", "targeting", "performance", "settings"].map((tab) => (
+          {TABS.map((tab) => (
             <TabsTrigger 
               key={tab}
               value={tab} 
@@ -168,11 +188,15 @@ function CampaignWorkspace() {
 
         <TabsContent value="overview" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Impressions" value="0" />
-            <StatCard label="Clicks" value="0" />
-            <StatCard label="Avg. CTR" value="0.00%" />
-            <StatCard label="Creatives" value={campaign.ad_creatives.length} />
+            <StatCard label="Impressions" value={totals.impressions.toLocaleString()} />
+            <StatCard label="Clicks" value={totals.clicks.toLocaleString()} />
+            <StatCard
+              label="Avg. CTR"
+              value={`${totals.impressions ? ((totals.clicks / totals.impressions) * 100).toFixed(2) : "0.00"}%`}
+            />
+            <StatCard label="Inventory units" value={inventoryRows.length} />
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -184,7 +208,7 @@ function CampaignWorkspace() {
                   {[
                     { label: "Campaign Details", status: readiness.details },
                     { label: "Creatives Uploaded", status: readiness.creatives, sub: "Add at least one ad unit" },
-                    { label: "Placements Assigned", status: readiness.placements },
+                    { label: "Inventory Assigned", status: readiness.inventory, sub: "Pick the slots this campaign may serve in" },
                     { label: "Targeting Configured", status: readiness.targeting },
                   ].map((step, i) => (
                     <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/40">
@@ -258,7 +282,8 @@ function CampaignWorkspace() {
           </div>
         </TabsContent>
 
-        <TabsContent value="creatives" className="pt-4 mt-0">
+        <TabsContent value="creatives" className="space-y-6 pt-4 mt-0">
+          <SponsorCreatives campaign={campaign as any} />
           <CampaignDetailDrawer 
             campaign={campaign as any} 
             open={true} 
@@ -268,15 +293,8 @@ function CampaignWorkspace() {
           />
         </TabsContent>
 
-        <TabsContent value="placements" className="pt-4 mt-0">
-          <div className="surface-card p-8 border rounded-xl text-center">
-            <Layout className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="font-semibold text-lg mb-2">Placement Targeting</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Configure specific zones or tournament pages where this campaign should be prioritized.
-            </p>
-            <Badge variant="outline" className="px-4 py-1">Advanced Mode Required</Badge>
-          </div>
+        <TabsContent value="inventory" className="pt-4 mt-0">
+          <InventoryManagement campaign={campaign as any} />
         </TabsContent>
 
         <TabsContent value="targeting" className="pt-4 mt-0">
@@ -284,15 +302,40 @@ function CampaignWorkspace() {
         </TabsContent>
 
         <TabsContent value="performance" className="pt-4 mt-0">
-          <div className="surface-card p-8 border rounded-xl text-center">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="font-semibold text-lg mb-2">Detailed Analytics</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Track impressions, clicks, and CTR breakdown by creative and placement.
-            </p>
-            <Badge variant="outline" className="px-4 py-1">Data Processing...</Badge>
-          </div>
+          {perf.length === 0 ? (
+            <div className="surface-card p-8 border rounded-xl text-center">
+              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+              <h3 className="font-semibold text-lg mb-2">No delivery yet</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                Impressions and clicks appear here as soon as this campaign starts serving.
+              </p>
+            </div>
+          ) : (
+            <div className="surface-card border rounded-xl divide-y divide-border/50">
+              <div className="grid grid-cols-4 gap-2 px-5 py-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+                <span className="col-span-2">Inventory</span>
+                <span className="text-right">Impressions</span>
+                <span className="text-right">Clicks / CTR</span>
+              </div>
+              {perf
+                .slice()
+                .sort((a, b) => b.impressions - a.impressions)
+                .map((row) => (
+                  <div key={row.inventory_key} className="grid grid-cols-4 gap-2 px-5 py-3 text-sm">
+                    <span className="col-span-2 font-medium">
+                      {INVENTORY_BY_KEY[row.inventory_key]?.label ?? row.inventory_key}
+                    </span>
+                    <span className="text-right tabular-nums">{row.impressions.toLocaleString()}</span>
+                    <span className="text-right tabular-nums">
+                      {row.clicks.toLocaleString()} ·{" "}
+                      {row.impressions ? ((row.clicks / row.impressions) * 100).toFixed(2) : "0.00"}%
+                    </span>
+                  </div>
+                ))}
+            </div>
+          )}
         </TabsContent>
+
 
         <TabsContent value="settings" className="pt-4 mt-0">
            <CampaignDetailDrawer 

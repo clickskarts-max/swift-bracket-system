@@ -49,6 +49,7 @@ export type Database = {
           campaign_id: string
           creative_id: string
           id: string
+          inventory_key: string | null
           page: string | null
           placement_id: string | null
           timestamp: string | null
@@ -59,6 +60,7 @@ export type Database = {
           campaign_id: string
           creative_id: string
           id?: string
+          inventory_key?: string | null
           page?: string | null
           placement_id?: string | null
           timestamp?: string | null
@@ -69,6 +71,7 @@ export type Database = {
           campaign_id?: string
           creative_id?: string
           id?: string
+          inventory_key?: string | null
           page?: string | null
           placement_id?: string | null
           timestamp?: string | null
@@ -198,14 +201,20 @@ export type Database = {
       }
       ad_creatives: {
         Row: {
+          alt_text: string | null
           aspect_ratio: string | null
+          body_text: string | null
           campaign_id: string
           created_at: string | null
+          creative_role: string
+          cta_label: string | null
           destination_url: string | null
+          headline: string | null
           height: number | null
           html_content: string | null
           id: string
           is_responsive: boolean | null
+          logo_dark_url: string | null
           max_width: number | null
           media_url: string
           min_width: number | null
@@ -214,20 +223,28 @@ export type Database = {
           provider_config: Json | null
           provider_type: string | null
           size_preset: string | null
+          sponsor_label: string | null
+          sponsor_name: string | null
           status: string | null
           type: string | null
           updated_at: string | null
           width: number | null
         }
         Insert: {
+          alt_text?: string | null
           aspect_ratio?: string | null
+          body_text?: string | null
           campaign_id: string
           created_at?: string | null
+          creative_role?: string
+          cta_label?: string | null
           destination_url?: string | null
+          headline?: string | null
           height?: number | null
           html_content?: string | null
           id?: string
           is_responsive?: boolean | null
+          logo_dark_url?: string | null
           max_width?: number | null
           media_url: string
           min_width?: number | null
@@ -236,20 +253,28 @@ export type Database = {
           provider_config?: Json | null
           provider_type?: string | null
           size_preset?: string | null
+          sponsor_label?: string | null
+          sponsor_name?: string | null
           status?: string | null
           type?: string | null
           updated_at?: string | null
           width?: number | null
         }
         Update: {
+          alt_text?: string | null
           aspect_ratio?: string | null
+          body_text?: string | null
           campaign_id?: string
           created_at?: string | null
+          creative_role?: string
+          cta_label?: string | null
           destination_url?: string | null
+          headline?: string | null
           height?: number | null
           html_content?: string | null
           id?: string
           is_responsive?: boolean | null
+          logo_dark_url?: string | null
           max_width?: number | null
           media_url?: string
           min_width?: number | null
@@ -258,6 +283,8 @@ export type Database = {
           provider_config?: Json | null
           provider_type?: string | null
           size_preset?: string | null
+          sponsor_label?: string | null
+          sponsor_name?: string | null
           status?: string | null
           type?: string | null
           updated_at?: string | null
@@ -302,33 +329,45 @@ export type Database = {
       }
       ad_settings: {
         Row: {
+          adsense_fallback_enabled: boolean
           auto_placement_enabled: boolean | null
           auto_placement_intensity: string | null
           created_at: string | null
           id: string
+          native_ads_enabled: boolean
           owner_id: string
           page_rules: Json | null
           public_ads_enabled: boolean | null
+          sponsorships_enabled: boolean
+          sticky_mobile_enabled: boolean
           updated_at: string | null
         }
         Insert: {
+          adsense_fallback_enabled?: boolean
           auto_placement_enabled?: boolean | null
           auto_placement_intensity?: string | null
           created_at?: string | null
           id?: string
+          native_ads_enabled?: boolean
           owner_id: string
           page_rules?: Json | null
           public_ads_enabled?: boolean | null
+          sponsorships_enabled?: boolean
+          sticky_mobile_enabled?: boolean
           updated_at?: string | null
         }
         Update: {
+          adsense_fallback_enabled?: boolean
           auto_placement_enabled?: boolean | null
           auto_placement_intensity?: string | null
           created_at?: string | null
           id?: string
+          native_ads_enabled?: boolean
           owner_id?: string
           page_rules?: Json | null
           public_ads_enabled?: boolean | null
+          sponsorships_enabled?: boolean
+          sticky_mobile_enabled?: boolean
           updated_at?: string | null
         }
         Relationships: []
@@ -362,6 +401,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      campaign_inventory: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          inventory_key: string
+          owner_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          inventory_key: string
+          owner_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          inventory_key?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_inventory_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       matches: {
         Row: {

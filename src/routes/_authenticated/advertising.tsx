@@ -257,8 +257,68 @@ function AdvertisingPage() {
         
 
         <TabsContent value="settings" className="space-y-6">
+          <div className="surface-card p-6 space-y-5">
+            <div>
+              <h3 className="font-semibold">Master switches</h3>
+              <p className="text-sm text-muted-foreground">
+                Turn whole categories of commercial content on or off across every public page.
+              </p>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              {([
+                {
+                  key: "public_ads_enabled",
+                  label: "Public advertising",
+                  help: "Master kill switch for all ads and sponsorships.",
+                  fallback: true,
+                },
+                {
+                  key: "sponsorships_enabled",
+                  label: "Tournament sponsorships",
+                  help: "Presented by, official partner and section sponsor lockups.",
+                  fallback: true,
+                },
+                {
+                  key: "native_ads_enabled",
+                  label: "Native sponsored cards",
+                  help: "Editorial cards between sections, always labelled Sponsored.",
+                  fallback: true,
+                },
+                {
+                  key: "sticky_mobile_enabled",
+                  label: "Sticky mobile banner",
+                  help: "Dismissible bottom banner on small screens.",
+                  fallback: false,
+                },
+                {
+                  key: "adsense_fallback_enabled",
+                  label: "AdSense fallback",
+                  help: "Fill unsold display inventory with network ads.",
+                  fallback: false,
+                },
+              ] as const).map((row) => (
+                <div key={row.key} className="flex items-start justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">{row.label}</Label>
+                    <p className="text-sm text-muted-foreground">{row.help}</p>
+                  </div>
+                  <Switch
+                    checked={(settings?.[row.key] as boolean | undefined) ?? row.fallback}
+                    onCheckedChange={(checked) =>
+                      updateSettings.mutate(
+                        { [row.key]: checked } as any,
+                        { onSuccess: () => toast.success("Settings updated") },
+                      )
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="surface-card p-6 space-y-6">
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Smart Auto Placement</Label>
