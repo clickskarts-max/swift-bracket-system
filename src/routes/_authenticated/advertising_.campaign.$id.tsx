@@ -123,9 +123,10 @@ function CampaignWorkspace() {
   const readiness = {
     details: true,
     creatives: campaign.ad_creatives.length > 0,
-    placements: true, // Placeholder for now
+    inventory: inventoryRows.length > 0,
     targeting: (campaign.tournament_targeting_mode ?? 'all') !== 'selected' || (campaign.ad_campaign_tournaments?.length ?? 0) > 0,
   };
+
 
   const isReady = Object.values(readiness).every(Boolean);
 
