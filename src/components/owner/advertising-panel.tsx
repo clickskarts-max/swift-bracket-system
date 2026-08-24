@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAdCampaigns, useAdStats } from "@/lib/ads.functions";
-import { INVENTORY_GROUPS } from "@/lib/ad-inventory";
+import { CATEGORY_META, inventoryByCategory, type InventoryCategory } from "@/lib/ad-inventory";
 import {
   EmptyState,
   KpiCard,
@@ -39,10 +39,14 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
   if (tab === "inventory" || tab === "placements") {
     return (
       <div className="space-y-4">
-        {INVENTORY_GROUPS.map((group) => (
-          <SectionCard key={group.key} title={group.label} description={group.description}>
+        {(Object.keys(CATEGORY_META) as InventoryCategory[]).map((category) => (
+          <SectionCard
+            key={category}
+            title={CATEGORY_META[category].label}
+            description={CATEGORY_META[category].description}
+          >
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {group.items.map((item) => {
+              {inventoryByCategory(category).map((item) => {
                 const active = campaigns.filter((c) =>
                   (c.campaign_inventory ?? []).some(
                     (i) => i.inventory_key === item.key && i.enabled,
@@ -53,7 +57,8 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
                     <p className="text-sm font-medium">{item.label}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                      {item.sizeHint && <span>{item.sizeHint}</span>}
+                      {item.sizes?.length ? <span>{item.sizes.join(" · ")}</span> : null}
+                      <span>{item.tournamentScoped ? "Tournament page" : "All pages"}</span>
                       <span>{active} campaign(s)</span>
                     </div>
                   </div>
