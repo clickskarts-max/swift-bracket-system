@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { EmptyState, TeamChip } from "@/components/data-bits";
 import type { Match, Team } from "@/lib/queries";
+import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 
 type BracketTeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color">;
 
@@ -70,6 +71,7 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
           </div>
         ))}
       </div>
+      <AutoAdRegion context="knockout" className="pt-8" />
     </div>
   );
 }
