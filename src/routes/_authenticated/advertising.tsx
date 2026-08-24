@@ -203,6 +203,16 @@ function AdvertisingPage() {
                             size="icon" 
                             onClick={() => {
                               setSelectedCampaign(c);
+                              setIsDetailOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => {
+                              setSelectedCampaign(c);
                               setIsCampaignDialogOpen(true);
                             }}
                           >
