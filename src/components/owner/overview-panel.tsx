@@ -1,14 +1,41 @@
-import { AlertTriangle, CheckCircle2, Megaphone, Trophy, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Megaphone, Trophy, Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
 import { useOwnerOverview } from "@/lib/owner";
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-lg border border-border/60 p-3">
+    <div className="rounded-lg bg-secondary/40 px-3 py-2">
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-0.5 font-display text-xl font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  hint,
+  tone = "default",
+}: {
+  label: string;
+  value: number | string;
+  hint?: string;
+  tone?: "default" | "warn";
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 font-display text-2xl font-semibold">{value}</p>
+      <p
+        className={`mt-1 font-display text-3xl font-semibold tabular-nums ${
+          tone === "warn" ? "text-amber-500" : ""
+        }`}
+      >
+        {value}
+      </p>
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -16,7 +43,14 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 export function OverviewPanel({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const { data, isLoading, error } = useOwnerOverview();
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading platform metrics…</p>;
+  if (isLoading)
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-xl bg-secondary/50" />
+        ))}
+      </div>
+    );
   if (error || !data)
     return (
       <p className="text-sm text-destructive">
@@ -57,62 +91,25 @@ export function OverviewPanel({ onNavigate }: { onNavigate: (tab: string) => voi
   ].filter((i) => i.count > 0);
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Users className="h-4 w-4 text-primary" /> Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <Stat label="Total" value={data.users.total} />
-            <Stat label="Active" value={data.users.active} />
-            <Stat label="Expiring 7d" value={data.users.expiring_soon} />
-            <Stat label="Expired" value={data.users.expired} />
-            <Stat label="Suspended" value={data.users.suspended} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Trophy className="h-4 w-4 text-primary" /> Tournaments
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <Stat label="Total" value={data.tournaments.total} />
-            <Stat label="Active" value={data.tournaments.active} />
-            <Stat label="Draft" value={data.tournaments.draft} />
-            <Stat label="Completed" value={data.tournaments.completed} />
-            <Stat label="Archived" value={data.tournaments.archived} />
-            <Stat label="Public" value={data.tournaments.public} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Megaphone className="h-4 w-4 text-primary" /> Advertising
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <Stat label="Campaigns" value={data.advertising.campaigns} />
-            <Stat label="Active" value={data.advertising.active} />
-            <Stat label="Ending 7d" value={data.advertising.ending_soon} />
-            <Stat label="Impressions" value={data.ad_analytics.impressions} />
-            <Stat label="Clicks" value={data.ad_analytics.clicks} />
-            <Stat label="CTR" value={`${ctr}%`} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Sponsors</CardTitle>
-            <CardDescription>Sponsor records across all tournaments.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
-            <Stat label="Total" value={data.sponsors.total} />
-            <Stat label="Missing logo" value={data.sponsors.missing_logo} />
-          </CardContent>
-        </Card>
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Kpi label="Users" value={data.users.total} hint={`${data.users.active} active`} />
+        <Kpi
+          label="Tournaments"
+          value={data.tournaments.total}
+          hint={`${data.tournaments.active} running`}
+        />
+        <Kpi
+          label="Campaigns"
+          value={data.advertising.campaigns}
+          hint={`${data.advertising.active} active · ${ctr}% CTR`}
+        />
+        <Kpi
+          label="Needs attention"
+          value={issues.reduce((sum, i) => sum + i.count, 0)}
+          hint={issues.length ? `${issues.length} check(s) failing` : "All checks passing"}
+          tone={issues.length ? "warn" : "default"}
+        />
       </div>
 
       <Card>
@@ -139,8 +136,11 @@ export function OverviewPanel({ onNavigate }: { onNavigate: (tab: string) => voi
                 onClick={() => onNavigate(issue.tab)}
                 className="flex w-full items-center justify-between gap-3 rounded-lg border border-border/60 p-3 text-left text-sm transition-colors hover:bg-secondary"
               >
-                <span>{issue.label}</span>
-                <Badge variant="secondary">{issue.count}</Badge>
+                <span className="min-w-0 truncate">{issue.label}</span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <Badge variant="secondary">{issue.count}</Badge>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </span>
               </button>
             ))
           )}
@@ -153,6 +153,55 @@ export function OverviewPanel({ onNavigate }: { onNavigate: (tab: string) => voi
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4 text-primary" /> Users
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-2">
+            <Stat label="Total" value={data.users.total} />
+            <Stat label="Active" value={data.users.active} />
+            <Stat label="Expiring 7d" value={data.users.expiring_soon} />
+            <Stat label="Expired" value={data.users.expired} />
+            <Stat label="Suspended" value={data.users.suspended} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Trophy className="h-4 w-4 text-primary" /> Tournaments
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-2">
+            <Stat label="Total" value={data.tournaments.total} />
+            <Stat label="Active" value={data.tournaments.active} />
+            <Stat label="Draft" value={data.tournaments.draft} />
+            <Stat label="Completed" value={data.tournaments.completed} />
+            <Stat label="Archived" value={data.tournaments.archived} />
+            <Stat label="Public" value={data.tournaments.public} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Megaphone className="h-4 w-4 text-primary" /> Advertising &amp; sponsors
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-2">
+            <Stat label="Campaigns" value={data.advertising.campaigns} />
+            <Stat label="Active" value={data.advertising.active} />
+            <Stat label="Ending 7d" value={data.advertising.ending_soon} />
+            <Stat label="Impressions" value={data.ad_analytics.impressions} />
+            <Stat label="Clicks" value={data.ad_analytics.clicks} />
+            <Stat label="CTR" value={`${ctr}%`} />
+            <Stat label="Sponsors" value={data.sponsors.total} />
+            <Stat label="No logo" value={data.sponsors.missing_logo} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
