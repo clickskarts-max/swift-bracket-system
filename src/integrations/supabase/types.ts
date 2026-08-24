@@ -645,6 +645,9 @@ export type Database = {
           primary_color: string | null
           secondary_color: string | null
           short_name: string | null
+          show_contact_public: boolean
+          show_logo_public: boolean
+          show_name_public: boolean
           socials: Json
           updated_at: string
           website: string | null
@@ -667,6 +670,9 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           short_name?: string | null
+          show_contact_public?: boolean
+          show_logo_public?: boolean
+          show_name_public?: boolean
           socials?: Json
           updated_at?: string
           website?: string | null
@@ -689,6 +695,9 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           short_name?: string | null
+          show_contact_public?: boolean
+          show_logo_public?: boolean
+          show_name_public?: boolean
           socials?: Json
           updated_at?: string
           website?: string | null
