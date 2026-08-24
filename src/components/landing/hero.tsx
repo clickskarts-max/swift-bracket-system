@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import DotField from "@/components/react-bits/DotField/DotField";
+
 import { useBranding } from "@/hooks/use-branding";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -25,15 +25,13 @@ export function LandingHero() {
 
   return (
     <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-20">
-        <DotField
-          dotRadius={1}
-          dotSpacing={20}
-          cursorRadius={500}
-          bulgeStrength={60}
-          gradientFrom={`${primaryColor}40`}
-          gradientTo="transparent"
-          glowColor={primaryColor}
+      <div className="absolute inset-0 z-0 opacity-10">
+        <div 
+          className="absolute inset-0" 
+          style={{ 
+            backgroundImage: `radial-gradient(circle at 2px 2px, ${primaryColor}40 1px, transparent 0)`,
+            backgroundSize: '24px 24px' 
+          }} 
         />
       </div>
 
