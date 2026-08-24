@@ -2,7 +2,7 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Megaphone, Trophy, Users } fro
 import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { useOwnerOverview } from "@/lib/owner";
 
 function Stat({ label, value }: { label: string; value: number | string }) {
