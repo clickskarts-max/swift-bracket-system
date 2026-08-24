@@ -44,10 +44,10 @@ export function ImageUpload({
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `${uid}/${folder}/${crypto.randomUUID()}.${ext}`;
       const up = await supabase.storage
-        .from("media")
+        .from(bucket)
         .upload(path, file, { contentType: file.type, upsert: false });
       if (up.error) throw new Error(up.error.message);
-      const signed = await supabase.storage.from("media").createSignedUrl(path, TEN_YEARS);
+      const signed = await supabase.storage.from(bucket).createSignedUrl(path, TEN_YEARS);
       if (signed.error || !signed.data)
         throw new Error(signed.error?.message ?? "Could not create link");
       onChange(signed.data.signedUrl);
