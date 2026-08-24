@@ -289,11 +289,6 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
             <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
           </DialogFooter>
         )}
-        {!inline && (
-          <DialogFooter className="mt-6 pt-6 border-t">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-          </DialogFooter>
-        )}
       </div>
     );
 
