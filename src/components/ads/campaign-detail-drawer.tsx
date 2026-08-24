@@ -289,13 +289,18 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
             <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
           </DialogFooter>
         )}
+        {!inline && (
+          <DialogFooter className="mt-6 pt-6 border-t">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+          </DialogFooter>
+        )}
       </div>
     );
 
     if (inline) {
       return (
         <>
-          {content}
+          {renderedContent}
           <CreativeDialog 
             open={isAddCreativeOpen}
             onOpenChange={(open) => {
@@ -313,7 +318,7 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl p-0">
           <div className="p-6">
-            {content}
+            {renderedContent}
           </div>
         </DialogContent>
 
