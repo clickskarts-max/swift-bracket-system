@@ -67,6 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key="/owner"
               to="/owner"
+              search={{ section: "dashboard" as const, tab: undefined }}
               onClick={onClick}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               activeProps={{ className: "bg-secondary text-foreground" }}

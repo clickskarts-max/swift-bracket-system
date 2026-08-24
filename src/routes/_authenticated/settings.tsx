@@ -689,7 +689,12 @@ function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" onClick={() => navigate({ to: "/owner" })}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate({ to: "/owner", search: { section: "dashboard", tab: undefined } })
+                }
+              >
                 Open owner dashboard <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             </section>

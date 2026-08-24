@@ -182,7 +182,7 @@ function OwnerAdmin() {
   const go = (next: SectionKey, nextTab?: string) => {
     navigate({
       to: "/owner",
-      search: { section: next, ...(nextTab ? { tab: nextTab } : {}) },
+      search: { section: next, tab: nextTab },
     });
     setMobileOpen(false);
   };
