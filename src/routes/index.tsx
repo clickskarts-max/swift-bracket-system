@@ -49,6 +49,10 @@ function Index() {
         <LandingWorkflow />
         <LandingFormats />
         <LandingPoolDraw />
+        
+        <div className="container mx-auto max-w-5xl px-4 py-12">
+          <SmartAdSlot placement="homepage-content" className="w-full" />
+        </div>
         <LandingWhiteLabel />
         <LandingSecurity />
 
