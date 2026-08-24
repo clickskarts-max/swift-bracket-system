@@ -394,10 +394,12 @@ function CreativeDialog({
 
   const handleSubmit = async () => {
     try {
+      const creativeType: AdCreative['type'] = source === 'html' ? 'html' : 'image';
+      
       const payload = {
         name: formData.name || `${source.toUpperCase()} Creative`,
         campaign_id: campaignId,
-        type: source === 'html' ? 'html' : 'image',
+        type: creativeType,
         provider_type: source === 'adsense' ? 'adsense' : 'direct',
         media_url: formData.media_url || '',
         html_content: formData.html_content,
