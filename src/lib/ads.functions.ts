@@ -11,6 +11,7 @@ export interface AdCampaign {
   priority: 'low' | 'normal' | 'high' | 'guaranteed';
   weight: number;
   targeting: any;
+  tournament_targeting_mode: 'all' | 'selected' | 'none';
   allow_auto_placement: boolean;
   start_date: string | null;
   end_date: string | null;
@@ -77,11 +78,14 @@ export const useAdCampaigns = () =>
     queryFn: async () => {
       const { data, error } = await (supabase
         .from("ad_campaigns" as any)
-        .select("*, ad_creatives(*)")
+        .select("*, ad_creatives(*), ad_campaign_tournaments(tournament_id)")
         .order("created_at", { ascending: false }) as any);
       
       if (error) throw error;
-      return data as (AdCampaign & { ad_creatives: AdCreative[] })[];
+      return data as (AdCampaign & {
+        ad_creatives: AdCreative[];
+        ad_campaign_tournaments?: { tournament_id: string }[];
+      })[];
     },
   });
 
@@ -157,32 +161,103 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
   useQuery({
     queryKey: ["active-ads", placementKey, tournamentId, isAuto],
     queryFn: async () => {
+      // Single request evaluates status, tournament targeting, creatives (no N+1).
       let query = supabase
         .from("ad_campaigns" as any)
-        .select("*, ad_creatives(*)")
-        .eq("status", "active");
+        .select("*, ad_creatives(*), ad_campaign_tournaments(tournament_id)")
+        .eq("status", "active")
+        .neq("tournament_targeting_mode", "none");
 
       if (isAuto) {
         query = query.eq("allow_auto_placement", true);
+      }
+
+      // No tournament context (e.g. homepage): only "all tournaments" campaigns.
+      if (!tournamentId) {
+        query = query.eq("tournament_targeting_mode", "all");
       }
 
       const { data, error } = await (query as any);
 
       if (error) throw error;
 
-      const campaigns = (data as (AdCampaign & { ad_creatives: AdCreative[] })[]).filter(c => {
+      const rows = data as (AdCampaign & {
+        ad_creatives: AdCreative[];
+        ad_campaign_tournaments?: { tournament_id: string }[];
+      })[];
+
+      return rows.filter((c) => {
+        const mode = c.tournament_targeting_mode ?? "all";
+        if (mode === "none") return false;
+
+        if (mode === "selected") {
+          const ids = (c.ad_campaign_tournaments || []).map((t) => t.tournament_id);
+          // No tournaments selected => ineligible (never falls back to "all").
+          if (!tournamentId || ids.length === 0) return false;
+          if (!ids.includes(tournamentId)) return false;
+        }
+
+        // Legacy page/device targeting still applies (AND-based).
         const targeting = c.targeting;
-        if (!targeting) return true;
-        if (tournamentId && targeting.tournament_ids?.length > 0) {
+        if (tournamentId && targeting?.tournament_ids?.length > 0) {
           return targeting.tournament_ids.includes(tournamentId);
         }
         return true;
       });
-
-      return campaigns;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+// Campaign ↔ Tournament targeting
+export const useCampaignTournaments = (campaignId: string) =>
+  useQuery({
+    queryKey: ["campaign-tournaments", campaignId],
+    enabled: !!campaignId,
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from("ad_campaign_tournaments" as any)
+        .select("tournament_id")
+        .eq("campaign_id", campaignId) as any);
+
+      if (error) throw error;
+      return (data as { tournament_id: string }[]).map((r) => r.tournament_id);
+    },
+  });
+
+export const useSetCampaignTournaments = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      campaignId,
+      tournamentIds,
+    }: {
+      campaignId: string;
+      tournamentIds: string[];
+    }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const owner_id = userData.user?.id;
+      if (!owner_id) throw new Error("Not authenticated");
+
+      const { error: delError } = await (supabase
+        .from("ad_campaign_tournaments" as any)
+        .delete()
+        .eq("campaign_id", campaignId) as any);
+      if (delError) throw delError;
+
+      if (tournamentIds.length > 0) {
+        const { error } = await (supabase.from("ad_campaign_tournaments" as any).insert(
+          tournamentIds.map((tournament_id) => ({ campaign_id: campaignId, tournament_id, owner_id })),
+        ) as any);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["campaign-tournaments", vars.campaignId] });
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+    },
+  });
+};
 
 // Analytics Mutations
 export const useRecordAdEvent = () => {

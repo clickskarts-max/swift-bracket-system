@@ -20,7 +20,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTournamentsIdRouteImport } from './routes/_authenticated/tournaments.$id'
 import { Route as AuthenticatedTournamentsNewRouteImport } from './routes/_authenticated/tournaments.new'
 import { Route as PublicTournamentSlugRouteImport } from './routes/public.tournament.$slug'
-import { Route as AuthenticatedAdvertisingCampaignIdRouteImport } from './routes/_authenticated/advertising.campaign.$id'
+import { Route as AuthenticatedAdvertisingCampaignIdRouteImport } from './routes/_authenticated/advertising_.campaign.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -81,16 +81,16 @@ const PublicTournamentSlugRoute = PublicTournamentSlugRouteImport.update({
 } as any)
 const AuthenticatedAdvertisingCampaignIdRoute =
   AuthenticatedAdvertisingCampaignIdRouteImport.update({
-    id: '/campaign/$id',
-    path: '/campaign/$id',
-    getParentRoute: () => AuthenticatedAdvertisingRoute,
+    id: '/advertising_/campaign/$id',
+    path: '/advertising/campaign/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/advertising': typeof AuthenticatedAdvertisingRouteWithChildren
+  '/advertising': typeof AuthenticatedAdvertisingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/owner': typeof AuthenticatedOwnerRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -103,7 +103,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/advertising': typeof AuthenticatedAdvertisingRouteWithChildren
+  '/advertising': typeof AuthenticatedAdvertisingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/owner': typeof AuthenticatedOwnerRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -118,14 +118,14 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/advertising': typeof AuthenticatedAdvertisingRouteWithChildren
+  '/_authenticated/advertising': typeof AuthenticatedAdvertisingRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tournaments/$id': typeof AuthenticatedTournamentsIdRoute
   '/_authenticated/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
-  '/_authenticated/advertising/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
+  '/_authenticated/advertising_/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,7 +167,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tournaments/$id'
     | '/_authenticated/tournaments/new'
     | '/public/tournament/$slug'
-    | '/_authenticated/advertising/campaign/$id'
+    | '/_authenticated/advertising_/campaign/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -257,47 +257,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicTournamentSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/advertising/campaign/$id': {
-      id: '/_authenticated/advertising/campaign/$id'
-      path: '/campaign/$id'
+    '/_authenticated/advertising_/campaign/$id': {
+      id: '/_authenticated/advertising_/campaign/$id'
+      path: '/advertising/campaign/$id'
       fullPath: '/advertising/campaign/$id'
       preLoaderRoute: typeof AuthenticatedAdvertisingCampaignIdRouteImport
-      parentRoute: typeof AuthenticatedAdvertisingRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedAdvertisingRouteChildren {
-  AuthenticatedAdvertisingCampaignIdRoute: typeof AuthenticatedAdvertisingCampaignIdRoute
-}
-
-const AuthenticatedAdvertisingRouteChildren: AuthenticatedAdvertisingRouteChildren =
-  {
-    AuthenticatedAdvertisingCampaignIdRoute:
-      AuthenticatedAdvertisingCampaignIdRoute,
-  }
-
-const AuthenticatedAdvertisingRouteWithChildren =
-  AuthenticatedAdvertisingRoute._addFileChildren(
-    AuthenticatedAdvertisingRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdvertisingRoute: typeof AuthenticatedAdvertisingRouteWithChildren
+  AuthenticatedAdvertisingRoute: typeof AuthenticatedAdvertisingRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTournamentsIdRoute: typeof AuthenticatedTournamentsIdRoute
   AuthenticatedTournamentsNewRoute: typeof AuthenticatedTournamentsNewRoute
+  AuthenticatedAdvertisingCampaignIdRoute: typeof AuthenticatedAdvertisingCampaignIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdvertisingRoute: AuthenticatedAdvertisingRouteWithChildren,
+  AuthenticatedAdvertisingRoute: AuthenticatedAdvertisingRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTournamentsIdRoute: AuthenticatedTournamentsIdRoute,
   AuthenticatedTournamentsNewRoute: AuthenticatedTournamentsNewRoute,
+  AuthenticatedAdvertisingCampaignIdRoute:
+    AuthenticatedAdvertisingCampaignIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
