@@ -199,7 +199,25 @@ export function KeysPanel() {
                       </Button>
                     </>
                   )}
+                  {(k.redemption_count ?? 0) === 0 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      disabled={deleteKey.isPending}
+                      onClick={() => {
+                        if (!window.confirm("Permanently delete this activation key?")) return;
+                        void deleteKey
+                          .mutateAsync(k.id)
+                          .then(() => toast.success("Key deleted"))
+                          .catch((err: Error) => toast.error(err.message));
+                      }}
+                    >
+                      <Trash2 className="mr-1.5 h-4 w-4" /> Delete
+                    </Button>
+                  )}
                 </div>
+
               </div>
             );
           })}
