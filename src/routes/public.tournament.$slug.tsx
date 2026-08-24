@@ -311,6 +311,7 @@ function PublicTournament() {
       
       <div className="mx-auto max-w-5xl px-4 pt-6 space-y-4">
         <SmartAdSlot placement="tournament-header" tournamentId={tournament.id} className="w-full" />
+        <NativeAdSlot tournamentId={tournament.id} />
         <AutoAdRegion context="tournament_overview" tournamentId={tournament.id} className="w-full" />
       </div>
 
@@ -361,6 +362,12 @@ function PublicTournament() {
           </TabsContent>
 
           <TabsContent value="results">
+            <SponsorSlot
+              inventory="results-sponsor"
+              tournamentId={tournament.id}
+              title="Results"
+              className="mb-4"
+            />
             {results.length === 0 ? (
               <EmptyState
                 title="No results yet"
@@ -386,6 +393,11 @@ function PublicTournament() {
 
           <TabsContent value="standings">
             <div className="space-y-6">
+              <SponsorSlot
+                inventory="standings-sponsor"
+                tournamentId={tournament.id}
+                title="Standings"
+              />
               <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
               <SmartAdSlot 
                 placement="sidebar" 
@@ -396,6 +408,12 @@ function PublicTournament() {
             </div>
           </TabsContent>
           <TabsContent value="bracket">
+            <SponsorSlot
+              inventory="bracket-sponsor"
+              tournamentId={tournament.id}
+              title="Knockout"
+              className="mb-4"
+            />
             <BracketTab teams={teams} matches={matches} />
           </TabsContent>
           <TabsContent value="teams">
@@ -416,6 +434,16 @@ function PublicTournament() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <div className="mx-auto max-w-5xl px-4 pb-8">
+        <SponsorSlot
+          inventory="official-partner"
+          tournamentId={tournament.id}
+          title="Official partners"
+          align="center"
+          multiple
+        />
+      </div>
 
       {footer.length > 0 && (
         <section className="border-t border-border/60 py-8">
@@ -455,6 +483,7 @@ function PublicTournament() {
           </p>
         </div>
       </footer>
+      <StickyMobileAd tournamentId={tournament.id} />
     </div>
   );
 }
