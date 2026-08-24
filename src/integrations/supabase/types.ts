@@ -156,40 +156,67 @@ export type Database = {
       }
       ad_creatives: {
         Row: {
+          aspect_ratio: string | null
           campaign_id: string
           created_at: string | null
           destination_url: string | null
           height: number | null
+          html_content: string | null
           id: string
+          is_responsive: boolean | null
+          max_width: number | null
           media_url: string
+          min_width: number | null
           name: string
           owner_id: string
+          provider_config: Json | null
+          provider_type: string | null
+          size_preset: string | null
+          status: string | null
           type: string | null
           updated_at: string | null
           width: number | null
         }
         Insert: {
+          aspect_ratio?: string | null
           campaign_id: string
           created_at?: string | null
           destination_url?: string | null
           height?: number | null
+          html_content?: string | null
           id?: string
+          is_responsive?: boolean | null
+          max_width?: number | null
           media_url: string
+          min_width?: number | null
           name: string
           owner_id: string
+          provider_config?: Json | null
+          provider_type?: string | null
+          size_preset?: string | null
+          status?: string | null
           type?: string | null
           updated_at?: string | null
           width?: number | null
         }
         Update: {
+          aspect_ratio?: string | null
           campaign_id?: string
           created_at?: string | null
           destination_url?: string | null
           height?: number | null
+          html_content?: string | null
           id?: string
+          is_responsive?: boolean | null
+          max_width?: number | null
           media_url?: string
+          min_width?: number | null
           name?: string
           owner_id?: string
+          provider_config?: Json | null
+          provider_type?: string | null
+          size_preset?: string | null
+          status?: string | null
           type?: string | null
           updated_at?: string | null
           width?: number | null
