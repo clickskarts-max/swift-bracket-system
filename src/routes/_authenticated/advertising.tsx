@@ -11,13 +11,12 @@ import {
   useUpdateAdCampaign,
   useDeleteAdCampaign,
   useAdPlacements,
-  useCreateAdCreative,
-  useDeleteAdCreative,
   AdCampaign,
   AdCreative
 } from "@/lib/ads.functions";
+import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info } from "lucide-react";
+import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -64,9 +63,9 @@ function AdvertisingPage() {
   const updateSettings = useUpdateAdSettings();
   const deleteCampaign = useDeleteAdCampaign();
 
+  const [selectedCampaign, setSelectedCampaign] = useState<(AdCampaign & { ad_creatives: AdCreative[] }) | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
-  const [isCreativeDialogOpen, setIsCreativeDialogOpen] = useState(false);
 
   // Safely handle campaigns array
   const campaigns = Array.isArray(campaignsData) ? campaignsData : [];
@@ -117,17 +116,12 @@ function AdvertisingPage() {
         title="Ads & Sponsors"
         description="Manage commercial ads, sponsorships and track performance."
         action={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setIsCreativeDialogOpen(true)}>
-               <ImageIcon className="mr-2 h-4 w-4" /> Add Creative
-            </Button>
-            <Button onClick={() => {
+          <Button onClick={() => {
               setSelectedCampaign(null);
               setIsCampaignDialogOpen(true);
             }}>
-              <Plus className="mr-2 h-4 w-4" /> Create Campaign
-            </Button>
-          </div>
+            <Plus className="mr-2 h-4 w-4" /> Create Campaign
+          </Button>
         }
       />
 
@@ -207,6 +201,16 @@ function AdvertisingPage() {
                             size="icon" 
                             onClick={() => {
                               setSelectedCampaign(c);
+                              setIsDetailOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => {
+                              setSelectedCampaign(c);
                               setIsCampaignDialogOpen(true);
                             }}
                           >
@@ -221,6 +225,77 @@ function AdvertisingPage() {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="creatives" className="space-y-4">
+          <div className="surface-card p-6 border rounded-lg overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <ImageIcon className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold">Global Creative Library</h3>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Creative</TableHead>
+                  <TableHead>Campaign</TableHead>
+                  <TableHead>Format</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {campaigns.flatMap(c => c.ad_creatives.map(cr => ({ ...cr, campaignName: c.name, fullCampaign: c }))).length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      No creatives found. Add them through a campaign.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  campaigns.flatMap(c => c.ad_creatives.map(cr => ({ ...cr, campaignName: c.name, fullCampaign: c }))).map((cr) => (
+                    <TableRow key={cr.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                            {cr.media_url ? (
+                              <img src={cr.media_url} className="h-full w-full object-cover" alt="" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center">
+                                <ImageIcon className="h-4 w-4 opacity-20" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="font-medium">{cr.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{cr.campaignName}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize text-[10px]">
+                          {cr.size_preset?.replace(/-/g, ' ') || 'Custom'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[10px] uppercase">
+                          {cr.provider_type === 'adsense' ? 'AdSense' : cr.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedCampaign(cr.fullCampaign);
+                            setIsDetailOpen(true);
+                          }}
+                        >
+                          View in Campaign
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -295,8 +370,7 @@ function AdvertisingPage() {
           {allCreatives.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border/60 bg-muted/20 py-12 text-muted-foreground">
               <ImageIcon className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">No creatives uploaded yet</p>
-              <Button variant="link" onClick={() => setIsCreativeDialogOpen(true)}>Add your first creative</Button>
+              <p className="text-sm">No creatives uploaded yet. Creatives are managed inside each campaign.</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -342,14 +416,22 @@ function AdvertisingPage() {
 
       <CampaignDialog 
         open={isCampaignDialogOpen} 
-        onOpenChange={setIsCampaignDialogOpen} 
+        onOpenChange={(open) => {
+          setIsCampaignDialogOpen(open);
+          if (!open) setSelectedCampaign(null);
+        }} 
         campaign={selectedCampaign}
       />
-      <CreativeDialog 
-        open={isCreativeDialogOpen} 
-        onOpenChange={setIsCreativeDialogOpen}
-        campaigns={campaigns}
-      />
+      {selectedCampaign && (
+        <CampaignDetailDrawer
+          open={isDetailOpen}
+          onOpenChange={(open) => {
+            setIsDetailOpen(open);
+            if (!open) setSelectedCampaign(null);
+          }}
+          campaign={selectedCampaign}
+        />
+      )}
     </div>
   );
 }
@@ -512,132 +594,3 @@ function CampaignDialog({
   );
 }
 
-function CreativeDialog({ 
-  open, 
-  onOpenChange,
-  campaigns
-}: { 
-  open: boolean, 
-  onOpenChange: (open: boolean) => void,
-  campaigns: AdCampaign[]
-}) {
-  const createCreative = useCreateAdCreative();
-  const [formData, setFormData] = useState({ 
-    name: '', 
-    campaign_id: '', 
-    type: 'image' as AdCreative['type'], 
-    media_url: '' as string | null,
-    destination_url: '' 
-  });
-
-  useMemo(() => {
-    if (open) {
-      setFormData({
-        name: '',
-        campaign_id: campaigns[0]?.id || '',
-        type: 'image',
-        media_url: null,
-        destination_url: ''
-      });
-    }
-  }, [open, campaigns]);
-
-  const handleSubmit = async () => {
-    if (!formData.media_url) {
-      toast.error("Please upload a creative image");
-      return;
-    }
-    try {
-      await createCreative.mutateAsync({
-        name: formData.name || 'Untitled Creative',
-        campaign_id: formData.campaign_id,
-        type: formData.type,
-        media_url: formData.media_url,
-        destination_url: formData.destination_url || null
-      });
-      toast.success("Creative added");
-      onOpenChange(false);
-    } catch (e) {
-      toast.error("Failed to add creative");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Add Ad Creative</DialogTitle>
-          <DialogDescription>
-            Upload an image and link it to a campaign.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="grid gap-2">
-            <Label>Creative Name</Label>
-            <Input 
-              placeholder="e.g. Header Banner v1" 
-              value={formData.name} 
-              onChange={e => setFormData(prev => ({...prev, name: e.target.value}))} 
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Link to Campaign</Label>
-            <Select 
-              value={formData.campaign_id} 
-              onValueChange={v => setFormData(prev => ({...prev, campaign_id: v}))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a campaign" />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label>Creative Type</Label>
-            <Select 
-              value={formData.type} 
-              onValueChange={v => setFormData(prev => ({...prev, type: v as any}))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="image">Standard Image</SelectItem>
-                <SelectItem value="animated">Animated GIF/WebP</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label>Ad Creative Image</Label>
-            <ImageUpload 
-              value={formData.media_url} 
-              onChange={url => setFormData(prev => ({...prev, media_url: url}))}
-              folder="creatives"
-              bucket="ad-creatives"
-              className="aspect-video"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Destination URL (Optional)</Label>
-            <Input 
-              type="url"
-              placeholder="https://example.com/promo" 
-              value={formData.destination_url} 
-              onChange={e => setFormData(prev => ({...prev, destination_url: e.target.value}))} 
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!formData.media_url || !formData.campaign_id}>
-            Add Creative
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}

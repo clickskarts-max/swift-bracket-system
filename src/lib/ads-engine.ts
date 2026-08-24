@@ -113,7 +113,8 @@ export class SmartPlacementEngine {
 
     // 2. Filter by width compatibility
     const compatible = allCreatives.filter(c => {
-      if (!c.width) return true; // Responsive
+      if (c.is_responsive || c.size_preset === 'responsive') return true;
+      if (!c.width) return true; // Fallback for older data
       return c.width <= containerWidth;
     });
 
