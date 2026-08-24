@@ -190,7 +190,9 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
       // Single request evaluates status, tournament targeting, creatives (no N+1).
       let query = supabase
         .from("ad_campaigns" as any)
-        .select("*, ad_creatives(*), ad_campaign_tournaments(tournament_id)")
+        .select(
+          "*, ad_creatives(*), ad_campaign_tournaments(tournament_id), campaign_inventory(inventory_key, enabled)",
+        )
         .eq("status", "active")
         .neq("tournament_targeting_mode", "none");
 
@@ -210,6 +212,7 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
       const rows = data as (AdCampaign & {
         ad_creatives: AdCreative[];
         ad_campaign_tournaments?: { tournament_id: string }[];
+        campaign_inventory?: { inventory_key: string; enabled: boolean }[];
       })[];
 
       return rows.filter((c) => {
@@ -223,6 +226,17 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
           if (!ids.includes(tournamentId)) return false;
         }
 
+        // Inventory selection (when configured) restricts which slots may serve.
+        // Legacy campaigns without inventory rows keep serving everywhere.
+        const inv = (c.campaign_inventory || []).filter((i) => i.enabled).map((i) => i.inventory_key);
+        if (inv.length > 0) {
+          if (isAuto) {
+            if (!inv.includes("smart-auto")) return false;
+          } else if (!inv.includes(placementKey)) {
+            return false;
+          }
+        }
+
         // Legacy page/device targeting still applies (AND-based).
         const targeting = c.targeting;
         if (tournamentId && targeting?.tournament_ids?.length > 0) {
@@ -230,6 +244,7 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
         }
         return true;
       });
+
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
