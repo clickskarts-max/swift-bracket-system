@@ -1,31 +1,83 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
-export type AdCampaign = Tables<"ad_campaigns">;
-export type AdCreative = Tables<"ad_creatives">;
-export type AdPlacement = Tables<"ad_placements">;
-export type AdAnalytic = Tables<"ad_analytics">;
+// Define manual types until Supabase types are regenerated
+export interface AdCampaign {
+  id: string;
+  owner_id: string;
+  name: string;
+  advertiser: string | null;
+  status: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
+  priority: 'low' | 'normal' | 'high' | 'guaranteed';
+  weight: number;
+  targeting: any;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-const unwrap = <T>({ data, error }: { data: T; error: { message: string } | null }) => {
-  if (error) throw new Error(error.message);
-  return data;
-};
+export interface AdCreative {
+  id: string;
+  owner_id: string;
+  campaign_id: string;
+  name: string;
+  type: 'image' | 'animated' | 'html';
+  media_url: string;
+  destination_url: string | null;
+  width: number | null;
+  height: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdPlacement {
+  id: string;
+  key: string;
+  label: string;
+  enabled: boolean;
+  allowed_sizes: { w: number; h: number }[];
+  created_at: string;
+}
+
+export interface AdAnalytic {
+  id: string;
+  campaign_id: string;
+  creative_id: string;
+  placement_id: string | null;
+  tournament_id: string | null;
+  type: 'impression' | 'click';
+  page: string | null;
+  timestamp: string;
+}
 
 // Admin Hooks
 export const useAdCampaigns = () =>
   useQuery({
     queryKey: ["ad-campaigns"],
-    queryFn: async () =>
-      unwrap(
-        await supabase.from("ad_campaigns").select("*, ad_creatives(*)").order("created_at", { ascending: false }),
-      ) as (AdCampaign & { ad_creatives: AdCreative[] })[],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ad_campaigns" as any)
+        .select("*, ad_creatives(*)")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data as (AdCampaign & { ad_creatives: AdCreative[] })[];
+    },
   });
 
 export const useAdPlacements = () =>
   useQuery({
     queryKey: ["ad-placements"],
-    queryFn: async () => unwrap(await supabase.from("ad_placements").select("*").order("label")),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ad_placements" as any)
+        .select("*")
+        .order("label");
+      
+      if (error) throw error;
+      return data as AdPlacement[];
+    },
   });
 
 export const useAdStats = () =>
@@ -33,14 +85,14 @@ export const useAdStats = () =>
     queryKey: ["ad-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("ad_analytics")
-        .select("type, campaign_id");
+        .from("ad_analytics" as any)
+        .select("type");
       
       if (error) throw error;
 
-      const stats = data.reduce((acc: any, curr) => {
-        const type = curr.type === "impression" ? "impressions" : "clicks";
-        acc[type] = (acc[type] || 0) + 1;
+      const stats = (data as any[]).reduce((acc: any, curr) => {
+        const typeKey = curr.type === "impression" ? "impressions" : "clicks";
+        acc[typeKey] = (acc[typeKey] || 0) + 1;
         return acc;
       }, { impressions: 0, clicks: 0 });
 
@@ -53,18 +105,15 @@ export const useActiveAds = (placementKey: string, tournamentId?: string) =>
   useQuery({
     queryKey: ["active-ads", placementKey, tournamentId],
     queryFn: async () => {
-      let query = supabase
-        .from("ad_campaigns")
+      const { data, error } = await supabase
+        .from("ad_campaigns" as any)
         .select("*, ad_creatives(*)")
         .eq("status", "active");
 
-      // Apply targeting logic here if needed via JS filter or more complex query
-      const { data, error } = await query;
       if (error) throw error;
 
-      // Filter by placement and tournament targeting in JS for V1 simplicity
       const campaigns = (data as (AdCampaign & { ad_creatives: AdCreative[] })[]).filter(c => {
-        const targeting = c.targeting as any;
+        const targeting = c.targeting;
         if (tournamentId && targeting?.tournament_ids?.length > 0) {
           return targeting.tournament_ids.includes(tournamentId);
         }
@@ -77,10 +126,15 @@ export const useActiveAds = (placementKey: string, tournamentId?: string) =>
   });
 
 // Analytics Mutations
-export const useRecordAdEvent = () =>
-  useMutation({
-    mutationFn: async (event: Omit<TablesInsert<"ad_analytics">, "owner_id">) => {
-      const { error } = await supabase.from("ad_analytics").insert(event);
+export const useRecordAdEvent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (event: Partial<AdAnalytic>) => {
+      const { error } = await supabase.from("ad_analytics" as any).insert(event);
       if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-stats"] });
     }
   });
+};
