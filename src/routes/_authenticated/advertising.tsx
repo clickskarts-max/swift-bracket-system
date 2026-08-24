@@ -320,16 +320,6 @@ function AdvertisingPage() {
         }} 
         campaign={selectedCampaign}
       />
-      {selectedCampaign && (
-        <CampaignDetailDrawer
-          open={isDetailOpen}
-          onOpenChange={(open) => {
-            setIsDetailOpen(open);
-            if (!open) setSelectedCampaign(null);
-          }}
-          campaign={selectedCampaign}
-        />
-      )}
     </div>
   );
 }
