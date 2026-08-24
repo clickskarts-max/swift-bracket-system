@@ -23,7 +23,7 @@ const SECTION_IDS: Record<string, string> = {
 
 function OwnerAdmin() {
   const scrollTo = (key: string) => {
-    const id = SECTION_IDS[key] ?? SECTION_IDS.overview;
+    const id = SECTION_IDS[key] ?? "owner-overview";
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
