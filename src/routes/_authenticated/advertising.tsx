@@ -164,6 +164,7 @@ function AdvertisingPage() {
                   <TableHead>Advertiser</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  <TableHead>Creatives</TableHead>
                   <TableHead>Auto</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
