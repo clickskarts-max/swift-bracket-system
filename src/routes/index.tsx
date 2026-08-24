@@ -15,6 +15,7 @@ import { Trophy, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
 import { AutoAdRegion } from "@/components/ads/auto-ad-region";
+import { NativeAdSlot } from "@/components/ads/native-ad-slot";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -56,6 +57,7 @@ function Index() {
           <div className="surface-card p-4 overflow-hidden">
             <p className="mb-4 text-center text-xs uppercase tracking-widest text-muted-foreground/60 font-bold">Featured Spotlight</p>
             <SmartAdSlot placement="homepage-content" className="w-full" />
+            <NativeAdSlot className="mt-4" />
           </div>
         </div>
         <LandingWhiteLabel />
