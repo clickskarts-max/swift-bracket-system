@@ -65,9 +65,9 @@ function AdvertisingPage() {
   const updateSettings = useUpdateAdSettings();
   const deleteCampaign = useDeleteAdCampaign();
 
+  const [selectedCampaign, setSelectedCampaign] = useState<(AdCampaign & { ad_creatives: AdCreative[] }) | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
-  const [isCreativeDialogOpen, setIsCreativeDialogOpen] = useState(false);
 
   // Safely handle campaigns array
   const campaigns = Array.isArray(campaignsData) ? campaignsData : [];
