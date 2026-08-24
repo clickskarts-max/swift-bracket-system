@@ -297,31 +297,19 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
       </div>
     );
 
-    if (inline) {
-      return (
-        <>
-          {renderedContent}
-          <CreativeDialog 
-            open={isAddCreativeOpen}
-            onOpenChange={(open) => {
-              setIsAddCreativeOpen(open);
-              if (!open) setEditingCreative(null);
-            }}
-            campaignId={campaign.id}
-            creative={editingCreative}
-          />
-        </>
-      );
-    }
-
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl p-0">
-          <div className="p-6">
-            {renderedContent}
-          </div>
-        </DialogContent>
-
+      <>
+        {inline ? (
+          renderedContent
+        ) : (
+          <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-4xl p-0">
+              <div className="p-6">
+                {renderedContent}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
         <CreativeDialog 
           open={isAddCreativeOpen}
           onOpenChange={(open) => {
@@ -331,7 +319,7 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
           campaignId={campaign.id}
           creative={editingCreative}
         />
-      </Dialog>
+      </>
     );
 }
 
