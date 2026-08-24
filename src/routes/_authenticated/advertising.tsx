@@ -149,10 +149,9 @@ function AdvertisingPage() {
       <Tabs defaultValue="campaigns" className="space-y-4">
         <TabsList>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="creatives">Creatives</TabsTrigger>
           <TabsTrigger value="settings">
             <Settings2 className="mr-2 h-4 w-4" />
-            Settings
+            Global Settings
           </TabsTrigger>
         </TabsList>
 
