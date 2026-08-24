@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     NAV.map(({ to, label, icon: Icon }) => (
       <Link
         key={to}
-        to={to}
+        to={to as any}
         onClick={onClick}
         className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         activeProps={{ className: "bg-secondary text-foreground" }}
