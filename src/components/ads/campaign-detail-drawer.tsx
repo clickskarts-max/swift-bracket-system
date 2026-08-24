@@ -291,8 +291,6 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
         )}
       </div>
     );
-
-    if (inline) {
       return (
         <>
           {content}
