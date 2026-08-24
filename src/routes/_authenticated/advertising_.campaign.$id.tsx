@@ -4,7 +4,9 @@ import {
   AdCampaign, 
   AdCreative, 
   useUpdateAdCampaign,
-  useDeleteAdCampaign
+  useDeleteAdCampaign,
+  useCampaignInventory,
+  useCampaignPerformance
 } from "@/lib/ads.functions";
 import { useState, useMemo } from "react";
 import { 
@@ -34,10 +36,15 @@ import { StatCard, StatusPill } from "@/components/data-bits";
 import { toast } from "sonner";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { TournamentTargeting, targetingSummary } from "@/components/ads/tournament-targeting";
+import { InventoryManagement } from "@/components/ads/inventory-management";
+import { SponsorCreatives } from "@/components/ads/sponsor-creatives";
+import { INVENTORY_BY_KEY } from "@/lib/ad-inventory";
 
 export const Route = createFileRoute("/_authenticated/advertising_/campaign/$id")({
   component: CampaignWorkspace,
 });
+
+const TABS = ["overview", "creatives", "inventory", "targeting", "performance", "settings"] as const;
 
 function CampaignWorkspace() {
   const { id } = Route.useParams();
@@ -45,13 +52,25 @@ function CampaignWorkspace() {
   const { data: campaigns = [], isLoading } = useAdCampaigns();
   const updateCampaign = useUpdateAdCampaign();
   const deleteCampaign = useDeleteAdCampaign();
+  const { data: inventoryRows = [] } = useCampaignInventory(id);
+  const { data: perf = [] } = useCampaignPerformance(id);
   
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   const campaign = useMemo(() => 
     campaigns.find(c => c.id === id), 
     [campaigns, id]
   );
+
+  const totals = useMemo(
+    () =>
+      perf.reduce(
+        (acc, r) => ({ impressions: acc.impressions + r.impressions, clicks: acc.clicks + r.clicks }),
+        { impressions: 0, clicks: 0 },
+      ),
+    [perf],
+  );
+
 
   if (isLoading) {
     return (
