@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Ban, Copy, KeyRound } from "lucide-react";
+import { Ban, Copy, KeyRound, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
