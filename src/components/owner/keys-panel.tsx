@@ -13,7 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { KEY_PLANS, useActivationKeys, useCreateKey, useRevokeKey } from "@/lib/owner";
+import {
+  KEY_PLANS,
+  useActivationKeys,
+  useCreateKey,
+  useDeleteKey,
+  useRevokeKey,
+} from "@/lib/owner";
+
 
 function maskKey(key: string, reveal: boolean) {
   if (reveal) return key;
