@@ -301,8 +301,7 @@ function AdvertisingPage() {
           {allCreatives.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border/60 bg-muted/20 py-12 text-muted-foreground">
               <ImageIcon className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">No creatives uploaded yet</p>
-              <Button variant="link" onClick={() => setIsCreativeDialogOpen(true)}>Add your first creative</Button>
+              <p className="text-sm">No creatives uploaded yet. Creatives are managed inside each campaign.</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
