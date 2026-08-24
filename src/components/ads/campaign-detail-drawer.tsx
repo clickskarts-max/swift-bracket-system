@@ -300,13 +300,16 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignD
 function CreativeDialog({ 
   open, 
   onOpenChange,
-  campaignId
+  campaignId,
+  creative
 }: { 
   open: boolean, 
   onOpenChange: (open: boolean) => void,
-  campaignId: string
+  campaignId: string,
+  creative?: AdCreative | null
 }) {
   const createCreative = useCreateAdCreative();
+  const updateCreative = useUpdateAdCreative();
   const [step, setStep] = useState(1);
   const [source, setSource] = useState<'upload' | 'html' | 'adsense'>('upload');
   
@@ -324,10 +327,42 @@ function CreativeDialog({
   });
 
   const resetForm = () => {
-    setStep(1);
-    setSource('upload');
-    setFormData({
-      name: '',
+    if (creative) {
+      setStep(3);
+      setSource(creative.provider_type === 'adsense' ? 'adsense' : creative.type === 'html' ? 'html' : 'upload');
+      setFormData({
+        name: creative.name,
+        type: creative.type,
+        media_url: creative.media_url,
+        html_content: creative.html_content || '',
+        destination_url: creative.destination_url || '',
+        size_preset: creative.size_preset || 'leaderboard',
+        width: creative.width,
+        height: creative.height,
+        is_responsive: creative.is_responsive || false,
+        provider_config: creative.provider_config || {}
+      });
+    } else {
+      setStep(1);
+      setSource('upload');
+      setFormData({
+        name: '',
+        type: 'image',
+        media_url: null,
+        html_content: '',
+        destination_url: '',
+        size_preset: 'leaderboard',
+        width: null,
+        height: null,
+        is_responsive: false,
+        provider_config: {}
+      });
+    }
+  };
+
+  useMemo(() => {
+    if (open) resetForm();
+  }, [open, creative]);
       type: 'image',
       media_url: null,
       html_content: '',
