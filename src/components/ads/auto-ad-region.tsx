@@ -52,7 +52,7 @@ export function AutoAdRegion({ context, tournamentId, className }: AutoAdRegionP
   }, [context, settings, campaigns, isMobile]);
 
   // Debug overlay (only if ?ad_debug=true in URL)
-  const isDebug = new URLSearchParams(window.location.search).get('ad_debug') === 'true';
+  const isDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('ad_debug') === 'true';
 
   return (
     <div ref={containerRef} className={className}>
@@ -60,7 +60,7 @@ export function AutoAdRegion({ context, tournamentId, className }: AutoAdRegionP
         <div className="relative group">
           <SmartAdSlot 
             placement={`auto-${context}`} 
-            tournamentId={tournamentId} 
+            tournamentId={tournamentId || undefined} 
             isAuto={true} 
           />
           {isDebug && regionScore && (
