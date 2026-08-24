@@ -63,6 +63,7 @@ function AdvertisingPage() {
   const { data: settings } = useAdSettings();
   const updateSettings = useUpdateAdSettings();
   const deleteCampaign = useDeleteAdCampaign();
+  const navigate = useNavigate();
 
   const [selectedCampaign, setSelectedCampaign] = useState<(AdCampaign & { ad_creatives: AdCreative[] }) | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
