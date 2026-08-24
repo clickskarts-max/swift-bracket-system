@@ -108,9 +108,17 @@ export function SmartAdSlot({ placement, tournamentId, className, isAuto = false
         margin: '0 auto'
       }}
     >
-      {selectedCreative.type === 'html' ? (
+      {selectedCreative.provider_type === 'adsense' ? (
+        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-xs text-center p-4">
+          <div>
+            <p className="font-semibold">Google AdSense</p>
+            <p className="opacity-60">{selectedCreative.size_preset || 'Responsive'}</p>
+            <p className="text-[10px] mt-2 italic">AdSense will render here in production</p>
+          </div>
+        </div>
+      ) : selectedCreative.type === 'html' ? (
         <iframe
-          srcDoc={selectedCreative.media_url}
+          srcDoc={selectedCreative.html_content || ''}
           sandbox="allow-scripts"
           className="w-full h-full border-0"
           title={selectedCreative.name}
