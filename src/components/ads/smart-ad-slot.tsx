@@ -55,10 +55,13 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
     compatible.sort((a, b) => {
       const pA = a.priority as keyof typeof priorityMap;
       const pB = b.priority as keyof typeof priorityMap;
-      return priorityMap[pB] - priorityMap[pA];
+      return (priorityMap[pB] || 0) - (priorityMap[pA] || 0);
     });
 
-    const highestPriority = compatible[0].priority;
+    const first = compatible[0];
+    if (!first) return null;
+
+    const highestPriority = first.priority;
     const topTier = compatible.filter(c => c.priority === highestPriority);
 
     // 4. Weighted selection within top tier
@@ -77,12 +80,14 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
   useEffect(() => {
     if (!selectedCreative || impressionRecorded.current) return;
 
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (entry && entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           // Record after 1s visibility
-          const timer = setTimeout(() => {
+          timer = setTimeout(() => {
             recordEvent.mutate({
               campaign_id: selectedCreative.campaign_id,
               creative_id: selectedCreative.id,
@@ -93,14 +98,18 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
             });
             impressionRecorded.current = true;
           }, 1000);
-          return () => clearTimeout(timer);
+        } else if (timer) {
+          clearTimeout(timer);
         }
       },
       { threshold: 0.5 }
     );
 
     if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (timer) clearTimeout(timer);
+    };
   }, [selectedCreative, recordEvent, tournamentId]);
 
   const handleClick = () => {
