@@ -363,21 +363,6 @@ function CreativeDialog({
   useMemo(() => {
     if (open) resetForm();
   }, [open, creative]);
-      type: 'image',
-      media_url: null,
-      html_content: '',
-      destination_url: '',
-      size_preset: 'leaderboard',
-      width: null,
-      height: null,
-      is_responsive: false,
-      provider_config: {}
-    });
-  };
-
-  useMemo(() => {
-    if (open) resetForm();
-  }, [open]);
 
   const handleFileUpload = async (url: string | null, file?: File) => {
     if (!url) {
