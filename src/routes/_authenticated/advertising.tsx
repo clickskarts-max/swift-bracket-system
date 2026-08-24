@@ -16,7 +16,8 @@ import {
 } from "@/lib/ads.functions";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye } from "lucide-react";
+import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye, LayoutDashboard } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Table,
   TableBody,
@@ -62,9 +63,10 @@ function AdvertisingPage() {
   const { data: settings } = useAdSettings();
   const updateSettings = useUpdateAdSettings();
   const deleteCampaign = useDeleteAdCampaign();
+  const navigate = useNavigate();
 
   const [selectedCampaign, setSelectedCampaign] = useState<(AdCampaign & { ad_creatives: AdCreative[] }) | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
 
   // Safely handle campaigns array
@@ -147,10 +149,9 @@ function AdvertisingPage() {
       <Tabs defaultValue="campaigns" className="space-y-4">
         <TabsList>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="creatives">Creatives</TabsTrigger>
           <TabsTrigger value="settings">
             <Settings2 className="mr-2 h-4 w-4" />
-            Settings
+            Global Settings
           </TabsTrigger>
         </TabsList>
 
@@ -163,6 +164,7 @@ function AdvertisingPage() {
                   <TableHead>Advertiser</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  <TableHead>Creatives</TableHead>
                   <TableHead>Auto</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -183,46 +185,58 @@ function AdvertisingPage() {
                 ) : (
                   campaigns.map((c) => (
                     <TableRow key={c.id}>
-                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <button 
+                          onClick={() => navigate({ to: `/advertising/campaign/${c.id}` })}
+                          className="hover:text-primary hover:underline text-left transition-colors"
+                        >
+                          {c.name}
+                        </button>
+                      </TableCell>
                       <TableCell>{c.advertiser || "—"}</TableCell>
                       <TableCell>
                         <StatusPill status={c.status} />
                       </TableCell>
                       <TableCell className="capitalize">{c.priority}</TableCell>
                       <TableCell>
+                        <Badge variant="outline" className="text-[10px]">
+                          {c.ad_creatives?.length || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={c.allow_auto_placement ? "default" : "secondary"} className="text-[10px]">
-                          {c.allow_auto_placement ? "Yes" : "No"}
+                          {c.allow_auto_placement ? "On" : "Off"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => {
-                              setSelectedCampaign(c);
-                              setIsDetailOpen(true);
-                            }}
+                            variant="default" 
+                            size="sm" 
+                            className="h-8 gap-1"
+                            onClick={() => navigate({ to: `/advertising/campaign/${c.id}` })}
                           >
-                            <Eye className="h-4 w-4" />
+                            <LayoutDashboard className="h-3.5 w-3.5" />
+                            Manage
                           </Button>
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="icon" 
+                            className="h-8 w-8"
                             onClick={() => {
                               setSelectedCampaign(c);
                               setIsCampaignDialogOpen(true);
                             }}
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <Settings2 className="h-3.5 w-3.5" />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="text-destructive hover:text-destructive"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
                             onClick={() => handleDeleteCampaign(c.id)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </TableCell>
@@ -234,76 +248,6 @@ function AdvertisingPage() {
           </div>
         </TabsContent>
         
-        <TabsContent value="creatives" className="space-y-4">
-          <div className="surface-card p-6 border rounded-lg overflow-hidden">
-            <div className="flex items-center gap-2 mb-4">
-              <ImageIcon className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold">Global Creative Library</h3>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Creative</TableHead>
-                  <TableHead>Campaign</TableHead>
-                  <TableHead>Format</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {campaigns.flatMap(c => c.ad_creatives.map(cr => ({ ...cr, campaignName: c.name, fullCampaign: c }))).length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No creatives found. Add them through a campaign.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  campaigns.flatMap(c => c.ad_creatives.map(cr => ({ ...cr, campaignName: c.name, fullCampaign: c }))).map((cr) => (
-                    <TableRow key={cr.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-16 bg-muted rounded overflow-hidden flex-shrink-0">
-                            {cr.media_url ? (
-                              <img src={cr.media_url} className="h-full w-full object-cover" alt="" />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <ImageIcon className="h-4 w-4 opacity-20" />
-                              </div>
-                            )}
-                          </div>
-                          <span className="font-medium">{cr.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{cr.campaignName}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize text-[10px]">
-                          {cr.size_preset?.replace(/-/g, ' ') || 'Custom'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-[10px] uppercase">
-                          {cr.provider_type === 'adsense' ? 'AdSense' : cr.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => {
-                            setSelectedCampaign(cr.fullCampaign);
-                            setIsDetailOpen(true);
-                          }}
-                        >
-                          View in Campaign
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
@@ -366,52 +310,6 @@ function AdvertisingPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="creatives">
-          {allCreatives.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border/60 bg-muted/20 py-12 text-muted-foreground">
-              <ImageIcon className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">No creatives uploaded yet. Creatives are managed inside each campaign.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {allCreatives.map((creative) => (
-                <Card key={creative.id} className="overflow-hidden group">
-                  <div className="aspect-video relative overflow-hidden bg-muted">
-                    <img 
-                      src={creative.media_url} 
-                      alt="" 
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                    />
-                    <div className="absolute top-2 right-2">
-                       <Badge variant="secondary" className="backdrop-blur-sm bg-background/60">
-                         {creative.type.toUpperCase()}
-                       </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-3 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium truncate flex-1">{creative.name || "Untitled"}</p>
-                      <Badge variant="outline" className="text-[9px] px-1 h-4">
-                        {creative.campaignName}
-                      </Badge>
-                    </div>
-                    {creative.destination_url && (
-                      <a 
-                        href={creative.destination_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-primary flex items-center hover:underline"
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Target URL
-                      </a>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
       </Tabs>
 
       <CampaignDialog 
@@ -422,16 +320,6 @@ function AdvertisingPage() {
         }} 
         campaign={selectedCampaign}
       />
-      {selectedCampaign && (
-        <CampaignDetailDrawer
-          open={isDetailOpen}
-          onOpenChange={(open) => {
-            setIsDetailOpen(open);
-            if (!open) setSelectedCampaign(null);
-          }}
-          campaign={selectedCampaign}
-        />
-      )}
     </div>
   );
 }
@@ -447,6 +335,8 @@ function CampaignDialog({
 }) {
   const createCampaign = useCreateAdCampaign();
   const updateCampaign = useUpdateAdCampaign();
+  const navigate = useNavigate();
+  
   
   const [formData, setFormData] = useState({ 
     name: '', 
@@ -489,7 +379,7 @@ function CampaignDialog({
         });
         toast.success("Campaign updated");
       } else {
-        await createCampaign.mutateAsync({
+        const newCampaign = await createCampaign.mutateAsync({
           name: formData.name,
           advertiser: formData.advertiser,
           priority: formData.priority,
@@ -498,6 +388,7 @@ function CampaignDialog({
           weight: 1
         });
         toast.success("Campaign created");
+        navigate({ to: `/advertising/campaign/${newCampaign.id}` });
       }
       onOpenChange(false);
     } catch (e) {
