@@ -452,3 +452,153 @@ export const useUpdateAdCreative = () => {
     }
   });
 };
+
+// ============================================================
+// Inventory (display placements + sponsorship slots)
+// ============================================================
+
+export const useCampaignInventory = (campaignId: string) =>
+  useQuery({
+    queryKey: ["campaign-inventory", campaignId],
+    enabled: !!campaignId,
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from("campaign_inventory" as any)
+        .select("id, campaign_id, inventory_key, enabled")
+        .eq("campaign_id", campaignId) as any);
+
+      if (error) throw error;
+      return data as CampaignInventoryRow[];
+    },
+  });
+
+export const useSetCampaignInventory = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      campaignId,
+      inventoryKeys,
+    }: {
+      campaignId: string;
+      inventoryKeys: string[];
+    }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const owner_id = userData.user?.id;
+      if (!owner_id) throw new Error("Not authenticated");
+
+      const { error: delError } = await (supabase
+        .from("campaign_inventory" as any)
+        .delete()
+        .eq("campaign_id", campaignId) as any);
+      if (delError) throw delError;
+
+      if (inventoryKeys.length > 0) {
+        const { error } = await (supabase.from("campaign_inventory" as any).insert(
+          inventoryKeys.map((inventory_key) => ({
+            campaign_id: campaignId,
+            inventory_key,
+            owner_id,
+            enabled: true,
+          })),
+        ) as any);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["campaign-inventory", vars.campaignId] });
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
+    },
+  });
+};
+
+/** Per-campaign, per-inventory analytics breakdown. */
+export const useCampaignPerformance = (campaignId: string) =>
+  useQuery({
+    queryKey: ["campaign-performance", campaignId],
+    enabled: !!campaignId,
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from("ad_analytics" as any)
+        .select("type, inventory_key")
+        .eq("campaign_id", campaignId) as any);
+
+      if (error) throw error;
+
+      const map = new Map<string, { impressions: number; clicks: number }>();
+      for (const row of (data as { type: string; inventory_key: string | null }[]) ?? []) {
+        const key = row.inventory_key || "unassigned";
+        const entry = map.get(key) ?? { impressions: 0, clicks: 0 };
+        if (row.type === "click") entry.clicks += 1;
+        else entry.impressions += 1;
+        map.set(key, entry);
+      }
+      return [...map.entries()].map(([inventory_key, v]) => ({ inventory_key, ...v }));
+    },
+  });
+
+export type ServedCampaign = AdCampaign & {
+  ad_creatives: AdCreative[];
+  ad_campaign_tournaments?: { tournament_id: string }[];
+  campaign_inventory?: { inventory_key: string; enabled: boolean }[];
+};
+
+const PRIORITY_RANK: Record<string, number> = { guaranteed: 4, high: 3, normal: 2, low: 1 };
+
+/**
+ * Single query that resolves every eligible sponsorship/native slot for a
+ * tournament (or the homepage when no tournament id is supplied).
+ * Returns a map of inventory_key -> served campaigns, so slots never fan out
+ * into N+1 requests.
+ */
+export const useTournamentInventory = (tournamentId?: string) =>
+  useQuery({
+    queryKey: ["tournament-inventory", tournamentId ?? "global"],
+    staleTime: 1000 * 60 * 5,
+    queryFn: async () => {
+      let query = supabase
+        .from("ad_campaigns" as any)
+        .select(
+          "*, ad_creatives(*), ad_campaign_tournaments(tournament_id), campaign_inventory(inventory_key, enabled)",
+        )
+        .eq("status", "active")
+        .neq("tournament_targeting_mode", "none");
+
+      if (!tournamentId) query = query.eq("tournament_targeting_mode", "all");
+
+      const { data, error } = await (query as any);
+      if (error) throw error;
+
+      const rows = (data as ServedCampaign[]) ?? [];
+
+      const eligible = rows.filter((c) => {
+        const mode = c.tournament_targeting_mode ?? "all";
+        if (mode === "selected") {
+          const ids = (c.ad_campaign_tournaments || []).map((t) => t.tournament_id);
+          if (!tournamentId || ids.length === 0 || !ids.includes(tournamentId)) return false;
+        }
+        return true;
+      });
+
+      const map: Record<string, ServedCampaign[]> = {};
+      for (const c of eligible) {
+        for (const inv of c.campaign_inventory ?? []) {
+          if (!inv.enabled) continue;
+          (map[inv.inventory_key] ||= []).push(c);
+        }
+      }
+
+      // Deterministic ordering: priority, then weight, then oldest commitment.
+      for (const key of Object.keys(map)) {
+        map[key]!.sort(
+          (a, b) =>
+            (PRIORITY_RANK[b.priority] ?? 0) - (PRIORITY_RANK[a.priority] ?? 0) ||
+            (b.weight ?? 1) - (a.weight ?? 1) ||
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        );
+      }
+
+      return map;
+    },
+  });
