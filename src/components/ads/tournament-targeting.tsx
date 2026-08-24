@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useTournaments } from "@/lib/queries";
 import {
@@ -73,7 +72,7 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
     if (mode === "none") return { ok: false, reason: "Targeting mode is set to No Tournaments" };
     if (mode === "selected" && !selected.includes(previewId))
       return { ok: false, reason: "Tournament is not in the selected list" };
-    if (!campaign.ad_creatives_count && campaign.status !== "active")
+    if (campaign.status !== "active")
       return { ok: true, reason: "Tournament matches targeting (campaign is not active yet)" };
     return { ok: true, reason: "Tournament matches targeting" };
   }, [previewId, mode, selected, campaign]);
@@ -149,7 +148,17 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
                     key={t.id}
                     className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/30 transition-colors"
                   >
-                    <Checkbox checked={selected.includes(t.id)} onCheckedChange={() => toggle(t.id)} />
+                    <span
+                      onClick={() => toggle(t.id)}
+                      className={cn(
+                        "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                        selected.includes(t.id)
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border",
+                      )}
+                    >
+                      {selected.includes(t.id) && <Check className="h-3 w-3" />}
+                    </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium truncate">{t.name}</p>
                       <p className="text-[11px] text-muted-foreground capitalize">
