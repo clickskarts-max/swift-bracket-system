@@ -419,7 +419,7 @@ function SettingsPage() {
                     <div>
                       <h2 className="text-base font-semibold">Logos & favicon</h2>
                       <p className="text-sm text-muted-foreground">
-                        Upload or paste a URL — both keep working.
+                        Upload image files — no links needed.
                       </p>
                     </div>
                     <Button type="button" variant="outline" size="sm" onClick={() => setResetOpen(true)}>
