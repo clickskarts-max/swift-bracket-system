@@ -329,10 +329,6 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
       </Dialog>
     );
 }
-
-function CreativeDialog({ 
-  open, 
-  onOpenChange,
   campaignId,
   creative
 }: { 
