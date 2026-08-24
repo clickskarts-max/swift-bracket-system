@@ -11,6 +11,7 @@ export interface AdCampaign {
   priority: 'low' | 'normal' | 'high' | 'guaranteed';
   weight: number;
   targeting: any;
+  allow_auto_placement: boolean;
   start_date: string | null;
   end_date: string | null;
   created_at: string;
@@ -49,6 +50,15 @@ export interface AdAnalytic {
   type: 'impression' | 'click';
   page: string | null;
   timestamp: string;
+}
+
+export interface AdSettings {
+  id?: string;
+  owner_id?: string;
+  auto_placement_enabled: boolean;
+  auto_placement_intensity: 'low' | 'balanced' | 'high';
+  public_ads_enabled: boolean;
+  page_rules: Record<string, boolean>;
 }
 
 // Admin Hooks
@@ -100,15 +110,54 @@ export const useAdStats = () =>
     }
   });
 
-// Public Hooks
-export const useActiveAds = (placementKey: string, tournamentId?: string) =>
+export const useAdSettings = () =>
   useQuery({
-    queryKey: ["active-ads", placementKey, tournamentId],
+    queryKey: ["ad-settings"],
     queryFn: async () => {
       const { data, error } = await (supabase
+        .from("ad_settings" as any)
+        .select("*")
+        .maybeSingle() as any);
+      
+      if (error) throw error;
+      
+      // Default fallback if no settings record exists yet
+      if (!data) {
+        return {
+          auto_placement_enabled: true,
+          auto_placement_intensity: 'balanced',
+          public_ads_enabled: true,
+          page_rules: {
+            homepage: true,
+            tournament_overview: true,
+            fixtures: true,
+            standings: true,
+            teams: true,
+            knockout: true,
+            pool_draw: false
+          }
+        } as AdSettings;
+      }
+      
+      return data as AdSettings;
+    }
+  });
+
+// Public Hooks
+export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto = false) =>
+  useQuery({
+    queryKey: ["active-ads", placementKey, tournamentId, isAuto],
+    queryFn: async () => {
+      let query = supabase
         .from("ad_campaigns" as any)
         .select("*, ad_creatives(*)")
-        .eq("status", "active") as any);
+        .eq("status", "active");
+
+      if (isAuto) {
+        query = query.eq("allow_auto_placement", true);
+      }
+
+      const { data, error } = await (query as any);
 
       if (error) throw error;
 
@@ -136,6 +185,26 @@ export const useRecordAdEvent = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-stats"] });
+    }
+  });
+};
+
+export const useUpdateAdSettings = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (settings: Partial<AdSettings>) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const owner_id = userData.user?.id;
+      if (!owner_id) throw new Error("Not authenticated");
+
+      const { error } = await (supabase
+        .from("ad_settings" as any)
+        .upsert({ ...settings, owner_id }) as any);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-settings"] });
     }
   });
 };

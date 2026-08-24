@@ -14,6 +14,7 @@ import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { MatchBreakdown } from "@/components/match-breakdown";
 import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
+import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useBranding } from "@/hooks/use-branding";
@@ -292,8 +293,9 @@ function PublicTournament() {
         </div>
       </section>
       
-      <div className="mx-auto max-w-5xl px-4 pt-6">
+      <div className="mx-auto max-w-5xl px-4 pt-6 space-y-4">
         <SmartAdSlot placement="tournament-header" tournamentId={tournament.id} className="w-full" />
+        <AutoAdRegion context="tournament_overview" tournamentId={tournament.id} className="w-full" />
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
@@ -335,6 +337,7 @@ function PublicTournament() {
                         </div>
                       ))}
                     </div>
+                    <AutoAdRegion context="fixtures" tournamentId={tournament.id} className="py-6" />
                   </div>
                 ))}
               </div>
@@ -373,6 +376,7 @@ function PublicTournament() {
                 tournamentId={tournament.id} 
                 className="w-full max-w-sm mx-auto" 
               />
+              <AutoAdRegion context="standings" tournamentId={tournament.id} className="pt-4" />
             </div>
           </TabsContent>
           <TabsContent value="bracket">
