@@ -290,6 +290,8 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
           </DialogFooter>
         )}
       </div>
+    );
+
     if (inline) {
       return (
         <>
