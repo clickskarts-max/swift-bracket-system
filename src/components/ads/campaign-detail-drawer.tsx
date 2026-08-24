@@ -374,7 +374,7 @@ function CreativeDialog({
 
   const handleSubmit = async () => {
     try {
-      await createCreative.mutateAsync({
+      const payload = {
         name: formData.name || `${source.toUpperCase()} Creative`,
         campaign_id: campaignId,
         type: source === 'html' ? 'html' : 'image',
@@ -387,12 +387,19 @@ function CreativeDialog({
         size_preset: formData.size_preset,
         is_responsive: formData.is_responsive,
         provider_config: formData.provider_config,
-        status: 'active'
-      });
-      toast.success("Creative added to campaign");
+        status: 'active' as const
+      };
+
+      if (creative) {
+        await updateCreative.mutateAsync({ id: creative.id, ...payload });
+        toast.success("Creative updated");
+      } else {
+        await createCreative.mutateAsync(payload);
+        toast.success("Creative added to campaign");
+      }
       onOpenChange(false);
     } catch (e) {
-      toast.error("Failed to add creative");
+      toast.error(creative ? "Failed to update creative" : "Failed to add creative");
     }
   };
 
