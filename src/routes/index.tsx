@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { Trophy, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -48,6 +49,13 @@ function Index() {
         <LandingWorkflow />
         <LandingFormats />
         <LandingPoolDraw />
+        
+        <div className="container mx-auto max-w-5xl px-4 py-20">
+          <div className="surface-card p-4 overflow-hidden">
+            <p className="mb-4 text-center text-xs uppercase tracking-widest text-muted-foreground/60 font-bold">Featured Spotlight</p>
+            <SmartAdSlot placement="homepage-content" className="w-full" />
+          </div>
+        </div>
         <LandingWhiteLabel />
         <LandingSecurity />
 

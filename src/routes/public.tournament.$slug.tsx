@@ -13,6 +13,7 @@ import { EmptyState, ScoreLine, StatusPill, TeamChip } from "@/components/data-b
 import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { MatchBreakdown } from "@/components/match-breakdown";
+import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useBranding } from "@/hooks/use-branding";
@@ -290,6 +291,10 @@ function PublicTournament() {
           </div>
         </div>
       </section>
+      
+      <div className="mx-auto max-w-5xl px-4 pt-6">
+        <SmartAdSlot placement="tournament-header" tournamentId={tournament.id} className="w-full" />
+      </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Tabs defaultValue="fixtures">
@@ -317,8 +322,17 @@ function PublicTournament() {
                       {label}
                     </h3>
                     <div className="space-y-2">
-                      {list.map((m) => (
-                        <MatchRow key={m.id} m={m} />
+                      {list.map((m, idx) => (
+                        <div key={m.id} className="space-y-4">
+                          <MatchRow m={m} />
+                          {idx === 2 && list.length > 3 && (
+                            <SmartAdSlot 
+                              placement="tournament-content" 
+                              tournamentId={tournament.id} 
+                              className="py-2"
+                            />
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -352,7 +366,14 @@ function PublicTournament() {
           </TabsContent>
 
           <TabsContent value="standings">
-            <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
+            <div className="space-y-6">
+              <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
+              <SmartAdSlot 
+                placement="sidebar" 
+                tournamentId={tournament.id} 
+                className="w-full max-w-sm mx-auto" 
+              />
+            </div>
           </TabsContent>
           <TabsContent value="bracket">
             <BracketTab teams={teams} matches={matches} />

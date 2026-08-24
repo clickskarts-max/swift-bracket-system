@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LayoutGrid, Menu, Plus, Settings, LogOut, Trophy } from "lucide-react";
+import { LayoutGrid, Menu, Plus, Settings, LogOut, Trophy, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -33,6 +33,7 @@ function OrganizationFooter() {
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { to: "/tournaments/new", label: "New tournament", icon: Plus },
+  { to: "/advertising", label: "Advertising", icon: Target },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -51,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     NAV.map(({ to, label, icon: Icon }) => (
       <Link
         key={to}
-        to={to}
+        to={to as any}
         onClick={onClick}
         className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         activeProps={{ className: "bg-secondary text-foreground" }}
