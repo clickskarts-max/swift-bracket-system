@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { StatusPill } from "@/components/data-bits";
 
-export const Route = createFileRoute("/_authenticated/advertising" as any)({
+export const Route = createFileRoute("/_authenticated/advertising")({
   component: AdvertisingPage,
 });
 
