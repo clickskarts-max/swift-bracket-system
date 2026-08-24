@@ -108,11 +108,11 @@ export const useCreateKey = () =>
       unwrap(
         await supabase.rpc("owner_create_key", {
           input_plan: vars.plan,
-          input_days: vars.days ?? null,
+          input_days: vars.days ?? undefined,
           input_max_redemptions: vars.maxRedemptions ?? 1,
-          input_assigned_email: vars.assignedEmail ?? null,
-          input_note: vars.note ?? null,
-          input_expires_at: vars.expiresAt ?? null,
+          input_assigned_email: vars.assignedEmail ?? undefined,
+          input_note: vars.note ?? undefined,
+          input_expires_at: vars.expiresAt ?? undefined,
         }),
       ) as string,
     [
@@ -149,7 +149,7 @@ export const useSetUserAccess = () =>
       unwrap(
         await supabase.rpc("owner_set_user_access", {
           input_email: email,
-          input_until: until ?? null,
+          input_until: until ?? undefined,
           input_unlimited: unlimited ?? false,
         }),
       ),
