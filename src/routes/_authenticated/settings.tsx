@@ -150,8 +150,8 @@ function FieldRow({
 }: {
   id: string;
   label: string;
-  hint?: string;
-  error?: string | null;
+  hint?: string | undefined;
+  error?: string | null | undefined;
   children: React.ReactNode;
 }) {
   return (
@@ -304,7 +304,7 @@ function SettingsPage() {
     showName: draft.show_name_public,
     showContact: draft.show_contact_public,
     contactEmail: draft.contact_email,
-    contactPhone: draft.contact_phone,
+    contactPhone: draft.contact_phone ?? "",
   };
 
   if (isLoading) {
