@@ -27,7 +27,7 @@ export function TournamentsPanel({ tab }: { tab: string }) {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const match = TAB_FILTER[tab] ?? TAB_FILTER.overview!;
+    const match = TAB_FILTER[tab] ?? (() => true);
     return tournaments.filter(
       (t) =>
         match(t.status, t.archived) &&
