@@ -16,7 +16,8 @@ import {
 } from "@/lib/ads.functions";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye } from "lucide-react";
+import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye, LayoutDashboard } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Table,
   TableBody,
