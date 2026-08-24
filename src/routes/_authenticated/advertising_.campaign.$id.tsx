@@ -175,7 +175,7 @@ function CampaignWorkspace() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent space-x-6">
-          {["overview", "creatives", "placements", "targeting", "performance", "settings"].map((tab) => (
+          {TABS.map((tab) => (
             <TabsTrigger 
               key={tab}
               value={tab} 
