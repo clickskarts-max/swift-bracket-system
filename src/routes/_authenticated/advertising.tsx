@@ -50,7 +50,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ImageUpload } from "@/components/image-upload";
 import { format } from "date-fns";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/advertising")({
   component: AdvertisingPage,
