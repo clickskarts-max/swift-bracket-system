@@ -33,6 +33,7 @@ function OrganizationFooter() {
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { to: "/tournaments/new", label: "New tournament", icon: Plus },
+  { to: "/advertising", label: "Advertising", icon: Target },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
