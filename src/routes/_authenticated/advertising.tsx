@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/data-bits";
 import { useAdCampaigns, useAdStats } from "@/lib/ads.functions";
 import { Button } from "@/components/ui/button";
-import { Plus, BarChart3, Image as ImageIcon, Target } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -43,22 +43,18 @@ function AdvertisingPage() {
         <StatCard 
           label="Active Campaigns" 
           value={campaigns.filter(c => c.status === 'active').length} 
-          icon={<Target className="h-4 w-4" />}
         />
         <StatCard 
           label="Impressions" 
           value={stats?.impressions || 0} 
-          icon={<ImageIcon className="h-4 w-4" />}
         />
         <StatCard 
           label="Clicks" 
           value={stats?.clicks || 0} 
-          icon={<ImageIcon className="h-4 w-4" />}
         />
         <StatCard 
           label="Avg. CTR" 
           value={`${ctr}%`} 
-          icon={<BarChart3 className="h-4 w-4" />}
         />
       </div>
 
@@ -119,7 +115,6 @@ function AdvertisingPage() {
 
         <TabsContent value="creatives">
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-             {/* Creatives grid would go here */}
              <div className="flex aspect-video items-center justify-center rounded-lg border-2 border-dashed border-border/60 bg-muted/20 text-muted-foreground">
                 <p className="text-xs">No creatives uploaded</p>
              </div>
