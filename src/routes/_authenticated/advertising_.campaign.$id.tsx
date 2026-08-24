@@ -188,11 +188,15 @@ function CampaignWorkspace() {
 
         <TabsContent value="overview" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Impressions" value="0" />
-            <StatCard label="Clicks" value="0" />
-            <StatCard label="Avg. CTR" value="0.00%" />
-            <StatCard label="Creatives" value={campaign.ad_creatives.length} />
+            <StatCard label="Impressions" value={totals.impressions.toLocaleString()} />
+            <StatCard label="Clicks" value={totals.clicks.toLocaleString()} />
+            <StatCard
+              label="Avg. CTR"
+              value={`${totals.impressions ? ((totals.clicks / totals.impressions) * 100).toFixed(2) : "0.00"}%`}
+            />
+            <StatCard label="Inventory units" value={inventoryRows.length} />
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
