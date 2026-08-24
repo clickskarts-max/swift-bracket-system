@@ -211,14 +211,13 @@ function AdvertisingPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => {
-                              setSelectedCampaign(c);
-                              setIsDetailOpen(true);
-                            }}
+                            variant="default" 
+                            size="sm" 
+                            className="h-8 gap-1"
+                            onClick={() => navigate({ to: `/advertising/campaign/${c.id}` })}
                           >
-                            <Eye className="h-4 w-4" />
+                            <LayoutDashboard className="h-3.5 w-3.5" />
+                            Manage
                           </Button>
                           <Button 
                             variant="ghost" 
