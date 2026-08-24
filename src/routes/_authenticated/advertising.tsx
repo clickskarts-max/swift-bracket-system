@@ -16,6 +16,7 @@ import {
   AdCampaign,
   AdCreative
 } from "@/lib/ads.functions";
+import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { Button } from "@/components/ui/button";
 import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye } from "lucide-react";
 import {
