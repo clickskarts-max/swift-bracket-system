@@ -78,7 +78,7 @@ export function SmartAdSlot({ placement, tournamentId, className, isAuto = false
   }, [selectedCreative, recordEvent, tournamentId]);
 
   const handleClick = () => {
-    if (!selectedCreative) return;
+    if (!selectedCreative || selectedCreative.provider_type === 'adsense') return;
     
     recordEvent.mutate({
       campaign_id: selectedCreative.campaign_id,
