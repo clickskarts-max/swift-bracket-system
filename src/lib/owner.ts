@@ -150,9 +150,10 @@ export const useSetUserAccess = () =>
       unwrap(
         await supabase.rpc("owner_set_user_access", {
           input_email: email,
-          input_until: until ?? undefined,
           input_unlimited: unlimited ?? false,
+          ...(until ? { input_until: until } : {}),
         }),
+
       ),
     [
       ["owner", "users"],
