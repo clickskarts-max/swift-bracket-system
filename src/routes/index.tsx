@@ -50,8 +50,11 @@ function Index() {
         <LandingFormats />
         <LandingPoolDraw />
         
-        <div className="container mx-auto max-w-5xl px-4 py-12">
-          <SmartAdSlot placement="homepage-content" className="w-full" />
+        <div className="container mx-auto max-w-5xl px-4 py-20">
+          <div className="surface-card p-4 overflow-hidden">
+            <p className="mb-4 text-center text-xs uppercase tracking-widest text-muted-foreground/60 font-bold">Featured Spotlight</p>
+            <SmartAdSlot placement="homepage-content" className="w-full" />
+          </div>
         </div>
         <LandingWhiteLabel />
         <LandingSecurity />
