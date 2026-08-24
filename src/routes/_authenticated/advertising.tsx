@@ -108,13 +108,13 @@ function AdvertisingPage() {
 
   // Flatten all creatives from all campaigns
   const allCreatives = useMemo(() => {
-    return campaigns.flatMap(c => (c.creatives || []).map(cr => ({ ...cr, campaignName: c.name })));
+    return campaigns.flatMap(c => (c.ad_creatives || []).map((cr: AdCreative) => ({ ...cr, campaignName: c.name })));
   }, [campaigns]);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Advertising & Sponsors"
+        title="Ads & Sponsors"
         description="Manage commercial ads, sponsorships and track performance."
         action={
           <div className="flex gap-2">
@@ -304,7 +304,7 @@ function AdvertisingPage() {
                 <Card key={creative.id} className="overflow-hidden group">
                   <div className="aspect-video relative overflow-hidden bg-muted">
                     <img 
-                      src={creative.image_url} 
+                      src={creative.media_url} 
                       alt="" 
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     />
@@ -321,9 +321,9 @@ function AdvertisingPage() {
                         {creative.campaignName}
                       </Badge>
                     </div>
-                    {creative.click_url && (
+                    {creative.destination_url && (
                       <a 
-                        href={creative.click_url} 
+                        href={creative.destination_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-[10px] text-primary flex items-center hover:underline"
@@ -369,9 +369,9 @@ function CampaignDialog({
   const [formData, setFormData] = useState({ 
     name: '', 
     advertiser: '', 
-    priority: 'normal' as 'low' | 'normal' | 'high', 
+    priority: 'normal' as AdCampaign['priority'], 
     allow_auto_placement: true,
-    status: 'active' as 'active' | 'paused' | 'ended'
+    status: 'active' as AdCampaign['status']
   });
 
   useMemo(() => {
@@ -397,10 +397,24 @@ function CampaignDialog({
   const handleSubmit = async () => {
     try {
       if (campaign) {
-        await updateCampaign.mutateAsync({ id: campaign.id, ...formData });
+        await updateCampaign.mutateAsync({ 
+          id: campaign.id, 
+          name: formData.name,
+          advertiser: formData.advertiser,
+          priority: formData.priority,
+          allow_auto_placement: formData.allow_auto_placement,
+          status: formData.status
+        });
         toast.success("Campaign updated");
       } else {
-        await createCampaign.mutateAsync(formData);
+        await createCampaign.mutateAsync({
+          name: formData.name,
+          advertiser: formData.advertiser,
+          priority: formData.priority,
+          allow_auto_placement: formData.allow_auto_placement,
+          status: formData.status,
+          weight: 1
+        });
         toast.success("Campaign created");
       }
       onOpenChange(false);
@@ -451,6 +465,7 @@ function CampaignDialog({
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="normal">Normal</SelectItem>
                   <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="guaranteed">Guaranteed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -464,9 +479,11 @@ function CampaignDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="ended">Ended</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -508,9 +525,9 @@ function CreativeDialog({
   const [formData, setFormData] = useState({ 
     name: '', 
     campaign_id: '', 
-    type: 'banner' as 'banner' | 'video' | 'native', 
-    image_url: '' as string | null,
-    click_url: '' 
+    type: 'image' as AdCreative['type'], 
+    media_url: '' as string | null,
+    destination_url: '' 
   });
 
   useMemo(() => {
@@ -518,22 +535,25 @@ function CreativeDialog({
       setFormData({
         name: '',
         campaign_id: campaigns[0]?.id || '',
-        type: 'banner',
-        image_url: null,
-        click_url: ''
+        type: 'image',
+        media_url: null,
+        destination_url: ''
       });
     }
   }, [open, campaigns]);
 
   const handleSubmit = async () => {
-    if (!formData.image_url) {
+    if (!formData.media_url) {
       toast.error("Please upload a creative image");
       return;
     }
     try {
       await createCreative.mutateAsync({
-        ...formData,
-        image_url: formData.image_url
+        name: formData.name || 'Untitled Creative',
+        campaign_id: formData.campaign_id,
+        type: formData.type,
+        media_url: formData.media_url,
+        destination_url: formData.destination_url || null
       });
       toast.success("Creative added");
       onOpenChange(false);
@@ -586,16 +606,16 @@ function CreativeDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="banner">Banner (Recommended)</SelectItem>
-                <SelectItem value="native">Native (Text + Icon)</SelectItem>
+                <SelectItem value="image">Standard Image</SelectItem>
+                <SelectItem value="animated">Animated GIF/WebP</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
             <Label>Ad Creative Image</Label>
             <ImageUpload 
-              value={formData.image_url} 
-              onChange={url => setFormData(prev => ({...prev, image_url: url}))}
+              value={formData.media_url} 
+              onChange={url => setFormData(prev => ({...prev, media_url: url}))}
               folder="creatives"
               bucket="ad-creatives"
               className="aspect-video"
@@ -606,14 +626,14 @@ function CreativeDialog({
             <Input 
               type="url"
               placeholder="https://example.com/promo" 
-              value={formData.click_url} 
-              onChange={e => setFormData(prev => ({...prev, click_url: e.target.value}))} 
+              value={formData.destination_url} 
+              onChange={e => setFormData(prev => ({...prev, destination_url: e.target.value}))} 
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!formData.image_url || !formData.campaign_id}>
+          <Button onClick={handleSubmit} disabled={!formData.media_url || !formData.campaign_id}>
             Add Creative
           </Button>
         </DialogFooter>
