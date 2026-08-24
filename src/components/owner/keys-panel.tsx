@@ -41,7 +41,7 @@ export function KeysPanel() {
         assignedEmail: assignedEmail.trim() || null,
         note: note.trim() || null,
       });
-      setGenerated(key);
+      setGenerated(key as string);
       toast.success("Activation key generated");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create key");
