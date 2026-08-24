@@ -109,6 +109,7 @@ export type Database = {
       ad_campaigns: {
         Row: {
           advertiser: string | null
+          allow_auto_placement: boolean | null
           created_at: string | null
           end_date: string | null
           id: string
@@ -123,6 +124,7 @@ export type Database = {
         }
         Insert: {
           advertiser?: string | null
+          allow_auto_placement?: boolean | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -137,6 +139,7 @@ export type Database = {
         }
         Update: {
           advertiser?: string | null
+          allow_auto_placement?: boolean | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -225,6 +228,39 @@ export type Database = {
           id?: string
           key?: string
           label?: string
+        }
+        Relationships: []
+      }
+      ad_settings: {
+        Row: {
+          auto_placement_enabled: boolean | null
+          auto_placement_intensity: string | null
+          created_at: string | null
+          id: string
+          owner_id: string
+          page_rules: Json | null
+          public_ads_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_placement_enabled?: boolean | null
+          auto_placement_intensity?: string | null
+          created_at?: string | null
+          id?: string
+          owner_id: string
+          page_rules?: Json | null
+          public_ads_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_placement_enabled?: boolean | null
+          auto_placement_intensity?: string | null
+          created_at?: string | null
+          id?: string
+          owner_id?: string
+          page_rules?: Json | null
+          public_ads_enabled?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }
