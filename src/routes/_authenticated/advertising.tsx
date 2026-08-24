@@ -309,52 +309,6 @@ function AdvertisingPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="creatives">
-          {allCreatives.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border/60 bg-muted/20 py-12 text-muted-foreground">
-              <ImageIcon className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">No creatives uploaded yet. Creatives are managed inside each campaign.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {allCreatives.map((creative) => (
-                <Card key={creative.id} className="overflow-hidden group">
-                  <div className="aspect-video relative overflow-hidden bg-muted">
-                    <img 
-                      src={creative.media_url} 
-                      alt="" 
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                    />
-                    <div className="absolute top-2 right-2">
-                       <Badge variant="secondary" className="backdrop-blur-sm bg-background/60">
-                         {creative.type.toUpperCase()}
-                       </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-3 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium truncate flex-1">{creative.name || "Untitled"}</p>
-                      <Badge variant="outline" className="text-[9px] px-1 h-4">
-                        {creative.campaignName}
-                      </Badge>
-                    </div>
-                    {creative.destination_url && (
-                      <a 
-                        href={creative.destination_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-primary flex items-center hover:underline"
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Target URL
-                      </a>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
       </Tabs>
 
       <CampaignDialog 
