@@ -419,7 +419,7 @@ function SettingsPage() {
                     <div>
                       <h2 className="text-base font-semibold">Logos & favicon</h2>
                       <p className="text-sm text-muted-foreground">
-                        Upload or paste a URL — both keep working.
+                        Upload image files — no links needed.
                       </p>
                     </div>
                     <Button type="button" variant="outline" size="sm" onClick={() => setResetOpen(true)}>
@@ -689,7 +689,12 @@ function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" onClick={() => navigate({ to: "/owner" })}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate({ to: "/owner", search: { section: "dashboard", tab: undefined } })
+                }
+              >
                 Open owner dashboard <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             </section>
