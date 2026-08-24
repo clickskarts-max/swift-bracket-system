@@ -63,6 +63,7 @@ interface CampaignDetailDrawerProps {
 export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignDetailDrawerProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const [isAddCreativeOpen, setIsAddCreativeOpen] = useState(false);
+  const [editingCreative, setEditingCreative] = useState<AdCreative | null>(null);
   const updateCampaign = useUpdateAdCampaign();
   const deleteCreative = useDeleteAdCreative();
 
