@@ -11,6 +11,7 @@ export interface AdCampaign {
   priority: 'low' | 'normal' | 'high' | 'guaranteed';
   weight: number;
   targeting: any;
+  tournament_targeting_mode: 'all' | 'selected' | 'none';
   allow_auto_placement: boolean;
   start_date: string | null;
   end_date: string | null;

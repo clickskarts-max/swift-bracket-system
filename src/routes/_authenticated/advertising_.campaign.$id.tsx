@@ -34,7 +34,7 @@ import { StatCard, StatusPill } from "@/components/data-bits";
 import { toast } from "sonner";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 
-export const Route = createFileRoute("/_authenticated/advertising/campaign/$id")({
+export const Route = createFileRoute("/_authenticated/advertising_/campaign/$id")({
   component: CampaignWorkspace,
 });
 
