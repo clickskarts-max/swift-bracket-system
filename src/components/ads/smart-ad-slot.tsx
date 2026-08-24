@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useActiveAds, useRecordAdEvent, AdCreative } from "@/lib/ads.functions";
+import { useActiveAds, useRecordAdEvent } from "@/lib/ads.functions";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface SmartAdSlotProps {
   placement: string;
@@ -53,7 +52,11 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
 
     // 3. Rank by priority
     const priorityMap = { guaranteed: 4, high: 3, normal: 2, low: 1 };
-    compatible.sort((a, b) => priorityMap[b.priority] - priorityMap[a.priority]);
+    compatible.sort((a, b) => {
+      const pA = a.priority as keyof typeof priorityMap;
+      const pB = b.priority as keyof typeof priorityMap;
+      return priorityMap[pB] - priorityMap[pA];
+    });
 
     const highestPriority = compatible[0].priority;
     const topTier = compatible.filter(c => c.priority === highestPriority);
@@ -77,14 +80,14 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+        if (entry && entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           // Record after 1s visibility
           const timer = setTimeout(() => {
             recordEvent.mutate({
               campaign_id: selectedCreative.campaign_id,
               creative_id: selectedCreative.id,
-              placement_id: null, // Would ideally map placement key to ID
-              tournament_id: tournamentId,
+              placement_id: null,
+              tournament_id: tournamentId || null,
               type: 'impression',
               page: window.location.pathname,
             });
@@ -106,7 +109,7 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
     recordEvent.mutate({
       campaign_id: selectedCreative.campaign_id,
       creative_id: selectedCreative.id,
-      tournament_id: tournamentId,
+      tournament_id: tournamentId || null,
       type: 'click',
       page: window.location.pathname,
     });
@@ -116,7 +119,7 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
     }
   };
 
-  if (isLoading) return <Skeleton className={cn("w-full h-24 rounded-lg", className)} />;
+  if (isLoading) return <div className={cn("w-full h-24 bg-secondary/20 animate-pulse rounded-lg", className)} />;
   if (!selectedCreative) return null;
 
   return (
