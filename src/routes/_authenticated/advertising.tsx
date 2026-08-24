@@ -386,7 +386,7 @@ function CampaignDialog({
         });
         toast.success("Campaign updated");
       } else {
-        await createCampaign.mutateAsync({
+        const newCampaign = await createCampaign.mutateAsync({
           name: formData.name,
           advertiser: formData.advertiser,
           priority: formData.priority,
@@ -395,6 +395,7 @@ function CampaignDialog({
           weight: 1
         });
         toast.success("Campaign created");
+        navigate({ to: `/advertising/campaign/${newCampaign.id}` });
       }
       onOpenChange(false);
     } catch (e) {
