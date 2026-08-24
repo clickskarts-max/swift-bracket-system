@@ -4,7 +4,8 @@ import {
   AdCreative, 
   useCreateAdCreative,
   useUpdateAdCampaign,
-  useDeleteAdCreative
+  useDeleteAdCreative,
+  useUpdateAdCreative
 } from "@/lib/ads.functions";
 import { 
   Dialog, 
