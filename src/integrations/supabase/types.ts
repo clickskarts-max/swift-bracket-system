@@ -16,30 +16,54 @@ export type Database = {
     Tables: {
       activation_keys: {
         Row: {
+          assigned_email: string | null
           created_at: string
+          created_by: string | null
+          duration_days: number | null
+          expires_at: string | null
           id: string
           key: string
+          max_redemptions: number
+          note: string | null
           plan: string
           redeemed_at: string | null
           redeemed_by: string | null
+          redemption_count: number
+          revoked: boolean
           updated_at: string
         }
         Insert: {
+          assigned_email?: string | null
           created_at?: string
+          created_by?: string | null
+          duration_days?: number | null
+          expires_at?: string | null
           id?: string
           key: string
+          max_redemptions?: number
+          note?: string | null
           plan: string
           redeemed_at?: string | null
           redeemed_by?: string | null
+          redemption_count?: number
+          revoked?: boolean
           updated_at?: string
         }
         Update: {
+          assigned_email?: string | null
           created_at?: string
+          created_by?: string | null
+          duration_days?: number | null
+          expires_at?: string | null
           id?: string
           key?: string
+          max_redemptions?: number
+          note?: string | null
           plan?: string
           redeemed_at?: string | null
           redeemed_by?: string | null
+          redemption_count?: number
+          revoked?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -399,6 +423,45 @@ export type Database = {
           role?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          after_value: Json | null
+          before_value: Json | null
+          created_at: string
+          id: string
+          target_id: string | null
+          target_label: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
         }
         Relationships: []
       }
@@ -956,8 +1019,55 @@ export type Database = {
         }
       }
       is_app_owner: { Args: never; Returns: boolean }
+      log_owner_action: {
+        Args: {
+          p_action: string
+          p_after?: Json
+          p_before?: Json
+          p_target_id?: string
+          p_target_label?: string
+          p_target_type?: string
+        }
+        Returns: undefined
+      }
       owner_create_activation_key: {
         Args: { input_plan: string }
+        Returns: string
+      }
+      owner_create_key: {
+        Args: {
+          input_assigned_email?: string
+          input_days?: number
+          input_expires_at?: string
+          input_max_redemptions?: number
+          input_note?: string
+          input_plan: string
+        }
+        Returns: string
+      }
+      owner_list_users: {
+        Args: never
+        Returns: {
+          activated_until: string
+          created_at: string
+          email: string
+          id: string
+          role: string
+          status: string
+          tournament_count: number
+        }[]
+      }
+      owner_overview: { Args: never; Returns: Json }
+      owner_revoke_activation_key: {
+        Args: { input_id: string }
+        Returns: undefined
+      }
+      owner_set_user_access: {
+        Args: {
+          input_email: string
+          input_unlimited?: boolean
+          input_until?: string
+        }
         Returns: string
       }
       owner_set_user_status: {
