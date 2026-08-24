@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatCard, StatusPill } from "@/components/data-bits";
 import { toast } from "sonner";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
+import { TournamentTargeting, targetingSummary } from "@/components/ads/tournament-targeting";
 
 export const Route = createFileRoute("/_authenticated/advertising_/campaign/$id")({
   component: CampaignWorkspace,
@@ -92,7 +93,7 @@ function CampaignWorkspace() {
     details: true,
     creatives: campaign.ad_creatives.length > 0,
     placements: true, // Placeholder for now
-    targeting: !!campaign.targeting,
+    targeting: (campaign.tournament_targeting_mode ?? 'all') !== 'selected' || (campaign.ad_campaign_tournaments?.length ?? 0) > 0,
   };
 
   const isReady = Object.values(readiness).every(Boolean);
@@ -206,6 +207,10 @@ function CampaignWorkspace() {
                     <p className="font-medium">{campaign.allow_auto_placement ? "Enabled" : "Disabled"}</p>
                   </div>
                   <div className="space-y-1">
+                    <p className="text-muted-foreground">Tournament Targeting</p>
+                    <p className="font-medium">{targetingSummary(campaign)}</p>
+                  </div>
+                  <div className="space-y-1">
                     <p className="text-muted-foreground">Start Date</p>
                     <p className="font-medium">Direct Delivery</p>
                   </div>
@@ -263,14 +268,7 @@ function CampaignWorkspace() {
         </TabsContent>
 
         <TabsContent value="targeting" className="pt-4 mt-0">
-          <div className="surface-card p-8 border rounded-xl text-center">
-            <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="font-semibold text-lg mb-2">Audience Segmentation</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Define which visitors see these ads based on location, device, or behavior.
-            </p>
-            <Badge variant="outline" className="px-4 py-1">Coming Soon</Badge>
-          </div>
+          <TournamentTargeting campaign={campaign} />
         </TabsContent>
 
         <TabsContent value="performance" className="pt-4 mt-0">

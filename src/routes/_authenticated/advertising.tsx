@@ -15,6 +15,7 @@ import {
   AdCreative
 } from "@/lib/ads.functions";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
+import { targetingSummary } from "@/components/ads/tournament-targeting";
 import { Button } from "@/components/ui/button";
 import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
@@ -164,6 +165,7 @@ function AdvertisingPage() {
                   <TableHead>Advertiser</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  <TableHead>Target</TableHead>
                   <TableHead>Creatives</TableHead>
                   <TableHead>Auto</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -172,13 +174,13 @@ function AdvertisingPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       Loading campaigns...
                     </TableCell>
                   </TableRow>
                 ) : campaigns.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No campaigns found. Create your first one to start serving ads.
                     </TableCell>
                   </TableRow>
@@ -198,6 +200,11 @@ function AdvertisingPage() {
                         <StatusPill status={c.status} />
                       </TableCell>
                       <TableCell className="capitalize">{c.priority}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[10px]">
+                          {targetingSummary(c)}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-[10px]">
                           {c.ad_creatives?.length || 0}
