@@ -233,6 +233,77 @@ function AdvertisingPage() {
             </Table>
           </div>
         </TabsContent>
+        
+        <TabsContent value="creatives" className="space-y-4">
+          <div className="surface-card p-6 border rounded-lg overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <ImageIcon className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold">Global Creative Library</h3>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Creative</TableHead>
+                  <TableHead>Campaign</TableHead>
+                  <TableHead>Format</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {campaigns.flatMap(c => c.ad_creatives.map(cr => ({ ...cr, campaignName: c.name, fullCampaign: c }))).length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      No creatives found. Add them through a campaign.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  campaigns.flatMap(c => c.ad_creatives.map(cr => ({ ...cr, campaignName: c.name, fullCampaign: c }))).map((cr) => (
+                    <TableRow key={cr.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                            {cr.media_url ? (
+                              <img src={cr.media_url} className="h-full w-full object-cover" alt="" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center">
+                                <ImageIcon className="h-4 w-4 opacity-20" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="font-medium">{cr.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{cr.campaignName}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize text-[10px]">
+                          {cr.size_preset?.replace(/-/g, ' ') || 'Custom'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[10px] uppercase">
+                          {cr.provider_type === 'adsense' ? 'AdSense' : cr.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedCampaign(cr.fullCampaign);
+                            setIsDetailOpen(true);
+                          }}
+                        >
+                          View in Campaign
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
