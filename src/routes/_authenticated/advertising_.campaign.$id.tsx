@@ -86,6 +86,18 @@ function CampaignWorkspace() {
 
   const toggleStatus = () => {
     const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+    if (newStatus === 'active') {
+      const missing: string[] = [];
+      if (campaign.ad_creatives.length === 0) missing.push("Add at least one creative");
+      if ((campaign.tournament_targeting_mode ?? 'all') === 'selected'
+        && (campaign.ad_campaign_tournaments?.length ?? 0) === 0) missing.push("Select at least one tournament");
+      if ((campaign.tournament_targeting_mode ?? 'all') === 'none') missing.push("Set tournament targeting to All or Selected");
+      if (missing.length > 0) {
+        toast.error("Campaign cannot be activated", { description: missing.join(" · ") });
+        setActiveTab("targeting");
+        return;
+      }
+    }
     updateCampaign.mutate({ id: campaign.id, status: newStatus });
   };
 

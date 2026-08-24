@@ -350,7 +350,8 @@ function CampaignDialog({
     advertiser: '', 
     priority: 'normal' as AdCampaign['priority'], 
     allow_auto_placement: true,
-    status: 'active' as AdCampaign['status']
+    status: 'active' as AdCampaign['status'],
+    tournament_targeting_mode: 'all' as AdCampaign['tournament_targeting_mode']
   });
 
   useMemo(() => {
@@ -360,7 +361,8 @@ function CampaignDialog({
         advertiser: campaign.advertiser || '',
         priority: campaign.priority,
         allow_auto_placement: campaign.allow_auto_placement,
-        status: campaign.status
+        status: campaign.status,
+        tournament_targeting_mode: campaign.tournament_targeting_mode ?? 'all'
       });
     } else {
       setFormData({
@@ -368,7 +370,8 @@ function CampaignDialog({
         advertiser: '',
         priority: 'normal',
         allow_auto_placement: true,
-        status: 'active'
+        status: 'active',
+        tournament_targeting_mode: 'all'
       });
     }
   }, [campaign, open]);
@@ -382,7 +385,8 @@ function CampaignDialog({
           advertiser: formData.advertiser,
           priority: formData.priority,
           allow_auto_placement: formData.allow_auto_placement,
-          status: formData.status
+          status: formData.status,
+          tournament_targeting_mode: formData.tournament_targeting_mode
         });
         toast.success("Campaign updated");
       } else {
@@ -392,6 +396,7 @@ function CampaignDialog({
           priority: formData.priority,
           allow_auto_placement: formData.allow_auto_placement,
           status: formData.status,
+          tournament_targeting_mode: formData.tournament_targeting_mode,
           weight: 1
         });
         toast.success("Campaign created");
@@ -467,6 +472,25 @@ function CampaignDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          <div className="grid gap-2">
+            <Label>Tournament Targeting</Label>
+            <Select
+              value={formData.tournament_targeting_mode}
+              onValueChange={v => setFormData(prev => ({...prev, tournament_targeting_mode: v as AdCampaign['tournament_targeting_mode']}))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tournaments</SelectItem>
+                <SelectItem value="selected">Selected Tournaments</SelectItem>
+                <SelectItem value="none">No Tournaments Yet</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              Pick specific tournaments in the campaign workspace after saving.
+            </p>
           </div>
           <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/20">
             <div className="space-y-0.5">
