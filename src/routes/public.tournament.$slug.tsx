@@ -248,6 +248,12 @@ function PublicTournament() {
           <img src={tournament.banner_url} alt="" className="h-44 w-full object-cover sm:h-60" />
         )}
         <div className="mx-auto max-w-5xl px-4 py-8">
+          <SponsorSlot
+            inventory="title-sponsor"
+            tournamentId={tournament.id}
+            align="left"
+            className="mb-4"
+          />
           <div className="flex flex-wrap items-center gap-4">
             {tournament.logo_url && (
               <img src={tournament.logo_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
@@ -260,6 +266,13 @@ function PublicTournament() {
             </div>
             <StatusPill status={tournament.status} />
           </div>
+          <SponsorSlot
+            inventory="presented-by"
+            tournamentId={tournament.id}
+            align="left"
+            className="mt-4"
+          />
+
           {tournament.description && (
             <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{tournament.description}</p>
           )}
