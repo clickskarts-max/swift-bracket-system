@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AppShell, PageHeader } from "@/components/app-shell";
 import { 
   useAdCampaigns, 
   AdCampaign, 
