@@ -282,7 +282,8 @@ function CampaignWorkspace() {
           </div>
         </TabsContent>
 
-        <TabsContent value="creatives" className="pt-4 mt-0">
+        <TabsContent value="creatives" className="space-y-6 pt-4 mt-0">
+          <SponsorCreatives campaign={campaign as any} />
           <CampaignDetailDrawer 
             campaign={campaign as any} 
             open={true} 
@@ -292,15 +293,8 @@ function CampaignWorkspace() {
           />
         </TabsContent>
 
-        <TabsContent value="placements" className="pt-4 mt-0">
-          <div className="surface-card p-8 border rounded-xl text-center">
-            <Layout className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="font-semibold text-lg mb-2">Placement Targeting</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Configure specific zones or tournament pages where this campaign should be prioritized.
-            </p>
-            <Badge variant="outline" className="px-4 py-1">Advanced Mode Required</Badge>
-          </div>
+        <TabsContent value="inventory" className="pt-4 mt-0">
+          <InventoryManagement campaign={campaign as any} />
         </TabsContent>
 
         <TabsContent value="targeting" className="pt-4 mt-0">
@@ -308,15 +302,40 @@ function CampaignWorkspace() {
         </TabsContent>
 
         <TabsContent value="performance" className="pt-4 mt-0">
-          <div className="surface-card p-8 border rounded-xl text-center">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="font-semibold text-lg mb-2">Detailed Analytics</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Track impressions, clicks, and CTR breakdown by creative and placement.
-            </p>
-            <Badge variant="outline" className="px-4 py-1">Data Processing...</Badge>
-          </div>
+          {perf.length === 0 ? (
+            <div className="surface-card p-8 border rounded-xl text-center">
+              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+              <h3 className="font-semibold text-lg mb-2">No delivery yet</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                Impressions and clicks appear here as soon as this campaign starts serving.
+              </p>
+            </div>
+          ) : (
+            <div className="surface-card border rounded-xl divide-y divide-border/50">
+              <div className="grid grid-cols-4 gap-2 px-5 py-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+                <span className="col-span-2">Inventory</span>
+                <span className="text-right">Impressions</span>
+                <span className="text-right">Clicks / CTR</span>
+              </div>
+              {perf
+                .slice()
+                .sort((a, b) => b.impressions - a.impressions)
+                .map((row) => (
+                  <div key={row.inventory_key} className="grid grid-cols-4 gap-2 px-5 py-3 text-sm">
+                    <span className="col-span-2 font-medium">
+                      {INVENTORY_BY_KEY[row.inventory_key]?.label ?? row.inventory_key}
+                    </span>
+                    <span className="text-right tabular-nums">{row.impressions.toLocaleString()}</span>
+                    <span className="text-right tabular-nums">
+                      {row.clicks.toLocaleString()} ·{" "}
+                      {row.impressions ? ((row.clicks / row.impressions) * 100).toFixed(2) : "0.00"}%
+                    </span>
+                  </div>
+                ))}
+            </div>
+          )}
         </TabsContent>
+
 
         <TabsContent value="settings" className="pt-4 mt-0">
            <CampaignDetailDrawer 
