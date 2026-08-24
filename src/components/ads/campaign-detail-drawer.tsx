@@ -286,8 +286,12 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignD
 
       <CreativeDialog 
         open={isAddCreativeOpen}
-        onOpenChange={setIsAddCreativeOpen}
+        onOpenChange={(open) => {
+          setIsAddCreativeOpen(open);
+          if (!open) setEditingCreative(null);
+        }}
         campaignId={campaign.id}
+        creative={editingCreative}
       />
     </Dialog>
   );
