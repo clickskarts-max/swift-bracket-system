@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { Trophy, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
 
 export const Route = createFileRoute("/")({
   component: Index,
