@@ -131,6 +131,16 @@ export const useRevokeKey = () =>
     ],
   );
 
+export const useDeleteKey = () =>
+  useOwnerMutation<string>(
+    async (id) => unwrap(await supabase.rpc("owner_delete_key", { input_id: id })),
+    [
+      ["owner", "keys"],
+      ["owner", "audit"],
+    ],
+  );
+
+
 export const useSetUserStatus = () =>
   useOwnerMutation<{ email: string; status: "active" | "suspended" }>(
     async ({ email, status }) =>

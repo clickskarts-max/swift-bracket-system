@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Ban, Copy, KeyRound } from "lucide-react";
+import { Ban, Copy, KeyRound, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { KEY_PLANS, useActivationKeys, useCreateKey, useRevokeKey } from "@/lib/owner";
+import {
+  KEY_PLANS,
+  useActivationKeys,
+  useCreateKey,
+  useDeleteKey,
+  useRevokeKey,
+} from "@/lib/owner";
+
 
 function maskKey(key: string, reveal: boolean) {
   if (reveal) return key;
@@ -24,6 +31,8 @@ export function KeysPanel() {
   const { data: keys = [], isLoading } = useActivationKeys();
   const createKey = useCreateKey();
   const revokeKey = useRevokeKey();
+  const deleteKey = useDeleteKey();
+
 
   const [plan, setPlan] = useState<string>("1_month");
   const [days, setDays] = useState("");
@@ -199,7 +208,25 @@ export function KeysPanel() {
                       </Button>
                     </>
                   )}
+                  {(k.redemption_count ?? 0) === 0 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      disabled={deleteKey.isPending}
+                      onClick={() => {
+                        if (!window.confirm("Permanently delete this activation key?")) return;
+                        void deleteKey
+                          .mutateAsync(k.id)
+                          .then(() => toast.success("Key deleted"))
+                          .catch((err: Error) => toast.error(err.message));
+                      }}
+                    >
+                      <Trash2 className="mr-1.5 h-4 w-4" /> Delete
+                    </Button>
+                  )}
                 </div>
+
               </div>
             );
           })}
