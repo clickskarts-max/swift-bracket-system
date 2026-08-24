@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LayoutGrid, Menu, Plus, Settings, LogOut, Trophy } from "lucide-react";
+import { LayoutGrid, Menu, Plus, Settings, LogOut, Trophy, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
