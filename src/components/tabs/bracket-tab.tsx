@@ -33,44 +33,45 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
   return (
     <div className="space-y-8">
       <div className="overflow-x-auto pb-2">
-      <div className="flex min-w-max gap-6">
-        {rounds.map(([roundIndex, list]) => (
-          <div key={roundIndex} className="flex w-64 flex-col justify-around gap-4">
-            <h3 className="font-display text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {list[0]?.round_name ?? `Round ${roundIndex}`}
-            </h3>
-            {list.map((m) => {
-              const aWin = m.score_a != null && m.score_b != null && m.score_a > m.score_b;
-              const bWin = m.score_a != null && m.score_b != null && m.score_b > m.score_a;
-              return (
-                <div key={m.id} className="surface-card animate-rise divide-y divide-border p-0">
-                  <div
-                    className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}
-                  >
-                    <TeamChip
-                      name={side(m.team_a_id, m.placeholder_a).name}
-                      logoUrl={side(m.team_a_id, m.placeholder_a).logo_url}
-                      color={side(m.team_a_id, m.placeholder_a).jersey_color}
-                      className="min-w-0"
-                    />
-                    <span className="tabular-nums">{m.score_a ?? "–"}</span>
+        <div className="flex min-w-max gap-6">
+          {rounds.map(([roundIndex, list]) => (
+            <div key={roundIndex} className="flex w-64 flex-col justify-around gap-4">
+              <h3 className="font-display text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                {list[0]?.round_name ?? `Round ${roundIndex}`}
+              </h3>
+              {list.map((m) => {
+                const aWin = m.score_a != null && m.score_b != null && m.score_a > m.score_b;
+                const bWin = m.score_a != null && m.score_b != null && m.score_b > m.score_a;
+                return (
+                  <div key={m.id} className="surface-card animate-rise divide-y divide-border p-0">
+                    <div
+                      className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}
+                    >
+                      <TeamChip
+                        name={side(m.team_a_id, m.placeholder_a).name}
+                        logoUrl={side(m.team_a_id, m.placeholder_a).logo_url}
+                        color={side(m.team_a_id, m.placeholder_a).jersey_color}
+                        className="min-w-0"
+                      />
+                      <span className="tabular-nums">{m.score_a ?? "–"}</span>
+                    </div>
+                    <div
+                      className={`flex items-center justify-between px-3 py-2 text-sm ${bWin ? "font-semibold text-primary" : ""}`}
+                    >
+                      <TeamChip
+                        name={side(m.team_b_id, m.placeholder_b).name}
+                        logoUrl={side(m.team_b_id, m.placeholder_b).logo_url}
+                        color={side(m.team_b_id, m.placeholder_b).jersey_color}
+                        className="min-w-0"
+                      />
+                      <span className="tabular-nums">{m.score_b ?? "–"}</span>
+                    </div>
                   </div>
-                  <div
-                    className={`flex items-center justify-between px-3 py-2 text-sm ${bWin ? "font-semibold text-primary" : ""}`}
-                  >
-                    <TeamChip
-                      name={side(m.team_b_id, m.placeholder_b).name}
-                      logoUrl={side(m.team_b_id, m.placeholder_b).logo_url}
-                      color={side(m.team_b_id, m.placeholder_b).jersey_color}
-                      className="min-w-0"
-                    />
-                    <span className="tabular-nums">{m.score_b ?? "–"}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
       <AutoAdRegion context="knockout" className="pt-8" />
     </div>
