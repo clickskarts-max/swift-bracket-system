@@ -328,7 +328,6 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, i
         />
       </Dialog>
     );
-  return null; // Should never be reached but for TS safety
 }
 
 function CreativeDialog({ 
