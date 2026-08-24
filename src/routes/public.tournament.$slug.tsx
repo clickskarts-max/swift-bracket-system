@@ -293,8 +293,9 @@ function PublicTournament() {
         </div>
       </section>
       
-      <div className="mx-auto max-w-5xl px-4 pt-6">
+      <div className="mx-auto max-w-5xl px-4 pt-6 space-y-4">
         <SmartAdSlot placement="tournament-header" tournamentId={tournament.id} className="w-full" />
+        <AutoAdRegion context="tournament_overview" tournamentId={tournament.id} className="w-full" />
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
