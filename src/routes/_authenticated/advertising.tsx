@@ -220,14 +220,15 @@ function AdvertisingPage() {
                             Manage
                           </Button>
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="icon" 
+                            className="h-8 w-8"
                             onClick={() => {
                               setSelectedCampaign(c);
                               setIsCampaignDialogOpen(true);
                             }}
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <Settings2 className="h-3.5 w-3.5" />
                           </Button>
                           <Button 
                             variant="ghost" 
