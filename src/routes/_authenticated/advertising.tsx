@@ -344,6 +344,8 @@ function CampaignDialog({
 }) {
   const createCampaign = useCreateAdCampaign();
   const updateCampaign = useUpdateAdCampaign();
+  const navigate = useNavigate();
+  
   
   const [formData, setFormData] = useState({ 
     name: '', 
