@@ -117,17 +117,12 @@ function AdvertisingPage() {
         title="Ads & Sponsors"
         description="Manage commercial ads, sponsorships and track performance."
         action={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setIsCreativeDialogOpen(true)}>
-               <ImageIcon className="mr-2 h-4 w-4" /> Add Creative
-            </Button>
-            <Button onClick={() => {
+          <Button onClick={() => {
               setSelectedCampaign(null);
               setIsCampaignDialogOpen(true);
             }}>
-              <Plus className="mr-2 h-4 w-4" /> Create Campaign
-            </Button>
-          </div>
+            <Plus className="mr-2 h-4 w-4" /> Create Campaign
+          </Button>
         }
       />
 
