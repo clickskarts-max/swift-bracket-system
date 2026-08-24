@@ -187,8 +187,8 @@ function AdvertisingPage() {
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">
                         <button 
-                          onClick={() => navigate({ to: `/advertising/campaign/${c.id}` })}
-                          className="hover:text-primary hover:underline text-left transition-colors"
+                          onClick={() => navigate({ to: '/advertising/campaign/$id', params: { id: c.id } })}
+                          className="hover:text-primary hover:underline text-left transition-colors font-bold"
                         >
                           {c.name}
                         </button>
@@ -214,7 +214,7 @@ function AdvertisingPage() {
                             variant="default" 
                             size="sm" 
                             className="h-8 gap-1"
-                            onClick={() => navigate({ to: `/advertising/campaign/${c.id}` })}
+                             onClick={() => navigate({ to: '/advertising/campaign/$id', params: { id: c.id } })}
                           >
                             <LayoutDashboard className="h-3.5 w-3.5" />
                             Manage
@@ -388,7 +388,7 @@ function CampaignDialog({
           weight: 1
         });
         toast.success("Campaign created");
-        navigate({ to: `/advertising/campaign/${newCampaign.id}` });
+        navigate({ to: '/advertising/campaign/$id', params: { id: newCampaign.id } });
       }
       onOpenChange(false);
     } catch (e) {
