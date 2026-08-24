@@ -66,7 +66,7 @@ function AdvertisingPage() {
   const navigate = useNavigate();
 
   const [selectedCampaign, setSelectedCampaign] = useState<(AdCampaign & { ad_creatives: AdCreative[] }) | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
 
   // Safely handle campaigns array
