@@ -185,15 +185,27 @@ function AdvertisingPage() {
                 ) : (
                   campaigns.map((c) => (
                     <TableRow key={c.id}>
-                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <button 
+                          onClick={() => navigate({ to: `/advertising/campaign/${c.id}` })}
+                          className="hover:text-primary hover:underline text-left transition-colors"
+                        >
+                          {c.name}
+                        </button>
+                      </TableCell>
                       <TableCell>{c.advertiser || "—"}</TableCell>
                       <TableCell>
                         <StatusPill status={c.status} />
                       </TableCell>
                       <TableCell className="capitalize">{c.priority}</TableCell>
                       <TableCell>
+                        <Badge variant="outline" className="text-[10px]">
+                          {c.ad_creatives?.length || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={c.allow_auto_placement ? "default" : "secondary"} className="text-[10px]">
-                          {c.allow_auto_placement ? "Yes" : "No"}
+                          {c.allow_auto_placement ? "On" : "Off"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
