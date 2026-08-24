@@ -108,13 +108,14 @@ export const useCreateKey = () =>
       unwrap(
         await supabase.rpc("owner_create_key", {
           input_plan: vars.plan,
-          input_days: vars.days ?? undefined,
           input_max_redemptions: vars.maxRedemptions ?? 1,
-          input_assigned_email: vars.assignedEmail ?? undefined,
-          input_note: vars.note ?? undefined,
-          input_expires_at: vars.expiresAt ?? undefined,
+          ...(vars.days != null ? { input_days: vars.days } : {}),
+          ...(vars.assignedEmail ? { input_assigned_email: vars.assignedEmail } : {}),
+          ...(vars.note ? { input_note: vars.note } : {}),
+          ...(vars.expiresAt ? { input_expires_at: vars.expiresAt } : {}),
         }),
       ) as string,
+
     [
       ["owner", "keys"],
       ["owner", "audit"],
