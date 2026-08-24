@@ -77,8 +77,20 @@ export interface AdSettings {
   auto_placement_enabled: boolean;
   auto_placement_intensity: 'low' | 'balanced' | 'high';
   public_ads_enabled: boolean;
+  sponsorships_enabled: boolean;
+  native_ads_enabled: boolean;
+  sticky_mobile_enabled: boolean;
+  adsense_fallback_enabled: boolean;
   page_rules: Record<string, boolean>;
 }
+
+export interface CampaignInventoryRow {
+  id: string;
+  campaign_id: string;
+  inventory_key: string;
+  enabled: boolean;
+}
+
 
 // Admin Hooks
 export const useAdCampaigns = () =>
