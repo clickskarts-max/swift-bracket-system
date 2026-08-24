@@ -58,10 +58,12 @@ interface CampaignDetailDrawerProps {
   campaign: AdCampaign & { ad_creatives: AdCreative[] };
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  forceTab?: string;
+  inline?: boolean;
 }
 
-export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignDetailDrawerProps) {
-  const [activeTab, setActiveTab] = useState("overview");
+export function CampaignDetailDrawer({ campaign, open, onOpenChange, forceTab, inline = false }: CampaignDetailDrawerProps) {
+  const [activeTab, setActiveTab] = useState(forceTab || "overview");
   const [isAddCreativeOpen, setIsAddCreativeOpen] = useState(false);
   const [editingCreative, setEditingCreative] = useState<AdCreative | null>(null);
   const updateCampaign = useUpdateAdCampaign();
@@ -92,9 +94,9 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignD
     return formats;
   }, [campaign.ad_creatives]);
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+  const content = (
+    <div className={inline ? "" : "max-h-[90vh] overflow-y-auto"}>
+      {!inline && (
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center justify-between pr-8">
             <div className="space-y-1">
@@ -117,8 +119,10 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignD
             </div>
           </div>
         </DialogHeader>
+      )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className={inline ? "" : "mt-4"}>
+        {!inline && (
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="creatives">Creatives</TabsTrigger>
@@ -126,6 +130,7 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignD
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+        )}
 
           <TabsContent value="overview" className="space-y-6 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -279,21 +284,50 @@ export function CampaignDetailDrawer({ campaign, open, onOpenChange }: CampaignD
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="mt-6 pt-6 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-        </DialogFooter>
-      </DialogContent>
+        {!inline && (
+          <DialogFooter className="mt-6 pt-6 border-t">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+          </DialogFooter>
+        )}
+      </div>
+    );
 
-      <CreativeDialog 
-        open={isAddCreativeOpen}
-        onOpenChange={(open) => {
-          setIsAddCreativeOpen(open);
-          if (!open) setEditingCreative(null);
-        }}
-        campaignId={campaign.id}
-        creative={editingCreative}
-      />
-    </Dialog>
+    if (inline) {
+      return (
+        <>
+          {content}
+          <CreativeDialog 
+            open={isAddCreativeOpen}
+            onOpenChange={(open) => {
+              setIsAddCreativeOpen(open);
+              if (!open) setEditingCreative(null);
+            }}
+            campaignId={campaign.id}
+            creative={editingCreative}
+          />
+        </>
+      );
+    }
+
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl p-0">
+          <div className="p-6">
+            {content}
+          </div>
+        </DialogContent>
+
+        <CreativeDialog 
+          open={isAddCreativeOpen}
+          onOpenChange={(open) => {
+            setIsAddCreativeOpen(open);
+            if (!open) setEditingCreative(null);
+          }}
+          campaignId={campaign.id}
+          creative={editingCreative}
+        />
+      </Dialog>
+    );
   );
 }
 

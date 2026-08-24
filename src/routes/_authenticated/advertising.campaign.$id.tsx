@@ -25,7 +25,8 @@ import {
   Pause,
   ExternalLink,
   MoreVertical,
-  Layers
+  Layers,
+  Globe
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
