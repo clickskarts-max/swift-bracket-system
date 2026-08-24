@@ -283,6 +283,7 @@ export function SponsorCreatives({
               <ImageUpload
                 value={draft.media_url || null}
                 onChange={(url) => set("media_url", url ?? "")}
+                folder="ads"
               />
               <p className="text-[11px] text-muted-foreground">
                 PNG or WebP with transparency preferred. Logos are never stretched.
@@ -295,6 +296,7 @@ export function SponsorCreatives({
                 <ImageUpload
                   value={draft.logo_dark_url || null}
                   onChange={(url) => set("logo_dark_url", url ?? "")}
+                  folder="ads"
                 />
               </div>
             )}
