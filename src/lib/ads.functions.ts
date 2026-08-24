@@ -316,3 +316,20 @@ export const useDeleteAdCreative = () => {
     }
   });
 };
+
+export const useUpdateAdCreative = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<AdCreative> & { id: string }) => {
+      const { error } = await (supabase
+        .from("ad_creatives" as any)
+        .update(updates)
+        .eq("id", id) as any);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+    }
+  });
+};
