@@ -31,12 +31,12 @@ export class SmartPlacementEngine {
 
     // 1. Check global and page-specific toggles
     if (!settings.auto_placement_enabled) return { score: 0, reasons: ['Auto-placement globally disabled'] };
-    if (!settings.page_rules[context]) return { score: 0, reasons: [\`Auto-placement disabled for \${context}\`] };
+    if (!settings.page_rules[context]) return { score: 0, reasons: [`Auto-placement disabled for ${context}`] };
 
     // 2. Density Check
     const maxAds = this.getDensityLimit(settings.auto_placement_intensity, pageHeight, isMobile);
     if (renderedAdsCount >= maxAds) {
-      return { score: 0, reasons: [\`Ad density limit reached (\${maxAds})\`] };
+      return { score: 0, reasons: [`Ad density limit reached (${maxAds})`] };
     }
 
     // 3. Page Context Scoring
@@ -50,7 +50,7 @@ export class SmartPlacementEngine {
       pool_draw: 10
     };
     score += contextScores[context] || 0;
-    reasons.push(\`Context score for \${context}: \${contextScores[context]}\`);
+    reasons.push(`Context score for ${context}: ${contextScores[context]}`);
 
     // 4. Width Check
     if (containerWidth < 300) {
@@ -70,7 +70,7 @@ export class SmartPlacementEngine {
     // 6. Proximity Penalty (simulated)
     if (renderedAdsCount > 0) {
       score -= (renderedAdsCount * 15);
-      reasons.push(\`Proximity penalty for \${renderedAdsCount} existing ads\`);
+      reasons.push(`Proximity penalty for ${renderedAdsCount} existing ads`);
     }
 
     return { score: Math.max(0, Math.min(100, score)), reasons };
