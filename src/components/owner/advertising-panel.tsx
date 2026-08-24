@@ -167,10 +167,9 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
                       <Link
                         to="/advertising/campaign/$id"
                         params={{ id: c.id }}
-                        search={{ tab: "creatives" } as never}
                         className="block rounded-md px-2 py-1.5 text-sm hover:bg-secondary"
                       >
-                        Creatives
+                        Creatives &amp; targeting
                       </Link>
                       <Link
                         to="/advertising"
