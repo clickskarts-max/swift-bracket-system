@@ -388,7 +388,7 @@ function CampaignDialog({
           weight: 1
         });
         toast.success("Campaign created");
-        navigate({ to: `/advertising/campaign/${newCampaign.id}` });
+        navigate({ to: '/advertising/campaign/$id', params: { id: newCampaign.id } });
       }
       onOpenChange(false);
     } catch (e) {
