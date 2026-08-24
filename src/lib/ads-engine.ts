@@ -104,7 +104,7 @@ export class SmartPlacementEngine {
 
     // 1. Get all creatives from eligible campaigns
     const allCreatives = campaigns.flatMap(c => 
-      c.ad_creatives.map(creative => ({ 
+      (c.ad_creatives || []).map(creative => ({ 
         ...creative, 
         priority: c.priority, 
         weight: c.weight 
@@ -127,7 +127,10 @@ export class SmartPlacementEngine {
       return (priorityMap[pB] || 0) - (priorityMap[pA] || 0);
     });
 
-    const highestPriority = compatible[0].priority;
+    const firstItem = compatible[0];
+    if (!firstItem) return null;
+
+    const highestPriority = firstItem.priority;
     const topTier = compatible.filter(c => c.priority === highestPriority);
 
     // 4. Weighted selection within top tier
@@ -136,9 +139,9 @@ export class SmartPlacementEngine {
     
     for (const creative of topTier) {
       random -= (creative.weight || 10);
-      if (random <= 0) return creative as AdCreative;
+      if (random <= 0) return creative as unknown as AdCreative;
     }
 
-    return topTier[0] as AdCreative;
+    return topTier[0] as unknown as AdCreative;
   }
 }
