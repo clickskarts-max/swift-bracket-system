@@ -208,3 +208,102 @@ export const useUpdateAdSettings = () => {
     }
   });
 };
+
+// Campaign Mutations
+export const useCreateAdCampaign = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (campaign: Partial<AdCampaign>) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const owner_id = userData.user?.id;
+      if (!owner_id) throw new Error("Not authenticated");
+
+      const { data, error } = await (supabase
+        .from("ad_campaigns" as any)
+        .insert({ ...campaign, owner_id })
+        .select()
+        .single() as any);
+      
+      if (error) throw error;
+      return data as AdCampaign;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+    }
+  });
+};
+
+export const useUpdateAdCampaign = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<AdCampaign> & { id: string }) => {
+      const { error } = await (supabase
+        .from("ad_campaigns" as any)
+        .update(updates)
+        .eq("id", id) as any);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+    }
+  });
+};
+
+export const useDeleteAdCampaign = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase
+        .from("ad_campaigns" as any)
+        .delete()
+        .eq("id", id) as any);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+    }
+  });
+};
+
+// Creative Mutations
+export const useCreateAdCreative = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (creative: Partial<AdCreative>) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const owner_id = userData.user?.id;
+      if (!owner_id) throw new Error("Not authenticated");
+
+      const { data, error } = await (supabase
+        .from("ad_creatives" as any)
+        .insert({ ...creative, owner_id })
+        .select()
+        .single() as any);
+      
+      if (error) throw error;
+      return data as AdCreative;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+    }
+  });
+};
+
+export const useDeleteAdCreative = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase
+        .from("ad_creatives" as any)
+        .delete()
+        .eq("id", id) as any);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+    }
+  });
+};
