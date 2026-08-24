@@ -395,12 +395,13 @@ function CreativeDialog({
   const handleSubmit = async () => {
     try {
       const creativeType: AdCreative['type'] = source === 'html' ? 'html' : 'image';
+      const providerType: AdCreative['provider_type'] = source === 'adsense' ? 'adsense' : 'direct';
       
       const payload = {
         name: formData.name || `${source.toUpperCase()} Creative`,
         campaign_id: campaignId,
         type: creativeType,
-        provider_type: source === 'adsense' ? 'adsense' : 'direct',
+        provider_type: providerType,
         media_url: formData.media_url || '',
         html_content: formData.html_content,
         destination_url: formData.destination_url || null,
