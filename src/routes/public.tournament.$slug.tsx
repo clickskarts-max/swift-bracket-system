@@ -13,6 +13,7 @@ import { EmptyState, ScoreLine, StatusPill, TeamChip } from "@/components/data-b
 import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { MatchBreakdown } from "@/components/match-breakdown";
+import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useBranding } from "@/hooks/use-branding";
