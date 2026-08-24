@@ -14,6 +14,7 @@ import { Link } from "@tanstack/react-router";
 import { Trophy, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
+import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -48,6 +49,7 @@ function Index() {
 
         <LandingWorkflow />
         <LandingFormats />
+        <AutoAdRegion context="homepage" className="container mx-auto max-w-5xl px-4 py-8" />
         <LandingPoolDraw />
         
         <div className="container mx-auto max-w-5xl px-4 py-20">

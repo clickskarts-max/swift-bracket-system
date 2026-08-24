@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useActiveAds, useRecordAdEvent } from "@/lib/ads.functions";
+import { SmartPlacementEngine } from "@/lib/ads-engine";
 import { cn } from "@/lib/utils";
 
 interface SmartAdSlotProps {
   placement: string;
   tournamentId?: string;
   className?: string;
+  isAuto?: boolean;
 }
 
-export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotProps) {
-  const { data: campaigns, isLoading } = useActiveAds(placement, tournamentId);
+export function SmartAdSlot({ placement, tournamentId, className, isAuto = false }: SmartAdSlotProps) {
+  const { data: campaigns, isLoading } = useActiveAds(placement, tournamentId, isAuto);
   const recordEvent = useRecordAdEvent();
   const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,44 +38,7 @@ export function SmartAdSlot({ placement, tournamentId, className }: SmartAdSlotP
   // Selection Logic
   const selectedCreative = useMemo(() => {
     if (!campaigns || campaigns.length === 0 || !containerSize) return null;
-
-    // 1. Get all creatives from eligible campaigns
-    const allCreatives = campaigns.flatMap(c => 
-      c.ad_creatives.map(creative => ({ ...creative, priority: c.priority, weight: c.weight }))
-    );
-
-    // 2. Filter by size compatibility (creative must fit in container)
-    const compatible = allCreatives.filter(c => {
-      if (!c.width || !c.height) return true; // Responsive/Fluid
-      return c.width <= containerSize.w;
-    });
-
-    if (compatible.length === 0) return null;
-
-    // 3. Rank by priority
-    const priorityMap = { guaranteed: 4, high: 3, normal: 2, low: 1 };
-    compatible.sort((a, b) => {
-      const pA = a.priority as keyof typeof priorityMap;
-      const pB = b.priority as keyof typeof priorityMap;
-      return (priorityMap[pB] || 0) - (priorityMap[pA] || 0);
-    });
-
-    const first = compatible[0];
-    if (!first) return null;
-
-    const highestPriority = first.priority;
-    const topTier = compatible.filter(c => c.priority === highestPriority);
-
-    // 4. Weighted selection within top tier
-    const totalWeight = topTier.reduce((sum, c) => sum + (c.weight || 10), 0);
-    let random = Math.random() * totalWeight;
-    
-    for (const creative of topTier) {
-      random -= (creative.weight || 10);
-      if (random <= 0) return creative;
-    }
-
-    return topTier[0];
+    return SmartPlacementEngine.findCompatibleCreative(campaigns, containerSize.w);
   }, [campaigns, containerSize]);
 
   // Impression Tracking
