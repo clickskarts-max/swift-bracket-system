@@ -204,7 +204,7 @@ function CampaignWorkspace() {
                   {[
                     { label: "Campaign Details", status: readiness.details },
                     { label: "Creatives Uploaded", status: readiness.creatives, sub: "Add at least one ad unit" },
-                    { label: "Placements Assigned", status: readiness.placements },
+                    { label: "Inventory Assigned", status: readiness.inventory, sub: "Pick the slots this campaign may serve in" },
                     { label: "Targeting Configured", status: readiness.targeting },
                   ].map((step, i) => (
                     <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/40">
