@@ -169,13 +169,8 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
         query = query.eq("allow_auto_placement", true);
       }
 
-      // Narrow server-side where possible: on a tournament page only "all"
-      // campaigns or ones explicitly linked to this tournament are relevant.
-      if (tournamentId) {
-        query = query.or(
-          `tournament_targeting_mode.eq.all,ad_campaign_tournaments.tournament_id.eq.${tournamentId}`,
-        );
-      } else {
+      // No tournament context (e.g. homepage): only "all tournaments" campaigns.
+      if (!tournamentId) {
         query = query.eq("tournament_targeting_mode", "all");
       }
 
