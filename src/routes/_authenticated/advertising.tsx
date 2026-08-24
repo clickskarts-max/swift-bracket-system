@@ -6,10 +6,18 @@ import {
   useAdCampaigns, 
   useAdStats, 
   useAdSettings, 
-  useUpdateAdSettings 
+  useUpdateAdSettings,
+  useCreateAdCampaign,
+  useUpdateAdCampaign,
+  useDeleteAdCampaign,
+  useAdPlacements,
+  useCreateAdCreative,
+  useDeleteAdCreative,
+  AdCampaign,
+  AdCreative
 } from "@/lib/ads.functions";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings2, ShieldCheck, Globe } from "lucide-react";
+import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -30,6 +38,19 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { ImageUpload } from "@/components/image-upload";
+import { format } from "date-fns";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const Route = createFileRoute("/_authenticated/advertising")({
   component: AdvertisingPage,
