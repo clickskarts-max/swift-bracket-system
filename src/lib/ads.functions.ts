@@ -24,10 +24,19 @@ export interface AdCreative {
   campaign_id: string;
   name: string;
   type: 'image' | 'animated' | 'html';
+  provider_type: 'direct' | 'adsense' | 'custom_provider';
+  provider_config: any;
   media_url: string;
+  html_content: string | null;
   destination_url: string | null;
   width: number | null;
   height: number | null;
+  size_preset: string | null;
+  is_responsive: boolean;
+  status: 'active' | 'disabled';
+  min_width: number | null;
+  max_width: number | null;
+  aspect_ratio: string | null;
   created_at: string;
   updated_at: string;
 }
