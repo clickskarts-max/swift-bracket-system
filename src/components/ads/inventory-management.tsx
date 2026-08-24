@@ -16,7 +16,7 @@ import {
 } from "@/lib/ad-inventory";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ORDER: InventoryCategory[] = ["sponsorship", "display", "native", "smart"];
@@ -144,7 +144,7 @@ export function InventoryManagement({
                       isOn ? "border-primary/60 bg-primary/5" : "border-border/50 hover:bg-secondary/20",
                     )}
                   >
-                    <Checkbox checked={isOn} onCheckedChange={() => toggle(def.key)} className="mt-0.5" />
+                    <Switch checked={isOn} onCheckedChange={() => toggle(def.key)} className="mt-0.5" />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="text-sm font-medium">{def.label}</span>
