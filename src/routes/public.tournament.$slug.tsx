@@ -328,6 +328,12 @@ function PublicTournament() {
           </div>
 
           <TabsContent value="fixtures">
+            <SponsorSlot
+              inventory="fixtures-sponsor"
+              tournamentId={tournament.id}
+              title="Fixtures"
+              className="mb-4"
+            />
             {upcoming.length === 0 ? (
               <EmptyState
                 title="Fixtures coming soon"
