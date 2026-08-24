@@ -291,6 +291,10 @@ function PublicTournament() {
           </div>
         </div>
       </section>
+      
+      <div className="mx-auto max-w-5xl px-4 pt-6">
+        <SmartAdSlot placement="tournament-header" tournamentId={tournament.id} className="w-full" />
+      </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Tabs defaultValue="fixtures">
