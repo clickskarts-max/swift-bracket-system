@@ -249,7 +249,9 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
       });
 
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 15_000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
 // Campaign ↔ Tournament targeting
@@ -299,6 +301,8 @@ export const useSetCampaignTournaments = () => {
       qc.invalidateQueries({ queryKey: ["campaign-tournaments", vars.campaignId] });
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
     },
   });
 };
@@ -333,6 +337,8 @@ export const useUpdateAdSettings = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-settings"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -357,6 +363,8 @@ export const useCreateAdCampaign = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -374,6 +382,8 @@ export const useUpdateAdCampaign = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -391,6 +401,8 @@ export const useDeleteAdCampaign = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -415,6 +427,8 @@ export const useCreateAdCreative = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -432,6 +446,8 @@ export const useDeleteAdCreative = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -449,6 +465,8 @@ export const useUpdateAdCreative = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     }
   });
 };
@@ -509,6 +527,8 @@ export const useSetCampaignInventory = () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
+      qc.invalidateQueries({ queryKey: ["active-ads"] });
+      qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
     },
   });
 };
@@ -555,7 +575,9 @@ const PRIORITY_RANK: Record<string, number> = { guaranteed: 4, high: 3, normal: 
 export const useTournamentInventory = (tournamentId?: string) =>
   useQuery({
     queryKey: ["tournament-inventory", tournamentId ?? "global"],
-    staleTime: 1000 * 60 * 5,
+    staleTime: 15_000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       let query = supabase
         .from("ad_campaigns" as any)
