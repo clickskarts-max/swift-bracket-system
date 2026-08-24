@@ -31,7 +31,8 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
     );
 
   return (
-    <div className="overflow-x-auto pb-2">
+    <div className="space-y-8">
+      <div className="overflow-x-auto pb-2">
       <div className="flex min-w-max gap-6">
         {rounds.map(([roundIndex, list]) => (
           <div key={roundIndex} className="flex w-64 flex-col justify-around gap-4">
