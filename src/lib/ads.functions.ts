@@ -114,7 +114,8 @@ export const useActiveAds = (placementKey: string, tournamentId?: string) =>
 
       const campaigns = (data as (AdCampaign & { ad_creatives: AdCreative[] })[]).filter(c => {
         const targeting = c.targeting;
-        if (tournamentId && targeting?.tournament_ids?.length > 0) {
+        if (!targeting) return true;
+        if (tournamentId && targeting.tournament_ids?.length > 0) {
           return targeting.tournament_ids.includes(tournamentId);
         }
         return true;
