@@ -106,6 +106,45 @@ export type Database = {
           },
         ]
       }
+      ad_campaign_tournaments: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          owner_id: string
+          tournament_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          owner_id: string
+          tournament_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          owner_id?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaign_tournaments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_campaign_tournaments_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_campaigns: {
         Row: {
           advertiser: string | null
@@ -119,6 +158,7 @@ export type Database = {
           start_date: string | null
           status: string | null
           targeting: Json | null
+          tournament_targeting_mode: string
           updated_at: string | null
           weight: number | null
         }
@@ -134,6 +174,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           targeting?: Json | null
+          tournament_targeting_mode?: string
           updated_at?: string | null
           weight?: number | null
         }
@@ -149,6 +190,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           targeting?: Json | null
+          tournament_targeting_mode?: string
           updated_at?: string | null
           weight?: number | null
         }
