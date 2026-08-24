@@ -32,12 +32,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard, StatusPill } from "@/components/data-bits";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 
