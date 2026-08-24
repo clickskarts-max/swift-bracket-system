@@ -366,7 +366,14 @@ function PublicTournament() {
           </TabsContent>
 
           <TabsContent value="standings">
-            <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
+            <div className="space-y-6">
+              <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
+              <SmartAdSlot 
+                placement="sidebar" 
+                tournamentId={tournament.id} 
+                className="w-full max-w-sm mx-auto" 
+              />
+            </div>
           </TabsContent>
           <TabsContent value="bracket">
             <BracketTab teams={teams} matches={matches} />
