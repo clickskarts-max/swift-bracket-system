@@ -241,7 +241,7 @@ function CampaignWorkspace() {
           </div>
         </TabsContent>
 
-        <TabsContent value="creatives" className="pt-4">
+        <TabsContent value="creatives" className="pt-4 mt-0">
           <CampaignDetailDrawer 
             campaign={campaign as any} 
             open={true} 
@@ -251,39 +251,40 @@ function CampaignWorkspace() {
           />
         </TabsContent>
 
-        <TabsContent value="placements" className="pt-4">
-          <CampaignDetailDrawer 
-            campaign={campaign as any} 
-            open={true} 
-            onOpenChange={() => {}} 
-            forceTab="placements"
-            inline
-          />
+        <TabsContent value="placements" className="pt-4 mt-0">
+          <div className="surface-card p-8 border rounded-xl text-center">
+            <Layout className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+            <h3 className="font-semibold text-lg mb-2">Placement Targeting</h3>
+            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+              Configure specific zones or tournament pages where this campaign should be prioritized.
+            </p>
+            <Badge variant="outline" className="px-4 py-1">Advanced Mode Required</Badge>
+          </div>
         </TabsContent>
 
-        <TabsContent value="targeting" className="pt-4">
+        <TabsContent value="targeting" className="pt-4 mt-0">
           <div className="surface-card p-8 border rounded-xl text-center">
             <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="font-semibold text-lg mb-2">Targeting Rules</h3>
+            <h3 className="font-semibold text-lg mb-2">Audience Segmentation</h3>
             <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Define which pages, tournaments, or devices this campaign should appear on.
+              Define which visitors see these ads based on location, device, or behavior.
             </p>
             <Badge variant="outline" className="px-4 py-1">Coming Soon</Badge>
           </div>
         </TabsContent>
 
-        <TabsContent value="performance" className="pt-4">
+        <TabsContent value="performance" className="pt-4 mt-0">
           <div className="surface-card p-8 border rounded-xl text-center">
             <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
             <h3 className="font-semibold text-lg mb-2">Detailed Analytics</h3>
             <p className="text-muted-foreground max-w-sm mx-auto mb-6">
               Track impressions, clicks, and CTR breakdown by creative and placement.
             </p>
-            <Badge variant="outline" className="px-4 py-1">Coming Soon</Badge>
+            <Badge variant="outline" className="px-4 py-1">Data Processing...</Badge>
           </div>
         </TabsContent>
 
-        <TabsContent value="settings" className="pt-4">
+        <TabsContent value="settings" className="pt-4 mt-0">
            <CampaignDetailDrawer 
             campaign={campaign as any} 
             open={true} 
