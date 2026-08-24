@@ -1054,6 +1054,7 @@ export type Database = {
         }
         Returns: string
       }
+      owner_delete_key: { Args: { input_id: string }; Returns: undefined }
       owner_list_users: {
         Args: never
         Returns: {
