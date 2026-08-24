@@ -56,10 +56,10 @@ export const useAdCampaigns = () =>
   useQuery({
     queryKey: ["ad-campaigns"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("ad_campaigns" as any)
         .select("*, ad_creatives(*)")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false }) as any);
       
       if (error) throw error;
       return data as (AdCampaign & { ad_creatives: AdCreative[] })[];
@@ -70,10 +70,10 @@ export const useAdPlacements = () =>
   useQuery({
     queryKey: ["ad-placements"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("ad_placements" as any)
         .select("*")
-        .order("label");
+        .order("label") as any);
       
       if (error) throw error;
       return data as AdPlacement[];
@@ -84,9 +84,9 @@ export const useAdStats = () =>
   useQuery({
     queryKey: ["ad-stats"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("ad_analytics" as any)
-        .select("type");
+        .select("type") as any);
       
       if (error) throw error;
 
@@ -105,10 +105,10 @@ export const useActiveAds = (placementKey: string, tournamentId?: string) =>
   useQuery({
     queryKey: ["active-ads", placementKey, tournamentId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("ad_campaigns" as any)
         .select("*, ad_creatives(*)")
-        .eq("status", "active");
+        .eq("status", "active") as any);
 
       if (error) throw error;
 
@@ -130,7 +130,7 @@ export const useRecordAdEvent = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (event: Partial<AdAnalytic>) => {
-      const { error } = await supabase.from("ad_analytics" as any).insert(event);
+      const { error } = await (supabase.from("ad_analytics" as any).insert(event) as any);
       if (error) throw error;
     },
     onSuccess: () => {
