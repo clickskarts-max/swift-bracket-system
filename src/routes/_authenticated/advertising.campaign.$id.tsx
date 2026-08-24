@@ -135,18 +135,9 @@ function CampaignWorkspace() {
             )}
           </Button>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" /> Delete Campaign
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button variant="outline" size="sm" onClick={handleDelete} className="text-destructive gap-2">
+            <Trash2 className="h-4 w-4" /> Delete
+          </Button>
         </div>
       </div>
 
