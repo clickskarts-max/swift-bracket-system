@@ -329,7 +329,11 @@ function CreativeDialog({
     if (open) resetForm();
   }, [open]);
 
-  const handleFileUpload = async (url: string, file?: File) => {
+  const handleFileUpload = async (url: string | null, file?: File) => {
+    if (!url) {
+      setFormData(prev => ({ ...prev, media_url: null }));
+      return;
+    }
     setFormData(prev => ({ ...prev, media_url: url }));
     if (file) {
       try {
