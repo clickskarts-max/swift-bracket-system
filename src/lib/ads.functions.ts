@@ -25,6 +25,7 @@ export interface AdCreative {
   campaign_id: string;
   name: string;
   type: 'image' | 'animated' | 'html';
+  creative_role: 'display' | 'sponsor_identity' | 'native';
   provider_type: 'direct' | 'adsense' | 'custom_provider';
   provider_config: any;
   media_url: string;
@@ -38,9 +39,17 @@ export interface AdCreative {
   min_width: number | null;
   max_width: number | null;
   aspect_ratio: string | null;
+  sponsor_name: string | null;
+  sponsor_label: string | null;
+  logo_dark_url: string | null;
+  alt_text: string | null;
+  headline: string | null;
+  body_text: string | null;
+  cta_label: string | null;
   created_at: string;
   updated_at: string;
 }
+
 
 export interface AdPlacement {
   id: string;
