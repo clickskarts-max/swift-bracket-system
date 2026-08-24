@@ -31,6 +31,8 @@ export function KeysPanel() {
   const { data: keys = [], isLoading } = useActivationKeys();
   const createKey = useCreateKey();
   const revokeKey = useRevokeKey();
+  const deleteKey = useDeleteKey();
+
 
   const [plan, setPlan] = useState<string>("1_month");
   const [days, setDays] = useState("");
