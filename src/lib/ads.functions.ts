@@ -161,6 +161,10 @@ export const useAdSettings = () =>
           auto_placement_enabled: true,
           auto_placement_intensity: 'balanced',
           public_ads_enabled: true,
+          sponsorships_enabled: true,
+          native_ads_enabled: true,
+          sticky_mobile_enabled: false,
+          adsense_fallback_enabled: true,
           page_rules: {
             homepage: true,
             tournament_overview: true,
@@ -171,6 +175,7 @@ export const useAdSettings = () =>
             pool_draw: false
           }
         } as AdSettings;
+
       }
       
       return data as AdSettings;
