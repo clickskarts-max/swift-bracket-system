@@ -27,7 +27,8 @@ import {
   Edit2, 
   Eye, 
   ExternalLink,
-  Info
+  Info,
+  Globe
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { 
