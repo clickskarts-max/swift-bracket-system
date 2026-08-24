@@ -322,8 +322,17 @@ function PublicTournament() {
                       {label}
                     </h3>
                     <div className="space-y-2">
-                      {list.map((m) => (
-                        <MatchRow key={m.id} m={m} />
+                      {list.map((m, idx) => (
+                        <div key={m.id} className="space-y-4">
+                          <MatchRow m={m} />
+                          {idx === 2 && list.length > 3 && (
+                            <SmartAdSlot 
+                              placement="tournament-content" 
+                              tournamentId={tournament.id} 
+                              className="py-2"
+                            />
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
