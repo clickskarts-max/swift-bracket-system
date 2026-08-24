@@ -11,8 +11,6 @@ import {
   useUpdateAdCampaign,
   useDeleteAdCampaign,
   useAdPlacements,
-  useCreateAdCreative,
-  useDeleteAdCreative,
   AdCampaign,
   AdCreative
 } from "@/lib/ads.functions";
