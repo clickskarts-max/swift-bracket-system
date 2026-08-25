@@ -157,14 +157,11 @@ export const usePublicSponsors = (tournamentId: string) =>
     queryKey: ["public-sponsors", tournamentId],
     queryFn: async () =>
       unwrap(
-        await supabase
-          .from("sponsors")
-          .select(PUBLIC_SPONSOR_COLS)
-          .eq("tournament_id", tournamentId)
-          .order("name"),
+        await supabase.rpc("get_public_sponsors", { p_tournament_id: tournamentId }),
       ) as unknown as PublicSponsor[],
     enabled: !!tournamentId,
   });
+
 
 export const useShowcaseTournament = () =>
   useQuery({
