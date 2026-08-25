@@ -1027,6 +1027,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_public_branding: {
+        Args: { p_hostname: string }
+        Returns: {
+          accent_color: string
+          brand_name: string
+          contact_email: string
+          contact_phone: string
+          custom_domain: string
+          favicon_url: string
+          footer_text: string
+          id: string
+          logo_dark_url: string
+          logo_url: string
+          name: string
+          powered_by_enabled: boolean
+          primary_color: string
+          secondary_color: string
+          short_name: string
+          socials: Json
+          website: string
+        }[]
+      }
+      get_public_sponsors: {
+        Args: { p_tournament_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          logo_url: string
+          name: string
+          placement: string
+          tier: string
+          tournament_id: string
+          updated_at: string
+        }[]
+      }
       is_app_owner: { Args: never; Returns: boolean }
       log_owner_action: {
         Args: {
