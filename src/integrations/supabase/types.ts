@@ -1006,87 +1006,7 @@ export type Database = {
       }
     }
     Views: {
-      public_organizations: {
-        Row: {
-          accent_color: string | null
-          brand_name: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          custom_domain: string | null
-          favicon_url: string | null
-          footer_text: string | null
-          id: string | null
-          logo_dark_url: string | null
-          logo_url: string | null
-          name: string | null
-          powered_by_enabled: boolean | null
-          primary_color: string | null
-          secondary_color: string | null
-          short_name: string | null
-          socials: Json | null
-          website: string | null
-        }
-        Insert: {
-          accent_color?: string | null
-          brand_name?: never
-          contact_email?: never
-          contact_phone?: never
-          custom_domain?: string | null
-          favicon_url?: string | null
-          footer_text?: string | null
-          id?: string | null
-          logo_dark_url?: never
-          logo_url?: never
-          name?: never
-          powered_by_enabled?: boolean | null
-          primary_color?: string | null
-          secondary_color?: string | null
-          short_name?: never
-          socials?: never
-          website?: never
-        }
-        Update: {
-          accent_color?: string | null
-          brand_name?: never
-          contact_email?: never
-          contact_phone?: never
-          custom_domain?: string | null
-          favicon_url?: string | null
-          footer_text?: string | null
-          id?: string | null
-          logo_dark_url?: never
-          logo_url?: never
-          name?: never
-          powered_by_enabled?: boolean | null
-          primary_color?: string | null
-          secondary_color?: string | null
-          short_name?: never
-          socials?: never
-          website?: never
-        }
-        Relationships: []
-      }
-      public_sponsors: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          logo_url: string | null
-          name: string | null
-          placement: string | null
-          tier: string | null
-          tournament_id: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sponsors_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       ensure_app_user: {
@@ -1106,6 +1026,41 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_public_branding: {
+        Args: { p_hostname: string }
+        Returns: {
+          accent_color: string
+          brand_name: string
+          contact_email: string
+          contact_phone: string
+          custom_domain: string
+          favicon_url: string
+          footer_text: string
+          id: string
+          logo_dark_url: string
+          logo_url: string
+          name: string
+          powered_by_enabled: boolean
+          primary_color: string
+          secondary_color: string
+          short_name: string
+          socials: Json
+          website: string
+        }[]
+      }
+      get_public_sponsors: {
+        Args: { p_tournament_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          logo_url: string
+          name: string
+          placement: string
+          tier: string
+          tournament_id: string
+          updated_at: string
+        }[]
       }
       is_app_owner: { Args: never; Returns: boolean }
       log_owner_action: {
