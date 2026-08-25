@@ -118,8 +118,7 @@ export const useOrganization = () =>
 /* Public (anon) reads: only columns granted to the anon role. */
 const PUBLIC_TEAM_COLS =
   "id,tournament_id,name,short_name,logo_url,jersey_color,group_label,seed,socials,created_at,updated_at";
-const PUBLIC_SPONSOR_COLS =
-  "id,tournament_id,name,logo_url,tier,placement,created_at,updated_at";
+
 
 export type PublicTeam = Pick<
   Team,
