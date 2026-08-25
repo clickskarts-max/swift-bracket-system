@@ -1006,7 +1006,87 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_organizations: {
+        Row: {
+          accent_color: string | null
+          brand_name: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          custom_domain: string | null
+          favicon_url: string | null
+          footer_text: string | null
+          id: string | null
+          logo_dark_url: string | null
+          logo_url: string | null
+          name: string | null
+          powered_by_enabled: boolean | null
+          primary_color: string | null
+          secondary_color: string | null
+          short_name: string | null
+          socials: Json | null
+          website: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          brand_name?: never
+          contact_email?: never
+          contact_phone?: never
+          custom_domain?: string | null
+          favicon_url?: string | null
+          footer_text?: string | null
+          id?: string | null
+          logo_dark_url?: never
+          logo_url?: never
+          name?: never
+          powered_by_enabled?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          short_name?: never
+          socials?: never
+          website?: never
+        }
+        Update: {
+          accent_color?: string | null
+          brand_name?: never
+          contact_email?: never
+          contact_phone?: never
+          custom_domain?: string | null
+          favicon_url?: string | null
+          footer_text?: string | null
+          id?: string | null
+          logo_dark_url?: never
+          logo_url?: never
+          name?: never
+          powered_by_enabled?: boolean | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          short_name?: never
+          socials?: never
+          website?: never
+        }
+        Relationships: []
+      }
+      public_sponsors: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          logo_url: string | null
+          name: string | null
+          placement: string | null
+          tier: string | null
+          tournament_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsors_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       ensure_app_user: {
