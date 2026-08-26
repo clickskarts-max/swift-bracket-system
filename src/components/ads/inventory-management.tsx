@@ -141,10 +141,16 @@ export function InventoryManagement({
                     key={def.key}
                     className={cn(
                       "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors",
-                      isOn ? "border-primary/60 bg-primary/5" : "border-border/50 hover:bg-secondary/20",
+                      isOn
+                        ? "border-primary/60 bg-primary/5"
+                        : "border-border/50 hover:bg-secondary/20",
                     )}
                   >
-                    <Switch checked={isOn} onCheckedChange={() => toggle(def.key)} className="mt-0.5" />
+                    <Switch
+                      checked={isOn}
+                      onCheckedChange={() => toggle(def.key)}
+                      className="mt-0.5"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="text-sm font-medium">{def.label}</span>
@@ -171,7 +177,9 @@ export function InventoryManagement({
                       </div>
                       <p className="mt-0.5 text-[11px] text-muted-foreground">{def.description}</p>
                       {def.sizes && (
-                        <p className="mt-1 text-[10px] text-muted-foreground">{def.sizes.join(" · ")}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {def.sizes.join(" · ")}
+                        </p>
                       )}
                     </div>
                   </label>

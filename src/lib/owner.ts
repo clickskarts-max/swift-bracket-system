@@ -140,7 +140,6 @@ export const useDeleteKey = () =>
     ],
   );
 
-
 export const useSetUserStatus = () =>
   useOwnerMutation<{ email: string; status: "active" | "suspended" }>(
     async ({ email, status }) =>
@@ -163,7 +162,6 @@ export const useSetUserAccess = () =>
           input_unlimited: unlimited ?? false,
           ...(until ? { input_until: until } : {}),
         }),
-
       ),
     [
       ["owner", "users"],

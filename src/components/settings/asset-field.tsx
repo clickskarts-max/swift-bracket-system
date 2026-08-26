@@ -48,9 +48,7 @@ export function AssetField({
       </div>
 
       <div className="mt-auto flex items-center justify-between gap-2">
-        {requirements && (
-          <p className="text-xs text-muted-foreground">{requirements}</p>
-        )}
+        {requirements && <p className="text-xs text-muted-foreground">{requirements}</p>}
         {value && (
           <Button
             type="button"

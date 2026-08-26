@@ -18,8 +18,9 @@ interface SponsorSlotProps {
 const isSafeUrl = (url: string | null | undefined) => !!url && /^https:\/\//i.test(url);
 
 const pickSponsorCreative = (c: ServedCampaign): AdCreative | null =>
-  c.ad_creatives?.find((cr) => cr.creative_role === "sponsor_identity" && cr.status !== "disabled") ??
-  null;
+  c.ad_creatives?.find(
+    (cr) => cr.creative_role === "sponsor_identity" && cr.status !== "disabled",
+  ) ?? null;
 
 function useViewability(
   ref: React.RefObject<HTMLElement | null>,
@@ -120,7 +121,12 @@ function SponsorLockup({
         {label}
       </span>
       {href ? (
-        <a href={href} target="_blank" rel="noopener noreferrer nofollow sponsored" onClick={onClick}>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer nofollow sponsored"
+          onClick={onClick}
+        >
           {visual}
         </a>
       ) : (

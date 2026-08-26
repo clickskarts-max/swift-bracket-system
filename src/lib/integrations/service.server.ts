@@ -122,8 +122,14 @@ export async function disconnectIntegration(supabase: Db, integrationId: string)
   if (error) throw new Error(error.message);
   if (!owned) throw new Error("Integration not found");
 
-  await (supabaseAdmin as any).from("integration_credentials").delete().eq("integration_id", integrationId);
-  const { error: delErr } = await asAny(supabase).from("integrations").delete().eq("id", integrationId);
+  await (supabaseAdmin as any)
+    .from("integration_credentials")
+    .delete()
+    .eq("integration_id", integrationId);
+  const { error: delErr } = await asAny(supabase)
+    .from("integrations")
+    .delete()
+    .eq("id", integrationId);
   if (delErr) throw new Error(delErr.message);
   return { ok: true };
 }
@@ -162,7 +168,10 @@ export async function runIntegrationAction(
     .single();
 
   if (kind === "sync") {
-    await asAny(supabase).from("integrations").update({ status: "syncing" }).eq("id", integrationId);
+    await asAny(supabase)
+      .from("integrations")
+      .update({ status: "syncing" })
+      .eq("id", integrationId);
   }
 
   let result: { ok: boolean; message: string; items?: number };

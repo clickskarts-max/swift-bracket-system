@@ -8,7 +8,6 @@ import { PasswordInput } from "@/components/password-input";
 import { BrandWordmark } from "@/components/brand";
 import { useBranding } from "@/hooks/use-branding";
 
-
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
@@ -38,7 +37,6 @@ function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { data: org } = useBranding();
-
 
   useEffect(() => {
     let settled = false;
@@ -110,8 +108,8 @@ function ResetPasswordPage() {
       </Link>
       <div className="surface-card w-full max-w-md space-y-4 p-6 relative overflow-hidden">
         {org && (
-          <div 
-            className="absolute top-0 left-0 w-full h-1" 
+          <div
+            className="absolute top-0 left-0 w-full h-1"
             style={{ backgroundColor: org.primary_color || "var(--primary)" }}
           />
         )}

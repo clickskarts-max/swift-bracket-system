@@ -30,7 +30,6 @@ import {
   useVenues,
 } from "@/lib/queries";
 
-
 export const Route = createFileRoute("/public/tournament/$slug")({
   head: ({ params }) => {
     const title = `${params.slug.replace(/-/g, " ")} — Ecluid Basketball`;
@@ -71,7 +70,6 @@ function PublicTournament() {
       document.title = `${tournament.name} | ${brandName}`;
     }
   }, [tournament, org]);
-
 
   const venueById = useMemo(() => new Map(venues.map((v) => [v.id, v])), [venues]);
 
@@ -124,7 +122,7 @@ function PublicTournament() {
       const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
       const timeDiff = descending ? tb - ta : ta - tb;
       if (timeDiff !== 0) return timeDiff;
-      
+
       const numA = a.match_no ?? Number.POSITIVE_INFINITY;
       const numB = b.match_no ?? Number.POSITIVE_INFINITY;
       return descending ? numB - numA : numA - numB;
@@ -133,7 +131,7 @@ function PublicTournament() {
     const entries = [...map.entries()].map(
       ([k, items]) => [k, [...items].sort(compareMatch)] as [string, (typeof matches)[number][]],
     );
-    
+
     const groupTime = (items: (typeof matches)[number][]) => {
       const times = items
         .map((m) => (m.scheduled_at ? new Date(m.scheduled_at).getTime() : null))
@@ -308,11 +306,19 @@ function PublicTournament() {
           </div>
         </div>
       </section>
-      
+
       <div className="mx-auto max-w-5xl px-4 pt-6 space-y-4">
-        <SmartAdSlot placement="tournament-header" tournamentId={tournament.id} className="w-full" />
+        <SmartAdSlot
+          placement="tournament-header"
+          tournamentId={tournament.id}
+          className="w-full"
+        />
         <NativeAdSlot tournamentId={tournament.id} />
-        <AutoAdRegion context="tournament_overview" tournamentId={tournament.id} className="w-full" />
+        <AutoAdRegion
+          context="tournament_overview"
+          tournamentId={tournament.id}
+          className="w-full"
+        />
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
@@ -351,16 +357,20 @@ function PublicTournament() {
                         <div key={m.id} className="space-y-4">
                           <MatchRow m={m} />
                           {idx === 2 && list.length > 3 && (
-                            <SmartAdSlot 
-                              placement="tournament-content" 
-                              tournamentId={tournament.id} 
+                            <SmartAdSlot
+                              placement="tournament-content"
+                              tournamentId={tournament.id}
                               className="py-2"
                             />
                           )}
                         </div>
                       ))}
                     </div>
-                    <AutoAdRegion context="fixtures" tournamentId={tournament.id} className="py-6" />
+                    <AutoAdRegion
+                      context="fixtures"
+                      tournamentId={tournament.id}
+                      className="py-6"
+                    />
                   </div>
                 ))}
               </div>
@@ -405,10 +415,10 @@ function PublicTournament() {
                 title="Standings"
               />
               <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
-              <SmartAdSlot 
-                placement="sidebar" 
-                tournamentId={tournament.id} 
-                className="w-full max-w-sm mx-auto" 
+              <SmartAdSlot
+                placement="sidebar"
+                tournamentId={tournament.id}
+                className="w-full max-w-sm mx-auto"
               />
               <AutoAdRegion context="standings" tournamentId={tournament.id} className="pt-4" />
             </div>
@@ -482,9 +492,12 @@ function PublicTournament() {
         <div className="flex flex-col items-center gap-2">
           <BrandWordmark />
           <p className="mt-2">
-            {org?.footer_text || `© ${new Date().getFullYear()} ${org?.brand_name || org?.name || "Ecluid Basketball"}`}
+            {org?.footer_text ||
+              `© ${new Date().getFullYear()} ${org?.brand_name || org?.name || "Ecluid Basketball"}`}
             {org?.powered_by_enabled !== false && (
-              <span className="block mt-1 opacity-50 italic">Powered by Ecluid Basketball · Professional Tournament Management</span>
+              <span className="block mt-1 opacity-50 italic">
+                Powered by Ecluid Basketball · Professional Tournament Management
+              </span>
             )}
           </p>
         </div>

@@ -10,7 +10,12 @@ interface SmartAdSlotProps {
   isAuto?: boolean | undefined;
 }
 
-export function SmartAdSlot({ placement, tournamentId, className, isAuto = false }: SmartAdSlotProps) {
+export function SmartAdSlot({
+  placement,
+  tournamentId,
+  className,
+  isAuto = false,
+}: SmartAdSlotProps) {
   const { data: campaigns, isLoading } = useActiveAds(placement, tournamentId, isAuto);
   const recordEvent = useRecordAdEvent();
   const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null);
@@ -20,7 +25,7 @@ export function SmartAdSlot({ placement, tournamentId, className, isAuto = false
   // ResizeObserver to detect container size
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
@@ -58,7 +63,7 @@ export function SmartAdSlot({ placement, tournamentId, className, isAuto = false
               creative_id: selectedCreative.id,
               placement_id: null,
               tournament_id: tournamentId || null,
-              type: 'impression',
+              type: "impression",
               page: window.location.pathname,
             });
             impressionRecorded.current = true;
@@ -67,7 +72,7 @@ export function SmartAdSlot({ placement, tournamentId, className, isAuto = false
           clearTimeout(timer);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (containerRef.current) observer.observe(containerRef.current);
@@ -78,53 +83,60 @@ export function SmartAdSlot({ placement, tournamentId, className, isAuto = false
   }, [selectedCreative, recordEvent, tournamentId]);
 
   const handleClick = () => {
-    if (!selectedCreative || selectedCreative.provider_type === 'adsense') return;
-    
+    if (!selectedCreative || selectedCreative.provider_type === "adsense") return;
+
     recordEvent.mutate({
       campaign_id: selectedCreative.campaign_id,
       creative_id: selectedCreative.id,
       tournament_id: tournamentId || null,
-      type: 'click',
+      type: "click",
       page: window.location.pathname,
     });
 
     if (selectedCreative.destination_url) {
-      window.open(selectedCreative.destination_url, '_blank', 'noopener,noreferrer');
+      window.open(selectedCreative.destination_url, "_blank", "noopener,noreferrer");
     }
   };
 
-  if (isLoading) return <div className={cn("w-full h-24 bg-secondary/20 animate-pulse rounded-lg", className)} />;
+  if (isLoading)
+    return (
+      <div className={cn("w-full h-24 bg-secondary/20 animate-pulse rounded-lg", className)} />
+    );
   if (!selectedCreative) return null;
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={cn("relative overflow-hidden rounded-lg transition-opacity duration-250 ease-transitions", className)}
-      style={{ 
-        aspectRatio: selectedCreative.width && selectedCreative.height 
-          ? `${selectedCreative.width}/${selectedCreative.height}` 
-          : 'auto',
-        maxWidth: selectedCreative.width ? `${selectedCreative.width}px` : '100%',
-        margin: '0 auto'
+      className={cn(
+        "relative overflow-hidden rounded-lg transition-opacity duration-250 ease-transitions",
+        className,
+      )}
+      style={{
+        aspectRatio:
+          selectedCreative.width && selectedCreative.height
+            ? `${selectedCreative.width}/${selectedCreative.height}`
+            : "auto",
+        maxWidth: selectedCreative.width ? `${selectedCreative.width}px` : "100%",
+        margin: "0 auto",
       }}
     >
-      {selectedCreative.provider_type === 'adsense' ? (
+      {selectedCreative.provider_type === "adsense" ? (
         <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-xs text-center p-4">
           <div>
             <p className="font-semibold">Google AdSense</p>
-            <p className="opacity-60">{selectedCreative.size_preset || 'Responsive'}</p>
+            <p className="opacity-60">{selectedCreative.size_preset || "Responsive"}</p>
             <p className="text-[10px] mt-2 italic">AdSense will render here in production</p>
           </div>
         </div>
-      ) : selectedCreative.type === 'html' ? (
+      ) : selectedCreative.type === "html" ? (
         <iframe
-          srcDoc={selectedCreative.html_content || ''}
+          srcDoc={selectedCreative.html_content || ""}
           sandbox="allow-scripts"
           className="w-full h-full border-0"
           title={selectedCreative.name}
         />
       ) : (
-        <button 
+        <button
           onClick={handleClick}
           className="block w-full h-full p-0 border-0 bg-transparent cursor-pointer group"
         >

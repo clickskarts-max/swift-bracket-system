@@ -90,7 +90,10 @@ export function TeamChip({
         <img
           src={logoUrl}
           alt=""
-          className={cn("shrink-0 rounded-lg object-contain ring-1 ring-border p-0.5 bg-white/5", box)}
+          className={cn(
+            "shrink-0 rounded-lg object-contain ring-1 ring-border p-0.5 bg-white/5",
+            box,
+          )}
         />
       ) : (
         <span
@@ -142,13 +145,16 @@ export function ScoreLine({
     if (!has || !final || mine == null || other == null || mine === other) return "text-foreground";
     return mine > other ? "text-success" : "text-destructive";
   };
-  
+
   return (
     <span
-      className={cn("font-display text-2xl font-extrabold tabular-nums sm:text-3xl inline-flex items-center", className)}
+      className={cn(
+        "font-display text-2xl font-extrabold tabular-nums sm:text-3xl inline-flex items-center",
+        className,
+      )}
     >
       <AnimatePresence mode="popLayout">
-        <motion.span 
+        <motion.span
           key={scoreA}
           initial={{ y: 5, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -161,7 +167,7 @@ export function ScoreLine({
       </AnimatePresence>
       <span className="mx-1.5 text-muted-foreground">:</span>
       <AnimatePresence mode="popLayout">
-        <motion.span 
+        <motion.span
           key={scoreB}
           initial={{ y: 5, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

@@ -41,7 +41,8 @@ export async function fetchWithRetry(
       if (res.status === 429 || res.status >= 500) {
         const retryAfter = Number(res.headers.get("retry-after"));
         if (i === attempts - 1) return res;
-        const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2 ** i * 500;
+        const waitMs =
+          Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2 ** i * 500;
         await new Promise((r) => setTimeout(r, Math.min(waitMs, 5000)));
         continue;
       }
@@ -65,7 +66,9 @@ async function recentResults(ctx: ProviderContext, sinceHours = 24) {
   const since = new Date(Date.now() - sinceHours * 3600_000).toISOString();
   const { data, error } = await ctx.supabase
     .from("matches")
-    .select("id, match_no, score_a, score_b, status, updated_at, tournament_id, team_a_id, team_b_id")
+    .select(
+      "id, match_no, score_a, score_b, status, updated_at, tournament_id, team_a_id, team_b_id",
+    )
     .eq("owner_id", ctx.userId)
     .eq("status", "completed")
     .not("score_a", "is", null)
@@ -93,7 +96,8 @@ const slack: ProviderHandler = {
     const url = ctx.secrets["webhook_url"];
     if (!url) return { ok: false, message: "Missing incoming webhook URL." };
     const results = await recentResults(ctx);
-    if (results.length === 0) return { ok: true, message: "No new results in the last 24 hours.", items: 0 };
+    if (results.length === 0)
+      return { ok: true, message: "No new results in the last 24 hours.", items: 0 };
     const lines = results.map(
       (m: any) => `• Match ${m.match_no ?? "—"}: ${m.score_a} – ${m.score_b}`,
     );
@@ -102,8 +106,13 @@ const slack: ProviderHandler = {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text: `*Latest results*\n${lines.join("\n")}` }),
     });
-    if (!res.ok) return { ok: false, message: `Slack responded ${res.status}: ${await res.text()}` };
-    return { ok: true, message: `Posted ${results.length} result(s) to Slack.`, items: results.length };
+    if (!res.ok)
+      return { ok: false, message: `Slack responded ${res.status}: ${await res.text()}` };
+    return {
+      ok: true,
+      message: `Posted ${results.length} result(s) to Slack.`,
+      items: results.length,
+    };
   },
 };
 
@@ -117,7 +126,8 @@ const outgoingWebhook: ProviderHandler = {
       headers["x-ecluid-signature"] = await hmacHex(ctx.secrets["signing_secret"], body);
     }
     const res = await fetchWithRetry(endpoint, { method: "POST", headers, body });
-    if (!res.ok) return { ok: false, message: `Endpoint responded ${res.status}: ${await res.text()}` };
+    if (!res.ok)
+      return { ok: false, message: `Endpoint responded ${res.status}: ${await res.text()}` };
     return { ok: true, message: "Endpoint accepted the ping." };
   },
   async sync(ctx) {
@@ -135,7 +145,8 @@ const outgoingWebhook: ProviderHandler = {
       headers["x-ecluid-signature"] = await hmacHex(ctx.secrets["signing_secret"], body);
     }
     const res = await fetchWithRetry(endpoint, { method: "POST", headers, body });
-    if (!res.ok) return { ok: false, message: `Endpoint responded ${res.status}: ${await res.text()}` };
+    if (!res.ok)
+      return { ok: false, message: `Endpoint responded ${res.status}: ${await res.text()}` };
     return { ok: true, message: `Sent ${results.length} result(s).`, items: results.length };
   },
   async verifyInbound({ body, headers, secrets }) {

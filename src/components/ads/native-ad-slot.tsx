@@ -102,7 +102,9 @@ export function NativeAdSlot({ tournamentId, className }: NativeAdSlotProps) {
             Sponsored
           </span>
           {creative.sponsor_name && (
-            <span className="truncate text-[11px] text-muted-foreground">{creative.sponsor_name}</span>
+            <span className="truncate text-[11px] text-muted-foreground">
+              {creative.sponsor_name}
+            </span>
           )}
         </div>
         <p className="mt-1.5 truncate font-display text-base font-semibold">

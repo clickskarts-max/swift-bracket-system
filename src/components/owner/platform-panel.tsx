@@ -63,7 +63,10 @@ export function PlatformPanel({ tab }: { tab: string }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <KpiCard label="Organization" value={org?.brand_name || org?.name || "Ecluid"} />
         <KpiCard label="Public branding" value={org?.show_logo_public ? "On" : "Off"} />
-        <KpiCard label="Powered by badge" value={org?.powered_by_enabled === false ? "Hidden" : "Shown"} />
+        <KpiCard
+          label="Powered by badge"
+          value={org?.powered_by_enabled === false ? "Hidden" : "Shown"}
+        />
       </div>
 
       <SectionCard

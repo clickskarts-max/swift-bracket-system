@@ -48,7 +48,7 @@ const mk = (
 ): MatchDraft => {
   const idA = typeof a === "object" && a ? a.id : typeof a === "string" ? a : null;
   const idB = typeof b === "object" && b ? b.id : typeof b === "string" ? b : null;
-  
+
   const validA = idA && isUUID(idA) ? idA : null;
   const validB = idB && isUUID(idB) ? idB : null;
 
@@ -289,7 +289,7 @@ export function groupKnockout(
       // Semi-final 2: B1 vs A2
       const m2 = no++;
       out.push(mk(m2, "knockout", "Semifinal", 1, W(b!, 1), W(a!, 2)));
-      
+
       // Final: Winner SF1 vs Winner SF2
       out.push(mk(no++, "final", "Final", 2, `Winner M${m1}`, `Winner M${m2}`));
       return out;
@@ -309,14 +309,13 @@ export function groupKnockout(
       qualifiers.push(W(label, rank));
     }
   }
-  
+
   const fakeTeams: TeamRef[] = qualifiers.map((name, i) => ({
     id: `__qualifier_${i}__`,
     name,
   }));
   return singleElimination(fakeTeams, startNo);
 }
-
 
 /** Playoff brackets driven by league standings seeds. */
 export function playoffMatches(kind: string, startNo = 1): MatchDraft[] {
@@ -399,16 +398,16 @@ export function generateSchedule({
 export function calculateGroupCapacities(
   teamCount: number,
   groupCount: number,
-  lockedAssignments?: Record<string, number>
+  lockedAssignments?: Record<string, number>,
 ): Record<string, number> | null {
   if (groupCount <= 0) return null;
-  
+
   const baseSize = Math.floor(teamCount / groupCount);
   const remainder = teamCount % groupCount;
-  
+
   const capacities: number[] = [
     ...Array(remainder).fill(baseSize + 1),
-    ...Array(groupCount - remainder).fill(baseSize)
+    ...Array(groupCount - remainder).fill(baseSize),
   ];
 
   const shuffle = (array: number[]) => {
@@ -422,12 +421,12 @@ export function calculateGroupCapacities(
 
   let attempts = 0;
   const labels = Array.from({ length: groupCount }, (_, i) => String.fromCharCode(65 + i));
-  
+
   while (attempts < 50) {
     const shuffled = shuffle(capacities);
     const result: Record<string, number> = {};
     let valid = true;
-    
+
     for (let i = 0; i < labels.length; i++) {
       const label = labels[i]!;
       const cap = shuffled[i]!;
@@ -438,7 +437,7 @@ export function calculateGroupCapacities(
       }
       result[label] = cap;
     }
-    
+
     if (valid) return result;
     attempts++;
   }

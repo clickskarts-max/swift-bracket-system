@@ -119,7 +119,6 @@ export const useOrganization = () =>
 const PUBLIC_TEAM_COLS =
   "id,tournament_id,name,short_name,logo_url,jersey_color,group_label,seed,socials,created_at,updated_at";
 
-
 export type PublicTeam = Pick<
   Team,
   | "id"
@@ -161,7 +160,6 @@ export const usePublicSponsors = (tournamentId: string) =>
     enabled: !!tournamentId,
   });
 
-
 export const useShowcaseTournament = () =>
   useQuery({
     queryKey: ["showcase-tournament"],
@@ -176,7 +174,6 @@ export const useShowcaseTournament = () =>
   });
 
 type TableName =
-
   | "tournaments"
   | "teams"
   | "players"

@@ -6,13 +6,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /** Clickable breadcrumb trail: Owner / Section / Detail */
-export function OwnerBreadcrumb({
-  items,
-}: {
-  items: { label: string; onClick?: () => void }[];
-}) {
+export function OwnerBreadcrumb({ items }: { items: { label: string; onClick?: () => void }[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="flex min-w-0 flex-wrap items-center gap-1 text-xs text-muted-foreground">
+    <nav
+      aria-label="Breadcrumb"
+      className="flex min-w-0 flex-wrap items-center gap-1 text-xs text-muted-foreground"
+    >
       <Link to="/dashboard" className="shrink-0 hover:text-foreground">
         Owner
       </Link>
@@ -20,11 +19,7 @@ export function OwnerBreadcrumb({
         <span key={`${item.label}-${i}`} className="flex min-w-0 items-center gap-1">
           <ChevronRight className="h-3 w-3 shrink-0 opacity-60" />
           {item.onClick ? (
-            <button
-              type="button"
-              onClick={item.onClick}
-              className="truncate hover:text-foreground"
-            >
+            <button type="button" onClick={item.onClick} className="truncate hover:text-foreground">
               {item.label}
             </button>
           ) : (
@@ -53,9 +48,7 @@ export function OwnerPageHeader({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="truncate font-display text-2xl font-semibold tracking-tight">{title}</h1>
-          {description && (
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>

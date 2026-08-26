@@ -31,7 +31,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { accessLabel, useOwnerUsers, useSetUserAccess, useSetUserStatus, type OwnerUser } from "@/lib/owner";
+import {
+  accessLabel,
+  useOwnerUsers,
+  useSetUserAccess,
+  useSetUserStatus,
+  type OwnerUser,
+} from "@/lib/owner";
 
 const PAGE_SIZE = 15;
 

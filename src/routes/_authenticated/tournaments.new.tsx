@@ -59,7 +59,9 @@ function NewTournament() {
 
                     const { error: teamError } = await supabase.from("teams").insert(teamsWithIds);
                     if (teamError) {
-                      toast.error("Tournament created but teams could not be saved: " + teamError.message);
+                      toast.error(
+                        "Tournament created but teams could not be saved: " + teamError.message,
+                      );
                     }
                   }
 
@@ -74,9 +76,13 @@ function NewTournament() {
                       owner_id,
                     }));
 
-                    const { error: venueError } = await supabase.from("tournament_venues").insert(venuesWithIds);
+                    const { error: venueError } = await supabase
+                      .from("tournament_venues")
+                      .insert(venuesWithIds);
                     if (venueError) {
-                      toast.error("Tournament created but venues could not be saved: " + venueError.message);
+                      toast.error(
+                        "Tournament created but venues could not be saved: " + venueError.message,
+                      );
                     }
                   }
                 }

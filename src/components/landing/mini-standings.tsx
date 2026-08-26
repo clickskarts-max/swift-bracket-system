@@ -14,7 +14,7 @@ export function MiniStandings({ teams, tournament }: { teams: any[]; tournament:
         jersey_color: t.jersey_color,
       })),
       [], // No matches for demo standings, just show teams
-      { format: tournament?.format || "league" }
+      { format: tournament?.format || "league" },
     ).slice(0, 5); // Just top 5 for the mini view
   }, [teams, tournament]);
 
@@ -37,9 +37,9 @@ export function MiniStandings({ teams, tournament }: { teams: any[]; tournament:
         {/* Sidebar Mock */}
         <div className="w-16 border-r border-border/50 bg-secondary/5 shrink-0 flex flex-col p-1 gap-1">
           {[Layout, Users, FileText, BarChart3].map((Icon, i) => (
-            <div 
-              key={i} 
-              className={`h-5 w-full rounded flex items-center justify-center ${i === 3 ? 'bg-primary/10 text-primary' : 'text-muted-foreground/40'}`}
+            <div
+              key={i}
+              className={`h-5 w-full rounded flex items-center justify-center ${i === 3 ? "bg-primary/10 text-primary" : "text-muted-foreground/40"}`}
             >
               <Icon className="h-2.5 w-2.5" />
             </div>
@@ -49,7 +49,9 @@ export function MiniStandings({ teams, tournament }: { teams: any[]; tournament:
         {/* Content Mock */}
         <div className="flex-1 overflow-hidden flex flex-col">
           <div className="px-3 py-2 border-b border-border/50 bg-background flex items-center justify-between">
-            <span className="font-black uppercase tracking-widest text-muted-foreground/60">Standings</span>
+            <span className="font-black uppercase tracking-widest text-muted-foreground/60">
+              Standings
+            </span>
             <span className="text-primary font-bold">View Full →</span>
           </div>
           <div className="flex-1 overflow-auto">
@@ -57,8 +59,12 @@ export function MiniStandings({ teams, tournament }: { teams: any[]; tournament:
               <thead>
                 <tr className="border-b border-border/30 bg-secondary/5">
                   <th className="text-left px-3 py-1.5 font-black text-muted-foreground/40">POS</th>
-                  <th className="text-left px-3 py-1.5 font-black text-muted-foreground/40">TEAM</th>
-                  <th className="text-right px-3 py-1.5 font-black text-muted-foreground/40">PTS</th>
+                  <th className="text-left px-3 py-1.5 font-black text-muted-foreground/40">
+                    TEAM
+                  </th>
+                  <th className="text-right px-3 py-1.5 font-black text-muted-foreground/40">
+                    PTS
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/20">
@@ -69,15 +75,23 @@ export function MiniStandings({ teams, tournament }: { teams: any[]; tournament:
                       <div className="flex items-center gap-1.5 min-w-0">
                         <div className="w-4 h-4 rounded-sm border border-border/50 flex items-center justify-center shrink-0 bg-white/5">
                           {r.team.logo_url ? (
-                            <img src={r.team.logo_url} className="w-full h-full object-contain" alt="" />
+                            <img
+                              src={r.team.logo_url}
+                              className="w-full h-full object-contain"
+                              alt=""
+                            />
                           ) : (
-                            <span className="text-[6px] font-bold text-muted-foreground/50">{r.team.name[0]}</span>
+                            <span className="text-[6px] font-bold text-muted-foreground/50">
+                              {r.team.name[0]}
+                            </span>
                           )}
                         </div>
                         <span className="font-bold truncate">{r.team.name}</span>
                       </div>
                     </td>
-                    <td className="px-3 py-1.5 text-right font-black tabular-nums">{(5 - i) * 2}</td>
+                    <td className="px-3 py-1.5 text-right font-black tabular-nums">
+                      {(5 - i) * 2}
+                    </td>
                   </tr>
                 ))}
               </tbody>

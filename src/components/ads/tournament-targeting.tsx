@@ -17,9 +17,21 @@ import {
 type Mode = "all" | "selected" | "none";
 
 const MODES: { value: Mode; label: string; description: string }[] = [
-  { value: "all", label: "All Tournaments", description: "Serve on every eligible public tournament page." },
-  { value: "selected", label: "Selected Tournaments", description: "Serve only on tournaments you pick below." },
-  { value: "none", label: "No Tournaments", description: "Never serve — useful for drafts and testing." },
+  {
+    value: "all",
+    label: "All Tournaments",
+    description: "Serve on every eligible public tournament page.",
+  },
+  {
+    value: "selected",
+    label: "Selected Tournaments",
+    description: "Serve only on tournaments you pick below.",
+  },
+  {
+    value: "none",
+    label: "No Tournaments",
+    description: "Never serve — useful for drafts and testing.",
+  },
 ];
 
 export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
@@ -33,14 +45,19 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
   const [search, setSearch] = useState("");
   const [previewId, setPreviewId] = useState<string>("");
 
-  useEffect(() => setMode(campaign.tournament_targeting_mode ?? "all"), [campaign.tournament_targeting_mode]);
+  useEffect(
+    () => setMode(campaign.tournament_targeting_mode ?? "all"),
+    [campaign.tournament_targeting_mode],
+  );
   useEffect(() => setSelected(linked), [linked]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return tournaments;
     return tournaments.filter((t: any) =>
-      [t.name, t.format, t.status].filter(Boolean).some((v: string) => String(v).toLowerCase().includes(q)),
+      [t.name, t.format, t.status]
+        .filter(Boolean)
+        .some((v: string) => String(v).toLowerCase().includes(q)),
     );
   }, [tournaments, search]);
 
@@ -93,7 +110,9 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
               onClick={() => setMode(m.value)}
               className={cn(
                 "text-left rounded-lg border p-4 transition-colors",
-                mode === m.value ? "border-primary bg-primary/5" : "border-border/60 hover:border-border",
+                mode === m.value
+                  ? "border-primary bg-primary/5"
+                  : "border-border/60 hover:border-border",
               )}
             >
               <div className="flex items-center justify-between">
@@ -118,7 +137,11 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
                 {selected.length} tournament{selected.length === 1 ? "" : "s"} selected
               </Label>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setSelected(tournaments.map((t: any) => t.id))}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelected(tournaments.map((t: any) => t.id))}
+                >
                   Select All
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setSelected([])}>
@@ -141,7 +164,9 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
               {loadingTournaments || loadingLinks ? (
                 <p className="p-4 text-sm text-muted-foreground">Loading tournaments...</p>
               ) : filtered.length === 0 ? (
-                <p className="p-4 text-sm text-muted-foreground">No tournaments match your search.</p>
+                <p className="p-4 text-sm text-muted-foreground">
+                  No tournaments match your search.
+                </p>
               ) : (
                 filtered.map((t: any) => (
                   <label
@@ -172,14 +197,18 @@ export function TournamentTargeting({ campaign }: { campaign: AdCampaign }) {
 
             {invalid && (
               <p className="text-sm text-destructive flex items-center gap-2">
-                <XCircle className="h-4 w-4" /> No tournaments selected — this campaign will not serve anywhere.
+                <XCircle className="h-4 w-4" /> No tournaments selected — this campaign will not
+                serve anywhere.
               </p>
             )}
           </div>
         )}
 
         <div className="flex items-center gap-3 pt-2">
-          <Button onClick={handleSave} disabled={!dirty || setTournaments.isPending || updateCampaign.isPending}>
+          <Button
+            onClick={handleSave}
+            disabled={!dirty || setTournaments.isPending || updateCampaign.isPending}
+          >
             Save Targeting
           </Button>
           {dirty && <span className="text-[11px] text-muted-foreground">Unsaved changes</span>}

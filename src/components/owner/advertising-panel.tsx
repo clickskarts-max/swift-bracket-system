@@ -29,9 +29,7 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return campaigns;
-    return campaigns.filter((c) =>
-      `${c.name} ${c.advertiser ?? ""}`.toLowerCase().includes(term),
-    );
+    return campaigns.filter((c) => `${c.name} ${c.advertiser ?? ""}`.toLowerCase().includes(term));
   }, [campaigns, search]);
 
   if (isLoading) return <LoadingSkeleton />;

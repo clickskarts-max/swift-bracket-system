@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { useBranding } from "@/hooks/use-branding";
 
-
 import appCss from "../styles.css?url";
 import { Toaster } from "../components/ui/sonner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -47,9 +46,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   // A stale/updated deployment can leave the browser pointing at a chunk that
   // no longer exists. Recover automatically (once) instead of showing a blank screen.
   useEffect(() => {
-    const isStaleChunk = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
-      error?.message ?? "",
-    );
+    const isStaleChunk =
+      /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+        error?.message ?? "",
+      );
     if (!isStaleChunk || typeof window === "undefined") return;
     const KEY = "app-chunk-reloaded";
     if (window.sessionStorage.getItem(KEY)) return;
@@ -173,7 +173,6 @@ function RootShell({ children }: { children: ReactNode }) {
 })();`,
           }}
         />
-
       </head>
       <body>
         {children}
@@ -224,4 +223,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

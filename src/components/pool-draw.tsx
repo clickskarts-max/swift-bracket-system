@@ -1,28 +1,28 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Trophy, 
-  RefreshCcw, 
-  Play, 
-  X, 
-  Check, 
-  Users, 
-  Zap, 
+import {
+  Trophy,
+  RefreshCcw,
+  Play,
+  X,
+  Check,
+  Users,
+  Zap,
   ArrowRight,
   ChevronRight,
   ListOrdered,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { calculateGroupCapacities } from "@/lib/formats";
 import { Button } from "@/components/ui/button";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { TeamValue } from "./tournament-form";
 import { cn } from "@/lib/utils";
@@ -37,14 +37,14 @@ interface PoolDrawProps {
   onApply: (teams: TeamValue[], capacities: Record<string, number>) => void;
 }
 
-export function PoolDraw({ 
-  open, 
-  onOpenChange, 
-  teams: initialTeams, 
-  groupCount, 
-  teamCount, 
-  initialCapacities, 
-  onApply 
+export function PoolDraw({
+  open,
+  onOpenChange,
+  teams: initialTeams,
+  groupCount,
+  teamCount,
+  initialCapacities,
+  onApply,
 }: PoolDrawProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [isAllocating, setIsAllocating] = useState(false);
@@ -52,7 +52,7 @@ export function PoolDraw({
   const [drawnTeams, setDrawnTeams] = useState<TeamValue[]>([]);
   const [remainingTeams, setRemainingTeams] = useState<TeamValue[]>([]);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
-  const [lastDrawn, setLastDrawn] = useState<{ team: TeamValue, group: string } | null>(null);
+  const [lastDrawn, setLastDrawn] = useState<{ team: TeamValue; group: string } | null>(null);
   const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -60,12 +60,12 @@ export function PoolDraw({
     setIsAllocating(true);
     // Determine locked assignments to respect them during allocation
     const lockedCounts: Record<string, number> = {};
-    initialTeams.forEach(t => {
+    initialTeams.forEach((t) => {
       if (t.group_label) lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
     });
 
     const newCapacities = calculateGroupCapacities(teamCount, groupCount, lockedCounts);
-    
+
     // Quick delay for effect
     setTimeout(() => {
       if (newCapacities) setCapacities(newCapacities);
@@ -76,12 +76,12 @@ export function PoolDraw({
   // Initialize: Locked teams (those already assigned) are excluded from the wheel
   useEffect(() => {
     if (open) {
-      const assigned = initialTeams.filter(t => !!t.group_label);
-      const unassigned = initialTeams.filter(t => !t.group_label);
-      
+      const assigned = initialTeams.filter((t) => !!t.group_label);
+      const unassigned = initialTeams.filter((t) => !t.group_label);
+
       setDrawnTeams(assigned);
       setRemainingTeams(unassigned);
-      
+
       if (initialCapacities) {
         setCapacities(initialCapacities);
       } else {
@@ -90,7 +90,7 @@ export function PoolDraw({
 
       // Determine next group to fill based on current counts
       const counts: Record<string, number> = {};
-      assigned.forEach(t => {
+      assigned.forEach((t) => {
         if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
       });
 
@@ -114,37 +114,37 @@ export function PoolDraw({
     if (isSpinning || remainingTeams.length === 0 || isAllocating) return;
 
     setIsSpinning(true);
-    
+
     // 1. Pick winner first
     const winnerIdx = Math.floor(Math.random() * remainingTeams.length);
     const winner = remainingTeams[winnerIdx]!;
-    
+
     // 2. Calculate animation
     const segmentDegree = 360 / remainingTeams.length;
-    const targetDegree = 360 - (winnerIdx * segmentDegree) - (segmentDegree / 2);
-    const totalRotation = rotation + (360 * 5) + targetDegree - (rotation % 360);
-    
+    const targetDegree = 360 - winnerIdx * segmentDegree - segmentDegree / 2;
+    const totalRotation = rotation + 360 * 5 + targetDegree - (rotation % 360);
+
     setRotation(totalRotation);
 
     // 3. Wait for animation
     setTimeout(() => {
       setIsSpinning(false);
       const groupLabel = String.fromCharCode(65 + currentGroupIdx);
-      
+
       const updatedWinner = { ...winner, group_label: groupLabel };
       setLastDrawn({ team: updatedWinner, group: groupLabel });
-      
-      setDrawnTeams(prev => [...prev, updatedWinner]);
-      setRemainingTeams(prev => prev.filter((_, i) => i !== winnerIdx));
-      
+
+      setDrawnTeams((prev) => [...prev, updatedWinner]);
+      setRemainingTeams((prev) => prev.filter((_, i) => i !== winnerIdx));
+
       // Rotate group index to next one that isn't full
-      setDrawnTeams(currentDrawn => {
+      setDrawnTeams((currentDrawn) => {
         const counts: Record<string, number> = {};
-        [...currentDrawn, updatedWinner].forEach(t => {
+        [...currentDrawn, updatedWinner].forEach((t) => {
           if (t.group_label) counts[t.group_label] = (counts[t.group_label] || 0) + 1;
         });
 
-        let nextIdx = (currentGroupIdx + 1) % groupCount;
+        const nextIdx = (currentGroupIdx + 1) % groupCount;
         for (let i = 0; i < groupCount; i++) {
           const idx = (nextIdx + i) % groupCount;
           const label = String.fromCharCode(65 + idx);
@@ -161,10 +161,19 @@ export function PoolDraw({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#ff6b1a', '#ffffff', '#22c55e']
+        colors: ["#ff6b1a", "#ffffff", "#22c55e"],
       });
     }, 3500);
-  }, [isSpinning, isAllocating, remainingTeams, rotation, currentGroupIdx, groupCount, teamCount, capacities]);
+  }, [
+    isSpinning,
+    isAllocating,
+    remainingTeams,
+    rotation,
+    currentGroupIdx,
+    groupCount,
+    teamCount,
+    capacities,
+  ]);
 
   const handleApply = () => {
     onApply(drawnTeams, capacities);
@@ -200,7 +209,9 @@ export function PoolDraw({
                   <Zap className="h-6 w-6 text-primary absolute inset-0 m-auto" />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-bold font-display uppercase tracking-widest">Phase 1</h3>
+                  <h3 className="text-xl font-bold font-display uppercase tracking-widest">
+                    Phase 1
+                  </h3>
                   <p className="text-muted-foreground">Randomizing group capacities...</p>
                 </div>
               </div>
@@ -214,31 +225,33 @@ export function PoolDraw({
                 {/* The Wheel */}
                 <motion.div
                   animate={{ rotate: rotation }}
-                  transition={{ 
-                    duration: 3.5, 
+                  transition={{
+                    duration: 3.5,
                     ease: [0.12, 0, 0.39, 0], // Fast start, slow end
                   }}
                   className="w-full h-full rounded-full border-8 border-primary/20 shadow-2xl relative overflow-hidden bg-background"
-                  style={{ transformOrigin: 'center' }}
+                  style={{ transformOrigin: "center" }}
                 >
                   <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                     {remainingTeams.map((team, i) => {
                       const segmentAngle = 360 / remainingTeams.length;
                       const startAngle = i * segmentAngle;
                       const endAngle = (i + 1) * segmentAngle;
-                      
+
                       const x1 = 50 + 50 * Math.cos((Math.PI * startAngle) / 180);
                       const y1 = 50 + 50 * Math.sin((Math.PI * startAngle) / 180);
                       const x2 = 50 + 50 * Math.cos((Math.PI * endAngle) / 180);
                       const y2 = 50 + 50 * Math.sin((Math.PI * endAngle) / 180);
 
                       const largeArc = segmentAngle > 180 ? 1 : 0;
-                      
+
                       return (
                         <g key={team.name + i}>
                           <path
                             d={`M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`}
-                            fill={i % 2 === 0 ? "rgba(255, 107, 26, 0.1)" : "rgba(255, 107, 26, 0.05)"}
+                            fill={
+                              i % 2 === 0 ? "rgba(255, 107, 26, 0.1)" : "rgba(255, 107, 26, 0.05)"
+                            }
                             stroke="rgba(255, 107, 26, 0.3)"
                             strokeWidth="0.5"
                           />
@@ -252,7 +265,7 @@ export function PoolDraw({
                             fill="currentColor"
                             className="text-foreground"
                           >
-                            {team.name.length > 15 ? team.name.substring(0, 12) + '...' : team.name}
+                            {team.name.length > 15 ? team.name.substring(0, 12) + "..." : team.name}
                           </text>
                         </g>
                       );
@@ -262,7 +275,7 @@ export function PoolDraw({
 
                 {/* Center circle */}
                 <div className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-background border-4 border-primary/30 shadow-inner flex items-center justify-center z-10">
-                   <Zap className={cn("h-6 w-6 text-primary", isSpinning && "animate-pulse")} />
+                  <Zap className={cn("h-6 w-6 text-primary", isSpinning && "animate-pulse")} />
                 </div>
               </div>
             ) : (
@@ -290,15 +303,23 @@ export function PoolDraw({
                   >
                     <div className="h-10 w-10 rounded-lg bg-background border border-border flex items-center justify-center shrink-0 overflow-hidden">
                       {lastDrawn.team.logo_url ? (
-                        <img src={lastDrawn.team.logo_url} alt="" className="h-full w-full object-contain" />
+                        <img
+                          src={lastDrawn.team.logo_url}
+                          alt=""
+                          className="h-full w-full object-contain"
+                        />
                       ) : (
                         <Users className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-primary uppercase tracking-tighter">Just Drawn</div>
+                      <div className="text-xs font-bold text-primary uppercase tracking-tighter">
+                        Just Drawn
+                      </div>
                       <div className="font-bold">{lastDrawn.team.name}</div>
-                      <div className="text-xs text-muted-foreground">Assigned to Group {lastDrawn.group}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Assigned to Group {lastDrawn.group}
+                      </div>
                     </div>
                   </motion.div>
                 ) : (
@@ -308,15 +329,17 @@ export function PoolDraw({
 
               {remainingTeams.length > 0 && (
                 <div className="text-center space-y-4">
-                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Targeting</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                      Targeting
+                    </span>
                     <div className="text-xl font-display font-bold px-4 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                       Group {currentGroupLabel}
                     </div>
                   </div>
-                  
-                  <Button 
-                    size="lg" 
+
+                  <Button
+                    size="lg"
                     className="h-14 px-10 text-lg font-bold shadow-xl animate-pulse-ring"
                     disabled={isSpinning}
                     onClick={spin}
@@ -344,33 +367,39 @@ export function PoolDraw({
                 {remainingTeams.length} teams remaining
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
               {Array.from({ length: groupCount }, (_, i) => {
                 const label = String.fromCharCode(65 + i);
-                const groupTeams = drawnTeams.filter(t => t.group_label === label);
+                const groupTeams = drawnTeams.filter((t) => t.group_label === label);
                 const isCurrent = currentGroupLabel === label && remainingTeams.length > 0;
-                
+
                 return (
-                  <div 
-                    key={label} 
+                  <div
+                    key={label}
                     className={cn(
                       "rounded-lg border p-3 transition-colors",
-                      isCurrent ? "border-primary bg-primary/5 ring-1 ring-primary/30" : "border-border/60 bg-muted/20"
+                      isCurrent
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                        : "border-border/60 bg-muted/20",
                     )}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-bold">Group {label}</span>
-                      <span className={cn(
-                        "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                        groupTeams.length === (capacities[label] || 0) ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-[10px] font-bold px-1.5 py-0.5 rounded",
+                          groupTeams.length === (capacities[label] || 0)
+                            ? "bg-green-500/10 text-green-500"
+                            : "bg-primary/10 text-primary",
+                        )}
+                      >
                         {groupTeams.length} / {capacities[label] || 0}
                       </span>
                     </div>
                     <div className="space-y-1.5">
                       {groupTeams.map((team, idx) => (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           key={team.name}
@@ -401,9 +430,9 @@ export function PoolDraw({
           </Button>
           <div className="flex gap-2">
             {remainingTeams.length === 0 && (
-               <Button onClick={handleApply} className="font-bold">
-                 Apply Draw <ArrowRight className="ml-2 h-4 w-4" />
-               </Button>
+              <Button onClick={handleApply} className="font-bold">
+                Apply Draw <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             )}
           </div>
         </DialogFooter>
@@ -411,4 +440,3 @@ export function PoolDraw({
     </Dialog>
   );
 }
-

@@ -11,10 +11,7 @@ import { EmptyState, TeamChip } from "@/components/data-bits";
 import { computeStandings } from "@/lib/standings";
 import type { Match, Team, Tournament } from "@/lib/queries";
 
-type StandingsTeamLike = Pick<
-  Team,
-  "id" | "name" | "logo_url" | "jersey_color" | "group_label"
->;
+type StandingsTeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color" | "group_label">;
 
 const playoffSlots = (tournament: Tournament | null) => {
   if (!tournament) return 0;
@@ -35,7 +32,7 @@ const fmtWinPct = (v: number) => {
 
 function StandingsLegend({ tournament }: { tournament: Tournament | null }) {
   const isLeague = tournament?.format === "league";
-  
+
   return (
     <div className="surface-card border border-border/70 p-4 text-xs text-muted-foreground">
       <div className="mb-3 flex flex-wrap gap-x-6 gap-y-2 border-b border-border/40 pb-3">
@@ -48,7 +45,7 @@ function StandingsLegend({ tournament }: { tournament: Tournament | null }) {
           )}
         </span>
       </div>
-      
+
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <span>
           <span className="font-semibold text-foreground">P</span> Played
@@ -108,29 +105,37 @@ function PointDistribution({ tournament }: { tournament: Tournament | null }) {
       <div className="mt-3 grid grid-cols-3 gap-4">
         <div className="flex flex-col items-center justify-center rounded-lg bg-success/5 p-3 text-center border border-success/20">
           <span className="text-2xl font-bold text-success">2</span>
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Win</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            Win
+          </span>
         </div>
         {isLeague ? (
           <>
             <div className="flex flex-col items-center justify-center rounded-lg bg-warning/5 p-3 text-center border border-warning/20">
               <span className="text-2xl font-bold text-warning">1</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Loss</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Loss
+              </span>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-destructive/5 p-3 text-center border border-destructive/20">
               <span className="text-2xl font-bold text-destructive">0</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Forfeit</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Forfeit
+              </span>
             </div>
           </>
         ) : (
           <div className="col-span-2 flex flex-col items-center justify-center rounded-lg bg-destructive/5 p-3 text-center border border-destructive/20">
             <span className="text-2xl font-bold text-destructive">0</span>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Loss</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+              Loss
+            </span>
           </div>
         )}
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed italic">
-        {isLeague 
-          ? "Points are awarded per game according to FIBA classification rules: 2 for a win, 1 for a loss, and 0 for a loss by forfeit." 
+        {isLeague
+          ? "Points are awarded per game according to FIBA classification rules: 2 for a win, 1 for a loss, and 0 for a loss by forfeit."
           : "Standard tournament points: 2 points for a win and 0 points for a loss."}
       </p>
     </div>
@@ -276,7 +281,7 @@ function statusMarker(
   const minPts = row.points;
   const maxPts = row.points + row.remaining * winPoints;
   const others = all.filter((r) => r.team.id !== row.team.id);
-  
+
   // For clinch/elimination logic, use the same win/loss points as the table
   const canBeatMin = others.filter((r) => r.points + r.remaining * winPoints > minPts).length;
   if (canBeatMin < slots) return "x";
@@ -317,9 +322,9 @@ export function StandingsTable({
           scheduled_at: m.scheduled_at,
           match_no: m.match_no,
         })),
-        { 
+        {
           groupLabel: groupLabel ?? null,
-          format: tournament?.format
+          format: tournament?.format,
         },
       ),
     [teams, matches, groupLabel, tournament?.format],
@@ -415,7 +420,7 @@ export function StandingsTab({
 }) {
   const isGroupKnockout = tournament?.format === "group_knockout";
   const groups = [...new Set(teams.map((t) => t.group_label).filter(Boolean))] as string[];
-  
+
   if (isGroupKnockout || groups.length > 1) {
     // For group knockout, we must show groups even if only one group label exists or even if none (though creation now enforces it)
     // If no group labels found, but it is group knockout, we might have a data issue, but we'll fallback to showing what we have.
@@ -431,7 +436,7 @@ export function StandingsTab({
                   Group {g}
                 </h3>
               </div>
-              
+
               <StandingsTable
                 teams={teams}
                 matches={matches}

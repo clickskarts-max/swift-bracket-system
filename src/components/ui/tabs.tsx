@@ -29,25 +29,25 @@ const TabsTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   // Radix UI passes data-state="active" to the trigger
   const [isActive, setIsActive] = React.useState(false);
-  
+
   // We use an observer to track the data-state attribute since Radix doesn't expose it via props
   const localRef = React.useRef<HTMLButtonElement>(null);
-  
+
   React.useLayoutEffect(() => {
     const el = localRef.current;
     if (!el) return;
-    
+
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-state') {
-          setIsActive(el.getAttribute('data-state') === 'active');
+        if (mutation.attributeName === "data-state") {
+          setIsActive(el.getAttribute("data-state") === "active");
         }
       });
     });
-    
+
     observer.observe(el, { attributes: true });
-    setIsActive(el.getAttribute('data-state') === 'active');
-    
+    setIsActive(el.getAttribute("data-state") === "active");
+
     return () => observer.disconnect();
   }, []);
 
@@ -56,7 +56,7 @@ const TabsTrigger = React.forwardRef<
       ref={(node) => {
         // Handle both refs
         (localRef as any).current = node;
-        if (typeof ref === 'function') ref(node);
+        if (typeof ref === "function") ref(node);
         else if (ref) (ref as any).current = node;
       }}
       className={cn(

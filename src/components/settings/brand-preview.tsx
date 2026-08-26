@@ -38,7 +38,11 @@ export function BrandPreview({ data }: { data: BrandPreviewData }) {
           <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
           <div className="ml-2 flex min-w-0 flex-1 items-center gap-1.5 rounded-md bg-background px-2 py-1">
             {data.faviconUrl ? (
-              <img src={data.faviconUrl} alt="" className="h-3.5 w-3.5 shrink-0 rounded-sm object-cover" />
+              <img
+                src={data.faviconUrl}
+                alt=""
+                className="h-3.5 w-3.5 shrink-0 rounded-sm object-cover"
+              />
             ) : (
               <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             )}
@@ -48,7 +52,10 @@ export function BrandPreview({ data }: { data: BrandPreviewData }) {
           </div>
         </div>
 
-        <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${primary}, ${accent})` }} />
+        <div
+          className="h-1 w-full"
+          style={{ background: `linear-gradient(90deg, ${primary}, ${accent})` }}
+        />
 
         <div className="space-y-4 p-4">
           <div className="flex min-w-0 items-center gap-3">
@@ -69,7 +76,9 @@ export function BrandPreview({ data }: { data: BrandPreviewData }) {
               ))}
             <div className="min-w-0">
               {data.showName && (
-                <p className="truncate text-sm font-semibold">{data.displayName || "Your organization"}</p>
+                <p className="truncate text-sm font-semibold">
+                  {data.displayName || "Your organization"}
+                </p>
               )}
               <p className="truncate text-xs text-muted-foreground">U-19 Girls Basketball League</p>
             </div>
@@ -101,7 +110,10 @@ export function BrandPreview({ data }: { data: BrandPreviewData }) {
                 className="flex items-center justify-between border-b border-border/60 px-3 py-2 text-xs last:border-b-0"
               >
                 <span className={r.win ? "font-semibold" : "text-muted-foreground"}>{r.team}</span>
-                <span className="font-mono font-bold" style={{ color: r.win ? primary : undefined }}>
+                <span
+                  className="font-mono font-bold"
+                  style={{ color: r.win ? primary : undefined }}
+                >
                   {r.score}
                 </span>
               </div>
@@ -110,10 +122,13 @@ export function BrandPreview({ data }: { data: BrandPreviewData }) {
 
           <div className="space-y-1 border-t border-border/60 pt-3 text-center text-[11px] text-muted-foreground">
             <p className="truncate">
-              {data.footerText || `© ${new Date().getFullYear()} ${data.displayName || "Your organization"}`}
+              {data.footerText ||
+                `© ${new Date().getFullYear()} ${data.displayName || "Your organization"}`}
             </p>
             {data.showContact && (data.contactEmail || data.contactPhone) && (
-              <p className="truncate">{[data.contactEmail, data.contactPhone].filter(Boolean).join(" · ")}</p>
+              <p className="truncate">
+                {[data.contactEmail, data.contactPhone].filter(Boolean).join(" · ")}
+              </p>
             )}
             {data.poweredBy && <p className="italic opacity-70">Powered by Ecluid Basketball</p>}
           </div>

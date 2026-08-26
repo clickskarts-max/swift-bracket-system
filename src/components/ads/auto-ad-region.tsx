@@ -39,7 +39,7 @@ export function AutoAdRegion({ context, tournamentId, className }: AutoAdRegionP
       settings,
       pageAdCount,
       document.body.scrollHeight,
-      isMobile
+      isMobile,
     );
 
     setRegionScore(score);
@@ -52,32 +52,39 @@ export function AutoAdRegion({ context, tournamentId, className }: AutoAdRegionP
   }, [context, settings, campaigns, isMobile]);
 
   // Debug overlay (only if ?ad_debug=true in URL)
-  const isDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('ad_debug') === 'true';
+  const isDebug =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("ad_debug") === "true";
 
   return (
     <div ref={containerRef} className={className}>
       {shouldRender ? (
         <div className="relative group">
-          <SmartAdSlot 
-            placement={`auto-${context}`} 
-            tournamentId={tournamentId || undefined} 
-            isAuto={true} 
+          <SmartAdSlot
+            placement={`auto-${context}`}
+            tournamentId={tournamentId || undefined}
+            isAuto={true}
           />
           {isDebug && regionScore && (
             <div className="absolute inset-0 bg-green-500/20 border-2 border-green-500 pointer-events-none z-50 p-2 text-[10px] font-mono overflow-auto">
               <div className="bg-black/80 text-white p-1 rounded">
                 <p className="font-bold">SMART AD: {regionScore.score}</p>
                 <ul className="list-disc pl-3">
-                  {regionScore.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                  {regionScore.reasons.map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
                 </ul>
               </div>
             </div>
           )}
         </div>
-      ) : isDebug && regionScore && (
-        <div className="h-10 border-2 border-dashed border-gray-400 bg-gray-100/10 flex items-center justify-center text-[10px] font-mono text-muted-foreground overflow-hidden">
-          BLOCKED: {regionScore.score} - {regionScore.reasons[0]}
-        </div>
+      ) : (
+        isDebug &&
+        regionScore && (
+          <div className="h-10 border-2 border-dashed border-gray-400 bg-gray-100/10 flex items-center justify-center text-[10px] font-mono text-muted-foreground overflow-hidden">
+            BLOCKED: {regionScore.score} - {regionScore.reasons[0]}
+          </div>
+        )
       )}
     </div>
   );
