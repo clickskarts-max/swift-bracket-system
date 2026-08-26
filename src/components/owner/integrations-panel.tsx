@@ -27,7 +27,7 @@ import {
   useSetIntegrationEnabled,
 } from "@/lib/integrations/hooks";
 
-function StatusPill({ row }: { row?: IntegrationRow }) {
+function StatusPill({ row }: { row?: IntegrationRow | undefined }) {
   const status = row?.status ?? "disconnected";
   const map: Record<string, { label: string; className: string }> = {
     connected: { label: "Connected", className: "bg-emerald-500/15 text-emerald-500" },
@@ -44,7 +44,7 @@ function ProviderCard({
   row,
 }: {
   meta: IntegrationProviderMeta;
-  row?: IntegrationRow;
+  row?: IntegrationRow | undefined;
 }) {
   const [open, setOpen] = useState(false);
   const [secrets, setSecrets] = useState<Record<string, string>>({});
@@ -100,11 +100,7 @@ function ProviderCard({
 
   return (
     <SectionCard
-      title={
-        <span className="flex items-center gap-2">
-          {meta.name} <StatusPill row={row} />
-        </span>
-      }
+      title={meta.name}
       description={meta.description}
       action={
         row ? (
@@ -127,6 +123,7 @@ function ProviderCard({
     >
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <StatusPill row={row} />
           <span>{meta.category}</span>
           <span>Auth: {meta.authType.replace("_", " ")}</span>
           {row?.last_synced_at && (
