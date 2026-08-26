@@ -322,7 +322,7 @@ export function StandingsTable({
           format: tournament?.format
         },
       ),
-    [teams, matches, groupLabel],
+    [teams, matches, groupLabel, tournament?.format],
   );
 
   if (rows.length === 0)
