@@ -500,6 +500,162 @@ export type Database = {
           },
         ]
       }
+      integration_credentials: {
+        Row: {
+          created_at: string
+          integration_id: string
+          secrets: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          integration_id: string
+          secrets?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          integration_id?: string
+          secrets?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_credentials_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: true
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_id: string
+          event_type: string | null
+          id: string
+          integration_id: string
+          payload: Json
+          processed_at: string | null
+          provider: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_id: string
+          event_type?: string | null
+          id?: string
+          integration_id: string
+          payload?: Json
+          processed_at?: string | null
+          provider: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_id?: string
+          event_type?: string | null
+          id?: string
+          integration_id?: string
+          payload?: Json
+          processed_at?: string | null
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_events_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_sync_runs: {
+        Row: {
+          finished_at: string | null
+          id: string
+          integration_id: string
+          items_processed: number
+          kind: string
+          message: string | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          finished_at?: string | null
+          id?: string
+          integration_id: string
+          items_processed?: number
+          kind?: string
+          message?: string | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          finished_at?: string | null
+          id?: string
+          integration_id?: string
+          items_processed?: number
+          kind?: string
+          message?: string | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_sync_runs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          display_name: string | null
+          enabled: boolean
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          owner_id: string
+          provider: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          display_name?: string | null
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          owner_id?: string
+          provider: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          display_name?: string | null
+          enabled?: boolean
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          owner_id?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           court: string | null
