@@ -112,7 +112,10 @@ export function SponsorCreatives({
       provider_type: "direct",
       status: "active",
       is_responsive: true,
-      name: draft.name || draft.sponsor_name || (role === "native" ? "Sponsored card" : "Sponsor identity"),
+      name:
+        draft.name ||
+        draft.sponsor_name ||
+        (role === "native" ? "Sponsored card" : "Sponsor identity"),
       sponsor_name: draft.sponsor_name || null,
       sponsor_label: draft.sponsor_label || null,
       media_url: draft.media_url,
@@ -151,7 +154,9 @@ export function SponsorCreatives({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{c.headline || c.sponsor_name || c.name}</p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {c.creative_role === "native" ? c.body_text || "Sponsored card" : c.sponsor_label || "Sponsor identity"}
+          {c.creative_role === "native"
+            ? c.body_text || "Sponsored card"
+            : c.sponsor_label || "Sponsor identity"}
         </p>
       </div>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(c)}>
@@ -224,7 +229,8 @@ export function SponsorCreatives({
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {draft.id ? "Edit" : "Add"} {role === "native" ? "sponsored card" : "sponsor identity"}
+              {draft.id ? "Edit" : "Add"}{" "}
+              {role === "native" ? "sponsored card" : "sponsor identity"}
             </DialogTitle>
             <DialogDescription>
               {role === "native"
@@ -273,7 +279,10 @@ export function SponsorCreatives({
                 </div>
                 <div className="grid gap-2">
                   <Label>CTA label</Label>
-                  <Input value={draft.cta_label} onChange={(e) => set("cta_label", e.target.value)} />
+                  <Input
+                    value={draft.cta_label}
+                    onChange={(e) => set("cta_label", e.target.value)}
+                  />
                 </div>
               </>
             )}

@@ -15,7 +15,9 @@ function OrganizationFooter() {
   if (org) {
     return (
       <div className="flex flex-col items-center gap-1">
-        <span>{org.footer_text || `© ${new Date().getFullYear()} ${org.brand_name || org.name}`}</span>
+        <span>
+          {org.footer_text || `© ${new Date().getFullYear()} ${org.brand_name || org.name}`}
+        </span>
         {org.powered_by_enabled !== false && (
           <span className="opacity-60">Powered by Ecluid Basketball</span>
         )}
@@ -28,7 +30,6 @@ function OrganizationFooter() {
     </>
   );
 }
-
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },

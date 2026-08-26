@@ -23,8 +23,7 @@ export function parsePeriods(raw: unknown): PeriodScores {
   };
 }
 
-export const hasPeriodScores = (p: PeriodScores) =>
-  [...p.a, ...p.b].some((v) => v != null);
+export const hasPeriodScores = (p: PeriodScores) => [...p.a, ...p.b].some((v) => v != null);
 
 export const periodTotal = (cells: (number | null)[]) =>
   cells.reduce<number>((sum, v) => sum + (v ?? 0), 0);
@@ -54,12 +53,12 @@ export function parsePlayerStats(raw: unknown): PlayerStatLine[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
-    .filter((r) => typeof r['player_id'] === "string")
+    .filter((r) => typeof r["player_id"] === "string")
     .map((r) => ({
-      player_id: r['player_id'] as string,
-      points: toNum(r['points']),
-      rebounds: toNum(r['rebounds']),
-      assists: toNum(r['assists']),
-      fouls: toNum(r['fouls']),
+      player_id: r["player_id"] as string,
+      points: toNum(r["points"]),
+      rebounds: toNum(r["rebounds"]),
+      assists: toNum(r["assists"]),
+      fouls: toNum(r["fouls"]),
     }));
 }

@@ -1,5 +1,11 @@
 import { Trophy } from "lucide-react";
-import { hasPeriodScores, parsePeriods, parsePlayerStats, periodLabel, periodTotal } from "@/lib/periods";
+import {
+  hasPeriodScores,
+  parsePeriods,
+  parsePlayerStats,
+  periodLabel,
+  periodTotal,
+} from "@/lib/periods";
 
 export type BreakdownPlayer = {
   id: string;
@@ -56,10 +62,12 @@ export function MatchBreakdown({
               </tr>
             </thead>
             <tbody>
-              {([
-                [teamAName, periods.a],
-                [teamBName, periods.b],
-              ] as const).map(([name, cells]) => (
+              {(
+                [
+                  [teamAName, periods.a],
+                  [teamBName, periods.b],
+                ] as const
+              ).map(([name, cells]) => (
                 <tr key={name} className="border-t border-border/40">
                   <td className="max-w-[9rem] truncate p-1">{name}</td>
                   {cells.map((v, i) => (
@@ -85,10 +93,12 @@ export function MatchBreakdown({
 
       {stats.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {([
-            [teamAName, sideStats(teamAId)],
-            [teamBName, sideStats(teamBId)],
-          ] as const).map(([name, rows]) =>
+          {(
+            [
+              [teamAName, sideStats(teamAId)],
+              [teamBName, sideStats(teamBId)],
+            ] as const
+          ).map(([name, rows]) =>
             rows.length === 0 ? null : (
               <div key={name}>
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

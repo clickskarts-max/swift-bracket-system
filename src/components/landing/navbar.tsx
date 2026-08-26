@@ -50,9 +50,9 @@ export function LandingNavbar() {
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-6",
-        isScrolled 
-          ? "bg-background/80 backdrop-blur-md border-b border-border/10 py-3" 
-          : "bg-transparent"
+        isScrolled
+          ? "bg-background/80 backdrop-blur-md border-b border-border/10 py-3"
+          : "bg-transparent",
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -76,15 +76,26 @@ export function LandingNavbar() {
 
         <div className="hidden md:flex items-center gap-6">
           {session ? (
-            <Button variant="outline" className="h-10 px-5 font-semibold uppercase tracking-widest rounded-lg border-border/40" asChild>
+            <Button
+              variant="outline"
+              className="h-10 px-5 font-semibold uppercase tracking-widest rounded-lg border-border/40"
+              asChild
+            >
               <Link to="/dashboard">Dashboard</Link>
             </Button>
           ) : (
             <>
-              <Button variant="ghost" className="h-10 px-5 font-semibold uppercase tracking-widest rounded-lg" asChild>
+              <Button
+                variant="ghost"
+                className="h-10 px-5 font-semibold uppercase tracking-widest rounded-lg"
+                asChild
+              >
                 <Link to="/auth">Sign In</Link>
               </Button>
-              <Button className="h-10 px-6 font-semibold uppercase tracking-widest rounded-lg" asChild>
+              <Button
+                className="h-10 px-6 font-semibold uppercase tracking-widest rounded-lg"
+                asChild
+              >
                 <Link to="/auth">Create Tournament</Link>
               </Button>
             </>
@@ -115,7 +126,11 @@ export function LandingNavbar() {
               </a>
             ))}
             <div className="flex flex-col gap-4 pt-4">
-              <Button size="lg" className="w-full font-bold uppercase tracking-widest rounded-2xl h-16" asChild>
+              <Button
+                size="lg"
+                className="w-full font-bold uppercase tracking-widest rounded-2xl h-16"
+                asChild
+              >
                 <Link to="/auth">Get Started</Link>
               </Button>
             </div>

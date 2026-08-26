@@ -1,6 +1,16 @@
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, ChevronDown, ChevronUp, List, Pencil, Plus, RefreshCw, X, MapPin } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ChevronDown,
+  ChevronUp,
+  List,
+  Pencil,
+  Plus,
+  RefreshCw,
+  X,
+  MapPin,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -459,12 +469,9 @@ function MatchDialog({
       next[side][index] = raw === "" ? null : Number(raw);
       return next;
     });
-  const addOvertime = () =>
-    setPeriods((p) => ({ a: [...p.a, null], b: [...p.b, null] }));
+  const addOvertime = () => setPeriods((p) => ({ a: [...p.a, null], b: [...p.b, null] }));
   const removeOvertime = () =>
-    setPeriods((p) =>
-      p.a.length > QUARTERS ? { a: p.a.slice(0, -1), b: p.b.slice(0, -1) } : p,
-    );
+    setPeriods((p) => (p.a.length > QUARTERS ? { a: p.a.slice(0, -1), b: p.b.slice(0, -1) } : p));
 
   const rosterFor = (teamId: string | null) =>
     teamId ? players.filter((p) => p.team_id === teamId) : [];
@@ -492,328 +499,329 @@ function MatchDialog({
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
           {mode === "game" && (
-          <>
-          <Field label="Match number">
-            <Input
-              type="number"
-              min={1}
-              value={draft.match_no ?? ""}
-              onChange={(e) => set("match_no", e.target.value ? Number(e.target.value) : null)}
-            />
-          </Field>
-          <Field label="Home / away">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() =>
-                {
-                setPeriods((p) => ({ a: p.b, b: p.a }));
-                setDraft((d) =>
-                  d
-                    ? {
-                        ...d,
-                        team_a_id: d.team_b_id,
-                        team_b_id: d.team_a_id,
-                        placeholder_a: d.placeholder_b,
-                        placeholder_b: d.placeholder_a,
-                        score_a: d.score_b,
-                        score_b: d.score_a,
-                      }
-                    : d,
-                );
-                }
-              }
-            >
-              <ArrowLeftRight className="mr-1.5 h-3.5 w-3.5" /> Switch sides
-            </Button>
-          </Field>
-          <Field label="Home team">
-            <Select
-              value={draft.team_a_id ?? "none"}
-              onValueChange={(v) => set("team_a_id", v === "none" ? null : v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={draft.placeholder_a ?? "TBD"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{draft.placeholder_a ?? "TBD"}</SelectItem>
-                {teams.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Away team">
-            <Select
-              value={draft.team_b_id ?? "none"}
-              onValueChange={(v) => set("team_b_id", v === "none" ? null : v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={draft.placeholder_b ?? "TBD"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{draft.placeholder_b ?? "TBD"}</SelectItem>
-                {teams.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          </>
+            <>
+              <Field label="Match number">
+                <Input
+                  type="number"
+                  min={1}
+                  value={draft.match_no ?? ""}
+                  onChange={(e) => set("match_no", e.target.value ? Number(e.target.value) : null)}
+                />
+              </Field>
+              <Field label="Home / away">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setPeriods((p) => ({ a: p.b, b: p.a }));
+                    setDraft((d) =>
+                      d
+                        ? {
+                            ...d,
+                            team_a_id: d.team_b_id,
+                            team_b_id: d.team_a_id,
+                            placeholder_a: d.placeholder_b,
+                            placeholder_b: d.placeholder_a,
+                            score_a: d.score_b,
+                            score_b: d.score_a,
+                          }
+                        : d,
+                    );
+                  }}
+                >
+                  <ArrowLeftRight className="mr-1.5 h-3.5 w-3.5" /> Switch sides
+                </Button>
+              </Field>
+              <Field label="Home team">
+                <Select
+                  value={draft.team_a_id ?? "none"}
+                  onValueChange={(v) => set("team_a_id", v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={draft.placeholder_a ?? "TBD"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{draft.placeholder_a ?? "TBD"}</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Away team">
+                <Select
+                  value={draft.team_b_id ?? "none"}
+                  onValueChange={(v) => set("team_b_id", v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={draft.placeholder_b ?? "TBD"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{draft.placeholder_b ?? "TBD"}</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </>
           )}
           {mode === "score" && (
-          <>
-          <Field label="Home score">
-            <Input
-              type="number"
-              min={0}
-              disabled={usePeriods}
-              value={usePeriods ? totalA : (draft.score_a ?? "")}
-              onChange={(e) => set("score_a", e.target.value ? Number(e.target.value) : null)}
-            />
-          </Field>
-          <Field label="Away score">
-            <Input
-              type="number"
-              min={0}
-              disabled={usePeriods}
-              value={usePeriods ? totalB : (draft.score_b ?? "")}
-              onChange={(e) => set("score_b", e.target.value ? Number(e.target.value) : null)}
-            />
-          </Field>
-          </>
+            <>
+              <Field label="Home score">
+                <Input
+                  type="number"
+                  min={0}
+                  disabled={usePeriods}
+                  value={usePeriods ? totalA : (draft.score_a ?? "")}
+                  onChange={(e) => set("score_a", e.target.value ? Number(e.target.value) : null)}
+                />
+              </Field>
+              <Field label="Away score">
+                <Input
+                  type="number"
+                  min={0}
+                  disabled={usePeriods}
+                  value={usePeriods ? totalB : (draft.score_b ?? "")}
+                  onChange={(e) => set("score_b", e.target.value ? Number(e.target.value) : null)}
+                />
+              </Field>
+            </>
           )}
           {mode === "game" && (
-          <>
-          <Field label="Tip-off">
-            <Input
-              type="datetime-local"
-              value={toLocalInput(draft.scheduled_at)}
-              onChange={(e) =>
-                set("scheduled_at", e.target.value ? new Date(e.target.value).toISOString() : null)
-              }
-            />
-          </Field>
-          <Field label="Venue">
-            <Select
-              value={(draft.venue_id as string) || "none"}
-              onValueChange={(v) => set("venue_id", v === "none" ? null : v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select venue" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No venue</SelectItem>
-                {venues.map((v) => (
-                  <SelectItem key={v.id} value={v.id}>
-                    {v.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Status">
-            <Select value={draft.status} onValueChange={(v) => set("status", v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MATCH_STATUSES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Venue">
-            <Input
-              value={draft.venue ?? ""}
-              onChange={(e) => set("venue", e.target.value || null)}
-            />
-          </Field>
-          <Field label="Court">
-            <Input
-              value={draft.court ?? ""}
-              onChange={(e) => set("court", e.target.value || null)}
-            />
-          </Field>
-          <Field label="Referee">
-            <Input
-              value={draft.referee ?? ""}
-              onChange={(e) => set("referee", e.target.value || null)}
-            />
-          </Field>
-          <Field label="Notes">
-            <Input
-              value={draft.notes ?? ""}
-              onChange={(e) => set("notes", e.target.value || null)}
-            />
-          </Field>
-          </>
+            <>
+              <Field label="Tip-off">
+                <Input
+                  type="datetime-local"
+                  value={toLocalInput(draft.scheduled_at)}
+                  onChange={(e) =>
+                    set(
+                      "scheduled_at",
+                      e.target.value ? new Date(e.target.value).toISOString() : null,
+                    )
+                  }
+                />
+              </Field>
+              <Field label="Venue">
+                <Select
+                  value={(draft.venue_id as string) || "none"}
+                  onValueChange={(v) => set("venue_id", v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select venue" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No venue</SelectItem>
+                    {venues.map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        {v.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Status">
+                <Select value={draft.status} onValueChange={(v) => set("status", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MATCH_STATUSES.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Venue">
+                <Input
+                  value={draft.venue ?? ""}
+                  onChange={(e) => set("venue", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Court">
+                <Input
+                  value={draft.court ?? ""}
+                  onChange={(e) => set("court", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Referee">
+                <Input
+                  value={draft.referee ?? ""}
+                  onChange={(e) => set("referee", e.target.value || null)}
+                />
+              </Field>
+              <Field label="Notes">
+                <Input
+                  value={draft.notes ?? ""}
+                  onChange={(e) => set("notes", e.target.value || null)}
+                />
+              </Field>
+            </>
           )}
         </div>
 
         {mode === "score" && (
-        <div className="mt-4 rounded-xl border border-border/60 p-3">
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Score by quarter
-            </p>
-            <div className="flex items-center gap-1.5">
-              {periods.a.length > QUARTERS && (
-                <Button type="button" variant="ghost" size="sm" onClick={removeOvertime}>
-                  <X className="mr-1 h-3.5 w-3.5" /> Remove OT
+          <div className="mt-4 rounded-xl border border-border/60 p-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Score by quarter
+              </p>
+              <div className="flex items-center gap-1.5">
+                {periods.a.length > QUARTERS && (
+                  <Button type="button" variant="ghost" size="sm" onClick={removeOvertime}>
+                    <X className="mr-1 h-3.5 w-3.5" /> Remove OT
+                  </Button>
+                )}
+                <Button type="button" variant="outline" size="sm" onClick={addOvertime}>
+                  <Plus className="mr-1 h-3.5 w-3.5" /> Add OT
                 </Button>
-              )}
-              <Button type="button" variant="outline" size="sm" onClick={addOvertime}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Add OT
-              </Button>
+              </div>
             </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[420px] text-sm">
-              <thead>
-                <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="p-1 text-left font-medium">Team</th>
-                  {periods.a.map((_, i) => (
-                    <th key={i} className="p-1 text-center font-medium">
-                      {periodLabel(i)}
-                    </th>
-                  ))}
-                  <th className="p-1 text-center font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(["a", "b"] as const).map((side) => (
-                  <tr key={side}>
-                    <td className="max-w-[9rem] truncate p-1 text-xs">
-                      {side === "a"
-                        ? (teams.find((t) => t.id === draft.team_a_id)?.name ??
-                          draft.placeholder_a ??
-                          "Home")
-                        : (teams.find((t) => t.id === draft.team_b_id)?.name ??
-                          draft.placeholder_b ??
-                          "Away")}
-                    </td>
-                    {periods[side].map((v, i) => (
-                      <td key={i} className="p-1">
-                        <Input
-                          type="number"
-                          min={0}
-                          className="h-9 w-16 text-center"
-                          value={v ?? ""}
-                          onChange={(e) => setCell(side, i, e.target.value)}
-                        />
-                      </td>
-                    ))}
-                    <td className="p-1 text-center font-display font-bold">
-                      {side === "a" ? totalA : totalB}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Entering quarter scores auto-updates the total score. Leave blank to enter totals
-            manually.
-          </p>
-        </div>
-        )}
-
-        {mode === "score" && (
-        <div className="mt-4 rounded-xl border border-border/60 p-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Player of the match
-          </p>
-          <Select
-            value={potm ?? "none"}
-            onValueChange={(v) => setPotm(v === "none" ? null : v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select player…" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No award</SelectItem>
-              {matchRoster.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Player stats
-          </p>
-          {matchRoster.length === 0 ? (
-            <p className="text-xs text-muted-foreground">
-              Add players to both teams to record game stats.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {([
-                ["a", draft.team_a_id] as const,
-                ["b", draft.team_b_id] as const,
-              ]).map(([side, teamId]) => {
-                const roster = rosterFor(teamId);
-                if (roster.length === 0) return null;
-                const teamName =
-                  teams.find((t) => t.id === teamId)?.name ??
-                  (side === "a" ? (draft.placeholder_a ?? "Home") : (draft.placeholder_b ?? "Away"));
-                return (
-                  <div key={side} className="overflow-x-auto">
-                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
-                      {teamName}
-                    </p>
+            <div className="overflow-x-auto">
               <table className="w-full min-w-[420px] text-sm">
                 <thead>
                   <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    <th className="p-1 text-left font-medium">Player</th>
-                    <th className="p-1 text-center font-medium">PTS</th>
-                    <th className="p-1 text-center font-medium">REB</th>
-                    <th className="p-1 text-center font-medium">AST</th>
-                    <th className="p-1 text-center font-medium">PF</th>
+                    <th className="p-1 text-left font-medium">Team</th>
+                    {periods.a.map((_, i) => (
+                      <th key={i} className="p-1 text-center font-medium">
+                        {periodLabel(i)}
+                      </th>
+                    ))}
+                    <th className="p-1 text-center font-medium">Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {roster.map((p) => {
-                    const s = statFor(p.id);
-                    return (
-                      <tr key={p.id}>
-                        <td className="max-w-[10rem] truncate p-1 text-xs">
-                          {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
-                          {p.name}
+                  {(["a", "b"] as const).map((side) => (
+                    <tr key={side}>
+                      <td className="max-w-[9rem] truncate p-1 text-xs">
+                        {side === "a"
+                          ? (teams.find((t) => t.id === draft.team_a_id)?.name ??
+                            draft.placeholder_a ??
+                            "Home")
+                          : (teams.find((t) => t.id === draft.team_b_id)?.name ??
+                            draft.placeholder_b ??
+                            "Away")}
+                      </td>
+                      {periods[side].map((v, i) => (
+                        <td key={i} className="p-1">
+                          <Input
+                            type="number"
+                            min={0}
+                            className="h-9 w-16 text-center"
+                            value={v ?? ""}
+                            onChange={(e) => setCell(side, i, e.target.value)}
+                          />
                         </td>
-                        {(["points", "rebounds", "assists", "fouls"] as const).map((k) => (
-                          <td key={k} className="p-1">
-                            <Input
-                              type="number"
-                              min={0}
-                              className="h-9 w-16 text-center"
-                              value={s[k]}
-                              onChange={(e) => setStat(p.id, k, e.target.value)}
-                            />
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
+                      ))}
+                      <td className="p-1 text-center font-display font-bold">
+                        {side === "a" ? totalA : totalB}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-                  </div>
-                );
-              })}
             </div>
-          )}
-        </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Entering quarter scores auto-updates the total score. Leave blank to enter totals
+              manually.
+            </p>
+          </div>
+        )}
+
+        {mode === "score" && (
+          <div className="mt-4 rounded-xl border border-border/60 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Player of the match
+            </p>
+            <Select value={potm ?? "none"} onValueChange={(v) => setPotm(v === "none" ? null : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select player…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No award</SelectItem>
+                {matchRoster.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Player stats
+            </p>
+            {matchRoster.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Add players to both teams to record game stats.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {[["a", draft.team_a_id] as const, ["b", draft.team_b_id] as const].map(
+                  ([side, teamId]) => {
+                    const roster = rosterFor(teamId);
+                    if (roster.length === 0) return null;
+                    const teamName =
+                      teams.find((t) => t.id === teamId)?.name ??
+                      (side === "a"
+                        ? (draft.placeholder_a ?? "Home")
+                        : (draft.placeholder_b ?? "Away"));
+                    return (
+                      <div key={side} className="overflow-x-auto">
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-primary">
+                          {teamName}
+                        </p>
+                        <table className="w-full min-w-[420px] text-sm">
+                          <thead>
+                            <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                              <th className="p-1 text-left font-medium">Player</th>
+                              <th className="p-1 text-center font-medium">PTS</th>
+                              <th className="p-1 text-center font-medium">REB</th>
+                              <th className="p-1 text-center font-medium">AST</th>
+                              <th className="p-1 text-center font-medium">PF</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {roster.map((p) => {
+                              const s = statFor(p.id);
+                              return (
+                                <tr key={p.id}>
+                                  <td className="max-w-[10rem] truncate p-1 text-xs">
+                                    {p.jersey_number != null ? `#${p.jersey_number} ` : ""}
+                                    {p.name}
+                                  </td>
+                                  {(["points", "rebounds", "assists", "fouls"] as const).map(
+                                    (k) => (
+                                      <td key={k} className="p-1">
+                                        <Input
+                                          type="number"
+                                          min={0}
+                                          className="h-9 w-16 text-center"
+                                          value={s[k]}
+                                          onChange={(e) => setStat(p.id, k, e.target.value)}
+                                        />
+                                      </td>
+                                    ),
+                                  )}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         <Button
@@ -834,9 +842,7 @@ function MatchDialog({
               score_b: scoreB,
               periods: usePeriods ? periods : emptyPeriods(),
               player_of_match_id: potm,
-              player_stats: stats.filter(
-                (s) => s.points || s.rebounds || s.assists || s.fouls,
-              ),
+              player_stats: stats.filter((s) => s.points || s.rebounds || s.assists || s.fouls),
               scheduled_at: draft.scheduled_at,
               venue: draft.venue,
               court: draft.court,

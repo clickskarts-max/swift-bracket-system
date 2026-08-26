@@ -2,22 +2,35 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/app-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/data-bits";
-import { 
-  useAdCampaigns, 
-  useAdStats, 
-  useAdSettings, 
+import {
+  useAdCampaigns,
+  useAdStats,
+  useAdSettings,
   useUpdateAdSettings,
   useCreateAdCampaign,
   useUpdateAdCampaign,
   useDeleteAdCampaign,
   useAdPlacements,
   AdCampaign,
-  AdCreative
+  AdCreative,
 } from "@/lib/ads.functions";
 import { CampaignDetailDrawer } from "@/components/ads/campaign-detail-drawer";
 import { targetingSummary } from "@/components/ads/tournament-targeting";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings2, ShieldCheck, Globe, Trash2, Edit2, ExternalLink, Image as ImageIcon, BarChart3, Info, Eye, LayoutDashboard } from "lucide-react";
+import {
+  Plus,
+  Settings2,
+  ShieldCheck,
+  Globe,
+  Trash2,
+  Edit2,
+  ExternalLink,
+  Image as ImageIcon,
+  BarChart3,
+  Info,
+  Eye,
+  LayoutDashboard,
+} from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Table,
@@ -30,12 +43,12 @@ import {
 import { StatusPill } from "@/components/data-bits";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -66,39 +79,53 @@ function AdvertisingPage() {
   const deleteCampaign = useDeleteAdCampaign();
   const navigate = useNavigate();
 
-  const [selectedCampaign, setSelectedCampaign] = useState<(AdCampaign & { ad_creatives: AdCreative[] }) | null>(null);
-  
+  const [selectedCampaign, setSelectedCampaign] = useState<
+    (AdCampaign & { ad_creatives: AdCreative[] }) | null
+  >(null);
+
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
 
   // Safely handle campaigns array
   const campaigns = Array.isArray(campaignsData) ? campaignsData : [];
 
-  const ctr = stats && stats.impressions > 0 
-    ? ((stats.clicks / stats.impressions) * 100).toFixed(2) 
-    : "0.00";
+  const ctr =
+    stats && stats.impressions > 0 ? ((stats.clicks / stats.impressions) * 100).toFixed(2) : "0.00";
 
   const handleToggleAutoPlacement = (checked: boolean) => {
-    updateSettings.mutate({ auto_placement_enabled: checked }, {
-      onSuccess: () => toast.success("Auto-placement settings updated"),
-    });
+    updateSettings.mutate(
+      { auto_placement_enabled: checked },
+      {
+        onSuccess: () => toast.success("Auto-placement settings updated"),
+      },
+    );
   };
 
   const handleIntensityChange = (value: string) => {
-    updateSettings.mutate({ auto_placement_intensity: value as 'low' | 'balanced' | 'high' }, {
-      onSuccess: () => toast.success("Placement intensity updated"),
-    });
+    updateSettings.mutate(
+      { auto_placement_intensity: value as "low" | "balanced" | "high" },
+      {
+        onSuccess: () => toast.success("Placement intensity updated"),
+      },
+    );
   };
 
   const handlePageRuleChange = (page: string, checked: boolean) => {
     if (!settings) return;
     const newRules = { ...settings.page_rules, [page]: checked };
-    updateSettings.mutate({ page_rules: newRules }, {
-      onSuccess: () => toast.success(`Page rule for ${page} updated`),
-    });
+    updateSettings.mutate(
+      { page_rules: newRules },
+      {
+        onSuccess: () => toast.success(`Page rule for ${page} updated`),
+      },
+    );
   };
 
   const handleDeleteCampaign = async (id: string) => {
-    if (confirm("Are you sure you want to delete this campaign? All associated analytics will be lost.")) {
+    if (
+      confirm(
+        "Are you sure you want to delete this campaign? All associated analytics will be lost.",
+      )
+    ) {
       try {
         await deleteCampaign.mutateAsync(id);
         toast.success("Campaign deleted");
@@ -110,7 +137,9 @@ function AdvertisingPage() {
 
   // Flatten all creatives from all campaigns
   const allCreatives = useMemo(() => {
-    return campaigns.flatMap(c => (c.ad_creatives || []).map((cr: AdCreative) => ({ ...cr, campaignName: c.name })));
+    return campaigns.flatMap((c) =>
+      (c.ad_creatives || []).map((cr: AdCreative) => ({ ...cr, campaignName: c.name })),
+    );
   }, [campaigns]);
 
   return (
@@ -119,32 +148,25 @@ function AdvertisingPage() {
         title="Ads & Sponsors"
         description="Manage commercial ads, sponsorships and track performance."
         action={
-          <Button onClick={() => {
+          <Button
+            onClick={() => {
               setSelectedCampaign(null);
               setIsCampaignDialogOpen(true);
-            }}>
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" /> Create Campaign
           </Button>
         }
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
-          label="Active Campaigns" 
-          value={campaigns.filter(c => c.status === 'active').length} 
+        <StatCard
+          label="Active Campaigns"
+          value={campaigns.filter((c) => c.status === "active").length}
         />
-        <StatCard 
-          label="Impressions" 
-          value={stats?.impressions || 0} 
-        />
-        <StatCard 
-          label="Clicks" 
-          value={stats?.clicks || 0} 
-        />
-        <StatCard 
-          label="Avg. CTR" 
-          value={`${ctr}%`} 
-        />
+        <StatCard label="Impressions" value={stats?.impressions || 0} />
+        <StatCard label="Clicks" value={stats?.clicks || 0} />
+        <StatCard label="Avg. CTR" value={`${ctr}%`} />
       </div>
 
       <Tabs defaultValue="campaigns" className="space-y-4">
@@ -188,8 +210,10 @@ function AdvertisingPage() {
                   campaigns.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">
-                        <button 
-                          onClick={() => navigate({ to: '/advertising/campaign/$id', params: { id: c.id } })}
+                        <button
+                          onClick={() =>
+                            navigate({ to: "/advertising/campaign/$id", params: { id: c.id } })
+                          }
                           className="hover:text-primary hover:underline text-left transition-colors font-bold"
                         >
                           {c.name}
@@ -211,24 +235,29 @@ function AdvertisingPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={c.allow_auto_placement ? "default" : "secondary"} className="text-[10px]">
+                        <Badge
+                          variant={c.allow_auto_placement ? "default" : "secondary"}
+                          className="text-[10px]"
+                        >
                           {c.allow_auto_placement ? "On" : "Off"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="default" 
-                            size="sm" 
+                          <Button
+                            variant="default"
+                            size="sm"
                             className="h-8 gap-1"
-                             onClick={() => navigate({ to: '/advertising/campaign/$id', params: { id: c.id } })}
+                            onClick={() =>
+                              navigate({ to: "/advertising/campaign/$id", params: { id: c.id } })
+                            }
                           >
                             <LayoutDashboard className="h-3.5 w-3.5" />
                             Manage
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
+                          <Button
+                            variant="outline"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => {
                               setSelectedCampaign(c);
@@ -237,9 +266,9 @@ function AdvertisingPage() {
                           >
                             <Settings2 className="h-3.5 w-3.5" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             onClick={() => handleDeleteCampaign(c.id)}
                           >
@@ -254,7 +283,6 @@ function AdvertisingPage() {
             </Table>
           </div>
         </TabsContent>
-        
 
         <TabsContent value="settings" className="space-y-6">
           <div className="surface-card p-6 space-y-5">
@@ -265,38 +293,40 @@ function AdvertisingPage() {
               </p>
             </div>
             <div className="grid gap-5 md:grid-cols-2">
-              {([
-                {
-                  key: "public_ads_enabled",
-                  label: "Public advertising",
-                  help: "Master kill switch for all ads and sponsorships.",
-                  fallback: true,
-                },
-                {
-                  key: "sponsorships_enabled",
-                  label: "Tournament sponsorships",
-                  help: "Presented by, official partner and section sponsor lockups.",
-                  fallback: true,
-                },
-                {
-                  key: "native_ads_enabled",
-                  label: "Native sponsored cards",
-                  help: "Editorial cards between sections, always labelled Sponsored.",
-                  fallback: true,
-                },
-                {
-                  key: "sticky_mobile_enabled",
-                  label: "Sticky mobile banner",
-                  help: "Dismissible bottom banner on small screens.",
-                  fallback: false,
-                },
-                {
-                  key: "adsense_fallback_enabled",
-                  label: "AdSense fallback",
-                  help: "Fill unsold display inventory with network ads.",
-                  fallback: false,
-                },
-              ] as const).map((row) => (
+              {(
+                [
+                  {
+                    key: "public_ads_enabled",
+                    label: "Public advertising",
+                    help: "Master kill switch for all ads and sponsorships.",
+                    fallback: true,
+                  },
+                  {
+                    key: "sponsorships_enabled",
+                    label: "Tournament sponsorships",
+                    help: "Presented by, official partner and section sponsor lockups.",
+                    fallback: true,
+                  },
+                  {
+                    key: "native_ads_enabled",
+                    label: "Native sponsored cards",
+                    help: "Editorial cards between sections, always labelled Sponsored.",
+                    fallback: true,
+                  },
+                  {
+                    key: "sticky_mobile_enabled",
+                    label: "Sticky mobile banner",
+                    help: "Dismissible bottom banner on small screens.",
+                    fallback: false,
+                  },
+                  {
+                    key: "adsense_fallback_enabled",
+                    label: "AdSense fallback",
+                    help: "Fill unsold display inventory with network ads.",
+                    fallback: false,
+                  },
+                ] as const
+              ).map((row) => (
                 <div key={row.key} className="flex items-start justify-between gap-4">
                   <div className="space-y-0.5">
                     <Label className="text-base">{row.label}</Label>
@@ -305,10 +335,9 @@ function AdvertisingPage() {
                   <Switch
                     checked={(settings?.[row.key] as boolean | undefined) ?? row.fallback}
                     onCheckedChange={(checked) =>
-                      updateSettings.mutate(
-                        { [row.key]: checked } as any,
-                        { onSuccess: () => toast.success("Settings updated") },
-                      )
+                      updateSettings.mutate({ [row.key]: checked } as any, {
+                        onSuccess: () => toast.success("Settings updated"),
+                      })
                     }
                   />
                 </div>
@@ -318,7 +347,6 @@ function AdvertisingPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="surface-card p-6 space-y-6">
-
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Smart Auto Placement</Label>
@@ -326,16 +354,16 @@ function AdvertisingPage() {
                     Automatically place eligible ads in safe areas.
                   </p>
                 </div>
-                <Switch 
-                  checked={settings?.auto_placement_enabled ?? true} 
+                <Switch
+                  checked={settings?.auto_placement_enabled ?? true}
                   onCheckedChange={handleToggleAutoPlacement}
                 />
               </div>
 
               <div className="space-y-3">
                 <Label>Auto Placement Intensity</Label>
-                <Select 
-                  value={settings?.auto_placement_intensity ?? 'balanced'} 
+                <Select
+                  value={settings?.auto_placement_intensity ?? "balanced"}
                   onValueChange={handleIntensityChange}
                 >
                   <SelectTrigger>
@@ -348,7 +376,8 @@ function AdvertisingPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-[11px] text-muted-foreground italic">
-                  Intensity controls how many auto-ads appear on a single page relative to content length.
+                  Intensity controls how many auto-ads appear on a single page relative to content
+                  length.
                 </p>
               </div>
             </div>
@@ -358,80 +387,80 @@ function AdvertisingPage() {
                 <Globe className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold">Public Page Rules</h3>
               </div>
-              
+
               <div className="space-y-4">
-                {settings && settings.page_rules && Object.entries(settings.page_rules).map(([page, enabled]) => (
-                  <div key={page} className="flex items-center justify-between">
-                    <Label className="capitalize cursor-pointer" htmlFor={`rule-${page}`}>
-                      {page.replace(/_/g, ' ')}
-                    </Label>
-                    <Switch 
-                      id={`rule-${page}`}
-                      checked={enabled} 
-                      onCheckedChange={(checked) => handlePageRuleChange(page, checked)}
-                    />
-                  </div>
-                ))}
+                {settings &&
+                  settings.page_rules &&
+                  Object.entries(settings.page_rules).map(([page, enabled]) => (
+                    <div key={page} className="flex items-center justify-between">
+                      <Label className="capitalize cursor-pointer" htmlFor={`rule-${page}`}>
+                        {page.replace(/_/g, " ")}
+                      </Label>
+                      <Switch
+                        id={`rule-${page}`}
+                        checked={enabled}
+                        onCheckedChange={(checked) => handlePageRuleChange(page, checked)}
+                      />
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
         </TabsContent>
-
       </Tabs>
 
-      <CampaignDialog 
-        open={isCampaignDialogOpen} 
+      <CampaignDialog
+        open={isCampaignDialogOpen}
         onOpenChange={(open) => {
           setIsCampaignDialogOpen(open);
           if (!open) setSelectedCampaign(null);
-        }} 
+        }}
         campaign={selectedCampaign}
       />
     </div>
   );
 }
 
-function CampaignDialog({ 
-  open, 
-  onOpenChange, 
-  campaign 
-}: { 
-  open: boolean, 
-  onOpenChange: (open: boolean) => void,
-  campaign: AdCampaign | null
+function CampaignDialog({
+  open,
+  onOpenChange,
+  campaign,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  campaign: AdCampaign | null;
 }) {
   const createCampaign = useCreateAdCampaign();
   const updateCampaign = useUpdateAdCampaign();
   const navigate = useNavigate();
-  
-  
-  const [formData, setFormData] = useState({ 
-    name: '', 
-    advertiser: '', 
-    priority: 'normal' as AdCampaign['priority'], 
+
+  const [formData, setFormData] = useState({
+    name: "",
+    advertiser: "",
+    priority: "normal" as AdCampaign["priority"],
     allow_auto_placement: true,
-    status: 'active' as AdCampaign['status'],
-    tournament_targeting_mode: 'all' as AdCampaign['tournament_targeting_mode']
+    status: "active" as AdCampaign["status"],
+    tournament_targeting_mode: "all" as AdCampaign["tournament_targeting_mode"],
   });
 
   useMemo(() => {
     if (campaign) {
       setFormData({
         name: campaign.name,
-        advertiser: campaign.advertiser || '',
+        advertiser: campaign.advertiser || "",
         priority: campaign.priority,
         allow_auto_placement: campaign.allow_auto_placement,
         status: campaign.status,
-        tournament_targeting_mode: campaign.tournament_targeting_mode ?? 'all'
+        tournament_targeting_mode: campaign.tournament_targeting_mode ?? "all",
       });
     } else {
       setFormData({
-        name: '',
-        advertiser: '',
-        priority: 'normal',
+        name: "",
+        advertiser: "",
+        priority: "normal",
         allow_auto_placement: true,
-        status: 'active',
-        tournament_targeting_mode: 'all'
+        status: "active",
+        tournament_targeting_mode: "all",
       });
     }
   }, [campaign, open]);
@@ -439,14 +468,14 @@ function CampaignDialog({
   const handleSubmit = async () => {
     try {
       if (campaign) {
-        await updateCampaign.mutateAsync({ 
-          id: campaign.id, 
+        await updateCampaign.mutateAsync({
+          id: campaign.id,
           name: formData.name,
           advertiser: formData.advertiser,
           priority: formData.priority,
           allow_auto_placement: formData.allow_auto_placement,
           status: formData.status,
-          tournament_targeting_mode: formData.tournament_targeting_mode
+          tournament_targeting_mode: formData.tournament_targeting_mode,
         });
         toast.success("Campaign updated");
       } else {
@@ -457,10 +486,10 @@ function CampaignDialog({
           allow_auto_placement: formData.allow_auto_placement,
           status: formData.status,
           tournament_targeting_mode: formData.tournament_targeting_mode,
-          weight: 1
+          weight: 1,
         });
         toast.success("Campaign created");
-        navigate({ to: '/advertising/campaign/$id', params: { id: newCampaign.id } });
+        navigate({ to: "/advertising/campaign/$id", params: { id: newCampaign.id } });
       }
       onOpenChange(false);
     } catch (e) {
@@ -473,35 +502,33 @@ function CampaignDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{campaign ? "Edit Campaign" : "Create Campaign"}</DialogTitle>
-          <DialogDescription>
-            Configure your advertising campaign details.
-          </DialogDescription>
+          <DialogDescription>Configure your advertising campaign details.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Campaign Name</Label>
-            <Input 
+            <Input
               id="name"
-              placeholder="e.g. Summer Championship Sponsor" 
-              value={formData.name} 
-              onChange={e => setFormData(prev => ({...prev, name: e.target.value}))} 
+              placeholder="e.g. Summer Championship Sponsor"
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="advertiser">Advertiser</Label>
-            <Input 
+            <Input
               id="advertiser"
-              placeholder="e.g. Nike, Red Bull, etc." 
-              value={formData.advertiser} 
-              onChange={e => setFormData(prev => ({...prev, advertiser: e.target.value}))} 
+              placeholder="e.g. Nike, Red Bull, etc."
+              value={formData.advertiser}
+              onChange={(e) => setFormData((prev) => ({ ...prev, advertiser: e.target.value }))}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label>Priority</Label>
-              <Select 
-                value={formData.priority} 
-                onValueChange={v => setFormData(prev => ({...prev, priority: v as any}))}
+              <Select
+                value={formData.priority}
+                onValueChange={(v) => setFormData((prev) => ({ ...prev, priority: v as any }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -516,9 +543,9 @@ function CampaignDialog({
             </div>
             <div className="grid gap-2">
               <Label>Status</Label>
-              <Select 
-                value={formData.status} 
-                onValueChange={v => setFormData(prev => ({...prev, status: v as any}))}
+              <Select
+                value={formData.status}
+                onValueChange={(v) => setFormData((prev) => ({ ...prev, status: v as any }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -537,7 +564,12 @@ function CampaignDialog({
             <Label>Tournament Targeting</Label>
             <Select
               value={formData.tournament_targeting_mode}
-              onValueChange={v => setFormData(prev => ({...prev, tournament_targeting_mode: v as AdCampaign['tournament_targeting_mode']}))}
+              onValueChange={(v) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  tournament_targeting_mode: v as AdCampaign["tournament_targeting_mode"],
+                }))
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -559,14 +591,16 @@ function CampaignDialog({
                 Let the AI place this ad in recommended slots.
               </p>
             </div>
-            <Switch 
-              checked={formData.allow_auto_placement} 
-              onCheckedChange={v => setFormData(prev => ({...prev, allow_auto_placement: v}))}
+            <Switch
+              checked={formData.allow_auto_placement}
+              onCheckedChange={(v) => setFormData((prev) => ({ ...prev, allow_auto_placement: v }))}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit} disabled={!formData.name}>
             {campaign ? "Save Changes" : "Create Campaign"}
           </Button>
@@ -575,4 +609,3 @@ function CampaignDialog({
     </Dialog>
   );
 }
-

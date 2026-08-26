@@ -1,13 +1,13 @@
 import { AdCampaign, AdCreative, AdSettings } from "./ads.functions";
 
-export type AdPageContext = 
-  | 'homepage' 
-  | 'tournament_overview' 
-  | 'fixtures' 
-  | 'standings' 
-  | 'teams' 
-  | 'knockout' 
-  | 'pool_draw';
+export type AdPageContext =
+  | "homepage"
+  | "tournament_overview"
+  | "fixtures"
+  | "standings"
+  | "teams"
+  | "knockout"
+  | "pool_draw";
 
 export interface AdRegionScore {
   score: number;
@@ -24,14 +24,16 @@ export class SmartPlacementEngine {
     settings: AdSettings,
     renderedAdsCount: number,
     pageHeight: number,
-    isMobile: boolean
+    isMobile: boolean,
   ): AdRegionScore {
     const reasons: string[] = [];
     let score = 50; // Base score
 
     // 1. Check global and page-specific toggles
-    if (!settings.auto_placement_enabled) return { score: 0, reasons: ['Auto-placement globally disabled'] };
-    if (!settings.page_rules[context]) return { score: 0, reasons: [`Auto-placement disabled for ${context}`] };
+    if (!settings.auto_placement_enabled)
+      return { score: 0, reasons: ["Auto-placement globally disabled"] };
+    if (!settings.page_rules[context])
+      return { score: 0, reasons: [`Auto-placement disabled for ${context}`] };
 
     // 2. Density Check
     const maxAds = this.getDensityLimit(settings.auto_placement_intensity, pageHeight, isMobile);
@@ -47,7 +49,7 @@ export class SmartPlacementEngine {
       standings: 50,
       teams: 40,
       knockout: 30,
-      pool_draw: 10
+      pool_draw: 10,
     };
     score += contextScores[context] || 0;
     reasons.push(`Context score for ${context}: ${contextScores[context]}`);
@@ -55,21 +57,21 @@ export class SmartPlacementEngine {
     // 4. Width Check
     if (containerWidth < 300) {
       score -= 50;
-      reasons.push('Container too narrow');
+      reasons.push("Container too narrow");
     } else if (containerWidth >= 728) {
       score += 20;
-      reasons.push('Leaderboard compatible width');
+      reasons.push("Leaderboard compatible width");
     }
 
     // 5. Mobile Penalty
     if (isMobile) {
       score -= 20;
-      reasons.push('Mobile density reduction');
+      reasons.push("Mobile density reduction");
     }
 
     // 6. Proximity Penalty (simulated)
     if (renderedAdsCount > 0) {
-      score -= (renderedAdsCount * 15);
+      score -= renderedAdsCount * 15;
       reasons.push(`Proximity penalty for ${renderedAdsCount} existing ads`);
     }
 
@@ -79,9 +81,13 @@ export class SmartPlacementEngine {
   /**
    * Determines the maximum number of auto-ads allowed based on intensity.
    */
-  static getDensityLimit(intensity: AdSettings['auto_placement_intensity'], pageHeight: number, isMobile: boolean): number {
-    const baseLimit = intensity === 'high' ? 4 : intensity === 'low' ? 1 : 2;
-    
+  static getDensityLimit(
+    intensity: AdSettings["auto_placement_intensity"],
+    pageHeight: number,
+    isMobile: boolean,
+  ): number {
+    const baseLimit = intensity === "high" ? 4 : intensity === "low" ? 1 : 2;
+
     // Scale by page height (approximate)
     const heightFactor = Math.max(1, Math.floor(pageHeight / 1500));
     let limit = baseLimit * heightFactor;
@@ -98,22 +104,22 @@ export class SmartPlacementEngine {
    */
   static findCompatibleCreative(
     campaigns: (AdCampaign & { ad_creatives: AdCreative[] })[],
-    containerWidth: number
+    containerWidth: number,
   ): AdCreative | null {
     if (!campaigns || campaigns.length === 0) return null;
 
     // 1. Get all creatives from eligible campaigns
-    const allCreatives = campaigns.flatMap(c => 
-      (c.ad_creatives || []).map(creative => ({ 
-        ...creative, 
-        priority: c.priority, 
-        weight: c.weight 
-      }))
+    const allCreatives = campaigns.flatMap((c) =>
+      (c.ad_creatives || []).map((creative) => ({
+        ...creative,
+        priority: c.priority,
+        weight: c.weight,
+      })),
     );
 
     // 2. Filter by width compatibility
-    const compatible = allCreatives.filter(c => {
-      if (c.is_responsive || c.size_preset === 'responsive') return true;
+    const compatible = allCreatives.filter((c) => {
+      if (c.is_responsive || c.size_preset === "responsive") return true;
       if (!c.width) return true; // Fallback for older data
       return c.width <= containerWidth;
     });
@@ -132,14 +138,14 @@ export class SmartPlacementEngine {
     if (!firstItem) return null;
 
     const highestPriority = firstItem.priority;
-    const topTier = compatible.filter(c => c.priority === highestPriority);
+    const topTier = compatible.filter((c) => c.priority === highestPriority);
 
     // 4. Weighted selection within top tier
     const totalWeight = topTier.reduce((sum, c) => sum + (c.weight || 10), 0);
     let random = Math.random() * totalWeight;
-    
+
     for (const creative of topTier) {
-      random -= (creative.weight || 10);
+      random -= creative.weight || 10;
       if (random <= 0) return creative as unknown as AdCreative;
     }
 

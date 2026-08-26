@@ -1,7 +1,24 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { 
-  MapPin, ChevronLeft, ChevronRight, ImagePlus, X, Users, RefreshCw, 
-  Zap, Trash2, Trophy, ArrowRight, Lock, Unlock, Play, Search, Edit2, GripVertical, Check, ListOrdered
+import {
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+  ImagePlus,
+  X,
+  Users,
+  RefreshCw,
+  Zap,
+  Trash2,
+  Trophy,
+  ArrowRight,
+  Lock,
+  Unlock,
+  Play,
+  Search,
+  Edit2,
+  GripVertical,
+  Check,
+  ListOrdered,
 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -27,7 +44,7 @@ import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS, calculateGroupCapacities } from "@
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
 import { cn } from "@/lib/utils";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -122,7 +139,6 @@ export function TournamentForm({
   pending?: boolean;
 }) {
   const [step, setStep] = useState(1);
-  
 
   const [showPoolDraw, setShowPoolDraw] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -219,13 +235,13 @@ export function TournamentForm({
     setValues((v) => {
       const teams = [...(v.teams || [])];
       const groupsCount = v.group_count || 1;
-      
-      const lockedTeams = teams.filter(t => t.is_locked && t.group_label);
-      const eligibleTeams = teams.filter(t => !t.is_locked || !t.group_label);
-      
+
+      const lockedTeams = teams.filter((t) => t.is_locked && t.group_label);
+      const eligibleTeams = teams.filter((t) => !t.is_locked || !t.group_label);
+
       // 1. Determine/Get randomized capacities
       const lockedCounts: Record<string, number> = {};
-      lockedTeams.forEach(t => {
+      lockedTeams.forEach((t) => {
         if (t.group_label) lockedCounts[t.group_label] = (lockedCounts[t.group_label] || 0) + 1;
       });
 
@@ -238,7 +254,10 @@ export function TournamentForm({
       // 2. Randomize eligible teams
       for (let i = eligibleTeams.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [eligibleTeams[i], eligibleTeams[j]] = [eligibleTeams[j]!, eligibleTeams[i]!] as [TeamValue, TeamValue];
+        [eligibleTeams[i], eligibleTeams[j]] = [eligibleTeams[j]!, eligibleTeams[i]!] as [
+          TeamValue,
+          TeamValue,
+        ];
       }
 
       // 3. Distribute teams into groups based on capacities
@@ -256,10 +275,10 @@ export function TournamentForm({
         }
       }
 
-      return { 
-        ...v, 
+      return {
+        ...v,
         teams: nextTeams,
-        group_capacities: newCapacities
+        group_capacities: newCapacities,
       };
     });
     toast.success("Teams shuffled successfully.");
@@ -268,7 +287,7 @@ export function TournamentForm({
   const clearGroups = () => {
     setValues((v) => ({
       ...v,
-      teams: (v.teams || []).map(t => t.is_locked ? t : { ...t, group_label: null })
+      teams: (v.teams || []).map((t) => (t.is_locked ? t : { ...t, group_label: null })),
     }));
     toast.success("Group assignments cleared");
     setShowClearConfirm(false);
@@ -292,7 +311,8 @@ export function TournamentForm({
       const isGroupKnockout = values.format === "group_knockout";
       if (isGroupKnockout) {
         // Enforce power-of-two group counts
-        const isValidGroupCount = values.group_count > 0 && (values.group_count & (values.group_count - 1)) === 0;
+        const isValidGroupCount =
+          values.group_count > 0 && (values.group_count & (values.group_count - 1)) === 0;
         if (!isValidGroupCount) {
           toast.error("Group count must be a power of two (2, 4, 8, 16...)");
           return false;
@@ -381,7 +401,7 @@ export function TournamentForm({
     if (step === 2 && isGroupKnockout) {
       // Step 2 is now the combined "Teams & Group Draw" for knockout
       const teams = values.teams || [];
-      const unassigned = teams.filter(t => !t.group_label);
+      const unassigned = teams.filter((t) => !t.group_label);
       if (unassigned.length > 0) {
         toast.error(`${unassigned.length} teams have not been assigned to a group.`);
         return;
@@ -405,10 +425,10 @@ export function TournamentForm({
   };
 
   const submit = () => {
-    const nextVal = { 
-      ...values, 
+    const nextVal = {
+      ...values,
       slug: values.slug || uniqueSlug(values.name),
-      qualifiers_per_group: values.format === "group_knockout" ? 2 : values.qualifiers_per_group 
+      qualifiers_per_group: values.format === "group_knockout" ? 2 : values.qualifiers_per_group,
     };
     const parsed = schema.safeParse(nextVal);
     if (!parsed.success) {
@@ -420,9 +440,14 @@ export function TournamentForm({
 
   const isLeague = values.format === "league";
   const isGroupKnockout = values.format === "group_knockout";
-  const teamsPerGroup = isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
-  const baseSize = isGroupKnockout && values.group_count > 0 ? Math.floor(values.team_count / values.group_count) : 0;
-  const remainder = isGroupKnockout && values.group_count > 0 ? values.team_count % values.group_count : 0;
+  const teamsPerGroup =
+    isGroupKnockout && values.group_count > 0 ? values.team_count / values.group_count : 0;
+  const baseSize =
+    isGroupKnockout && values.group_count > 0
+      ? Math.floor(values.team_count / values.group_count)
+      : 0;
+  const remainder =
+    isGroupKnockout && values.group_count > 0 ? values.team_count % values.group_count : 0;
   const isUnevenGroups = remainder > 0;
   const knockoutTeams = isGroupKnockout ? values.group_count * 2 : 0;
 
@@ -436,7 +461,7 @@ export function TournamentForm({
 
   const renderStep2 = () => {
     if (isGroupKnockout) return renderCombinedStep2();
-    
+
     return (
       <div className="space-y-6">
         <div className="surface-card p-6">
@@ -447,12 +472,15 @@ export function TournamentForm({
               <span className="text-sm font-medium">{values.team_count} Teams</span>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(values.teams || []).map((team, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20">
+              <div
+                key={idx}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20"
+              >
                 <div className="w-12 h-12 shrink-0 bg-background rounded-lg border border-border/60 p-1">
-                  <ImageUpload 
+                  <ImageUpload
                     value={team.logo_url}
                     onChange={(url) => setTeam(idx, { logo_url: url })}
                     folder="team-logos"
@@ -485,13 +513,15 @@ export function TournamentForm({
 
   const renderCombinedStep2 = () => {
     const teams = values.teams || [];
-    const filteredTeams = teams.map((t, i) => ({ ...t, originalIdx: i })).filter(t => 
-      t.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredTeams = teams
+      .map((t, i) => ({ ...t, originalIdx: i }))
+      .filter((t) => t.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const groups = Array.from({ length: values.group_count }, (_, i) =>
+      String.fromCharCode(65 + i),
     );
-    
-    const groups = Array.from({ length: values.group_count }, (_, i) => String.fromCharCode(65 + i));
     const currentCapacities = values.group_capacities;
-    
+
     // Total teams in each group based on current state
     const getCapacityForGroup = (label: string) => {
       if (currentCapacities?.[label]) return currentCapacities[label];
@@ -512,12 +542,16 @@ export function TournamentForm({
                   <Users className="h-6 w-6" />
                   Teams & Group Draw
                 </h2>
-                <p className="text-sm text-muted-foreground">Manage your roster and assign groups in one workspace.</p>
+                <p className="text-sm text-muted-foreground">
+                  Manage your roster and assign groups in one workspace.
+                </p>
               </div>
               <div className="flex items-center gap-3">
-                 <div className="text-lg font-bold font-display px-4 py-2 rounded-xl bg-background border-2 border-primary/20 flex items-center gap-2">
+                <div className="text-lg font-bold font-display px-4 py-2 rounded-xl bg-background border-2 border-primary/20 flex items-center gap-2">
                   <span className="text-primary">{values.team_count}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-sans">Total Teams</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-sans">
+                    Total Teams
+                  </span>
                 </div>
               </div>
             </div>
@@ -528,8 +562,8 @@ export function TournamentForm({
                 <div className="flex items-center justify-between gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="Search teams..." 
+                    <Input
+                      placeholder="Search teams..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-9 bg-muted/30 border-border/40 focus:border-primary/50 transition-all rounded-full"
@@ -550,19 +584,19 @@ export function TournamentForm({
                       {filteredTeams.map((team) => {
                         const isEditing = editingTeamIdx === team.originalIdx;
                         return (
-                          <div 
-                            key={team.originalIdx} 
+                          <div
+                            key={team.originalIdx}
                             className={cn(
                               "grid grid-cols-[50px_60px_1fr_120px] gap-4 items-center px-4 py-3 transition-all hover:bg-primary/5",
-                              team.group_label && "bg-primary/[0.02]"
+                              team.group_label && "bg-primary/[0.02]",
                             )}
                           >
                             <div className="text-xs font-mono text-muted-foreground text-center">
                               {team.originalIdx + 1}
                             </div>
-                            
+
                             <div className="relative group w-11 h-11 bg-background border border-border/60 rounded-xl overflow-hidden">
-                              <ImageUpload 
+                              <ImageUpload
                                 value={team.logo_url}
                                 onChange={(url) => setTeam(team.originalIdx, { logo_url: url })}
                                 folder="team-logos"
@@ -577,21 +611,30 @@ export function TournamentForm({
                                   <Input
                                     autoFocus
                                     value={team.name}
-                                    onChange={(e) => setTeam(team.originalIdx, { name: e.target.value })}
+                                    onChange={(e) =>
+                                      setTeam(team.originalIdx, { name: e.target.value })
+                                    }
                                     onBlur={() => setEditingTeamIdx(null)}
-                                    onKeyDown={(e) => e.key === 'Enter' && setEditingTeamIdx(null)}
+                                    onKeyDown={(e) => e.key === "Enter" && setEditingTeamIdx(null)}
                                     className="h-8 text-sm focus-visible:ring-primary/30"
                                   />
-                                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingTeamIdx(null)}>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8"
+                                    onClick={() => setEditingTeamIdx(null)}
+                                  >
                                     <Check className="h-4 w-4 text-green-500" />
                                   </Button>
                                 </div>
                               ) : (
-                                <div 
+                                <div
                                   className="flex items-center gap-2 cursor-text group"
                                   onClick={() => setEditingTeamIdx(team.originalIdx)}
                                 >
-                                  <span className="font-semibold text-sm truncate max-w-[180px]">{team.name}</span>
+                                  <span className="font-semibold text-sm truncate max-w-[180px]">
+                                    {team.name}
+                                  </span>
                                   <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </div>
                               )}
@@ -602,55 +645,71 @@ export function TournamentForm({
                                 value={team.group_label || "unassigned"}
                                 onValueChange={(v) => {
                                   const newGroup = v === "unassigned" ? null : v;
-                                  setTeam(team.originalIdx, { 
+                                  setTeam(team.originalIdx, {
                                     group_label: newGroup,
-                                    is_locked: !!newGroup
+                                    is_locked: !!newGroup,
                                   });
-                                  
+
                                   const lockedCounts: Record<string, number> = {};
                                   const updatedTeams = [...(values.teams || [])];
                                   const t = updatedTeams[team.originalIdx];
                                   if (t) {
-                                    updatedTeams[team.originalIdx] = { 
-                                      ...t, 
+                                    updatedTeams[team.originalIdx] = {
+                                      ...t,
                                       group_label: newGroup,
-                                      is_locked: !!newGroup
+                                      is_locked: !!newGroup,
                                     };
                                   }
-                                  
-                                  updatedTeams.forEach(ut => {
+
+                                  updatedTeams.forEach((ut) => {
                                     if (ut.group_label) {
-                                      lockedCounts[ut.group_label] = (lockedCounts[ut.group_label] || 0) + 1;
+                                      lockedCounts[ut.group_label] =
+                                        (lockedCounts[ut.group_label] || 0) + 1;
                                     }
                                   });
-                                  
-                                  const newCapacities = calculateGroupCapacities(values.team_count, values.group_count, lockedCounts);
+
+                                  const newCapacities = calculateGroupCapacities(
+                                    values.team_count,
+                                    values.group_count,
+                                    lockedCounts,
+                                  );
                                   if (newCapacities) {
                                     set("group_capacities", newCapacities);
                                   }
                                 }}
                               >
-                                <SelectTrigger className={cn(
-                                  "h-8 text-[11px] font-bold px-3 border-border/40 rounded-lg",
-                                  team.group_label ? "bg-primary text-primary-foreground border-transparent" : "bg-background"
-                                )}>
+                                <SelectTrigger
+                                  className={cn(
+                                    "h-8 text-[11px] font-bold px-3 border-border/40 rounded-lg",
+                                    team.group_label
+                                      ? "bg-primary text-primary-foreground border-transparent"
+                                      : "bg-background",
+                                  )}
+                                >
                                   <SelectValue placeholder="-" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="unassigned" className="text-xs">No Group</SelectItem>
+                                  <SelectItem value="unassigned" className="text-xs">
+                                    No Group
+                                  </SelectItem>
                                   {groups.map((g) => {
-                                    const count = teams.filter(t => t.group_label === g).length;
+                                    const count = teams.filter((t) => t.group_label === g).length;
                                     const capacity = getCapacityForGroup(g);
                                     const isFull = count >= capacity && team.group_label !== g;
                                     return (
-                                      <SelectItem key={g} value={g} disabled={isFull} className="text-xs">
+                                      <SelectItem
+                                        key={g}
+                                        value={g}
+                                        disabled={isFull}
+                                        className="text-xs"
+                                      >
                                         Group {g} ({count}/{capacity}) {isFull ? "FULL" : ""}
                                       </SelectItem>
                                     );
                                   })}
                                 </SelectContent>
                               </Select>
-                              
+
                               {team.group_label && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -658,13 +717,21 @@ export function TournamentForm({
                                       variant="ghost"
                                       size="icon"
                                       className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                                      onClick={() => setTeam(team.originalIdx, { is_locked: !team.is_locked })}
+                                      onClick={() =>
+                                        setTeam(team.originalIdx, { is_locked: !team.is_locked })
+                                      }
                                     >
-                                      {team.is_locked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                                      {team.is_locked ? (
+                                        <Lock className="h-3.5 w-3.5" />
+                                      ) : (
+                                        <Unlock className="h-3.5 w-3.5" />
+                                      )}
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    {team.is_locked ? "Locked: Won't be changed by Shuffle" : "Unlocked: Can be shuffled"}
+                                    {team.is_locked
+                                      ? "Locked: Won't be changed by Shuffle"
+                                      : "Unlocked: Can be shuffled"}
                                   </TooltipContent>
                                 </Tooltip>
                               )}
@@ -681,9 +748,13 @@ export function TournamentForm({
                                   </PopoverTrigger>
                                   <PopoverContent className="w-48 p-2" align="end">
                                     <div className="space-y-1">
-                                      <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Assign to Group</div>
-                                      {groups.map(g => {
-                                        const count = teams.filter(t => t.group_label === g).length;
+                                      <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
+                                        Assign to Group
+                                      </div>
+                                      {groups.map((g) => {
+                                        const count = teams.filter(
+                                          (t) => t.group_label === g,
+                                        ).length;
                                         const capacity = getCapacityForGroup(g);
                                         const isFull = count >= capacity;
                                         return (
@@ -693,7 +764,12 @@ export function TournamentForm({
                                             size="sm"
                                             disabled={isFull}
                                             className="w-full justify-start font-bold text-xs h-8"
-                                            onClick={() => setTeam(team.originalIdx, { group_label: g, is_locked: true })}
+                                            onClick={() =>
+                                              setTeam(team.originalIdx, {
+                                                group_label: g,
+                                                is_locked: true,
+                                              })
+                                            }
                                           >
                                             Group {g} ({count}/{capacity}) {isFull ? "FULL" : ""}
                                           </Button>
@@ -720,30 +796,30 @@ export function TournamentForm({
                     Quick Actions
                   </h3>
                   <div className="grid gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={shuffleGroups} 
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={shuffleGroups}
                       className="justify-start border-border/60 bg-background/50 hover:bg-primary/5 hover:border-primary/40 rounded-xl h-11"
                     >
-                      <RefreshCw className="mr-3 h-4 w-4 text-primary" /> 
+                      <RefreshCw className="mr-3 h-4 w-4 text-primary" />
                       <span className="font-semibold">Shuffle All</span>
                     </Button>
-                    <Button 
-                      size="sm" 
-                      onClick={poolDraw} 
+                    <Button
+                      size="sm"
+                      onClick={poolDraw}
                       className="justify-start shadow-lg shadow-primary/20 rounded-xl h-11 bg-primary hover:bg-primary/90"
                     >
-                      <Trophy className="mr-3 h-4 w-4" /> 
+                      <Trophy className="mr-3 h-4 w-4" />
                       <span className="font-semibold">Pool Draw</span>
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setShowClearConfirm(true)} 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowClearConfirm(true)}
                       className="justify-start text-destructive hover:bg-destructive/5 rounded-xl h-11"
                     >
-                      <Trash2 className="mr-3 h-4 w-4" /> 
+                      <Trash2 className="mr-3 h-4 w-4" />
                       <span className="font-semibold">Reset Assignments</span>
                     </Button>
                   </div>
@@ -756,16 +832,18 @@ export function TournamentForm({
                   <ScrollArea className="h-[400px] pr-4 -mr-4">
                     <div className="grid gap-3">
                       {groups.map((g) => {
-                        const groupTeams = teams.filter(t => t.group_label === g);
+                        const groupTeams = teams.filter((t) => t.group_label === g);
                         const capacity = getCapacityForGroup(g);
                         const isFull = groupTeams.length >= capacity;
-                        
+
                         return (
-                          <div 
-                            key={g} 
+                          <div
+                            key={g}
                             className={cn(
                               "p-4 rounded-2xl border transition-all duration-300",
-                              isFull ? "border-green-500/30 bg-green-500/5" : "border-border/60 bg-background shadow-sm"
+                              isFull
+                                ? "border-green-500/30 bg-green-500/5"
+                                : "border-border/60 bg-background shadow-sm",
                             )}
                           >
                             <div className="flex items-center justify-between mb-3">
@@ -775,25 +853,39 @@ export function TournamentForm({
                                 </div>
                                 <span className="font-bold text-sm">Group {g}</span>
                               </div>
-                              <Badge variant={isFull ? "default" : "outline"} className={cn(
-                                "text-[10px] font-bold rounded-full px-2 h-5",
-                                isFull ? "bg-green-500 hover:bg-green-500 text-white" : "border-primary/20 text-primary"
-                              )}>
+                              <Badge
+                                variant={isFull ? "default" : "outline"}
+                                className={cn(
+                                  "text-[10px] font-bold rounded-full px-2 h-5",
+                                  isFull
+                                    ? "bg-green-500 hover:bg-green-500 text-white"
+                                    : "border-primary/20 text-primary",
+                                )}
+                              >
                                 {groupTeams.length} / {capacity}
                               </Badge>
                             </div>
                             <div className="space-y-2">
                               {groupTeams.map((t) => (
-                                <div key={t.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20 text-[11px] font-medium animate-in fade-in slide-in-from-left-1">
+                                <div
+                                  key={t.name}
+                                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20 text-[11px] font-medium animate-in fade-in slide-in-from-left-1"
+                                >
                                   <div className="h-4 w-4 rounded bg-background border border-border/40 flex items-center justify-center overflow-hidden shrink-0">
                                     {t.logo_url ? (
-                                      <img src={t.logo_url} alt="" className="h-full w-full object-contain p-0.5" />
+                                      <img
+                                        src={t.logo_url}
+                                        alt=""
+                                        className="h-full w-full object-contain p-0.5"
+                                      />
                                     ) : (
                                       <Users className="h-2 w-2 text-muted-foreground" />
                                     )}
                                   </div>
                                   <span className="truncate flex-1">{t.name}</span>
-                                  {t.is_locked && <Lock className="h-2.5 w-2.5 text-muted-foreground/40" />}
+                                  {t.is_locked && (
+                                    <Lock className="h-2.5 w-2.5 text-muted-foreground/40" />
+                                  )}
                                 </div>
                               ))}
                               {groupTeams.length === 0 && (
@@ -816,12 +908,16 @@ export function TournamentForm({
             <Button variant="ghost" onClick={back} className="rounded-xl px-6 h-12">
               <ChevronLeft className="mr-2 h-4 w-4" /> Back to Format
             </Button>
-            <Button onClick={next} disabled={pending} className="px-10 h-12 font-bold rounded-xl shadow-xl shadow-primary/20">
+            <Button
+              onClick={next}
+              disabled={pending}
+              className="px-10 h-12 font-bold rounded-xl shadow-xl shadow-primary/20"
+            >
               Continue to Venues <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
 
-          <PoolDraw 
+          <PoolDraw
             open={showPoolDraw}
             onOpenChange={setShowPoolDraw}
             teams={teams}
@@ -829,10 +925,10 @@ export function TournamentForm({
             teamCount={values.team_count}
             initialCapacities={values.group_capacities || null}
             onApply={(drawn, finalCapacities) => {
-              setValues(v => ({
+              setValues((v) => ({
                 ...v,
                 teams: drawn,
-                group_capacities: finalCapacities
+                group_capacities: finalCapacities,
               }));
             }}
           />
@@ -840,14 +936,20 @@ export function TournamentForm({
           <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
             <AlertDialogContent className="rounded-2xl border-primary/20">
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-2xl font-display font-bold">Reset assignments?</AlertDialogTitle>
+                <AlertDialogTitle className="text-2xl font-display font-bold">
+                  Reset assignments?
+                </AlertDialogTitle>
                 <AlertDialogDescription className="text-base">
-                  This will move all teams back to the "Unassigned" pool. Your team names and logos will be preserved.
+                  This will move all teams back to the "Unassigned" pool. Your team names and logos
+                  will be preserved.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="gap-3">
                 <AlertDialogCancel className="rounded-xl">Keep Current</AlertDialogCancel>
-                <AlertDialogAction onClick={clearGroups} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                <AlertDialogAction
+                  onClick={clearGroups}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                >
                   Reset Everything
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -862,20 +964,22 @@ export function TournamentForm({
     <div className="space-y-6">
       <div className="surface-card space-y-4 p-5">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-display text-lg font-semibold text-primary">Step 1: Basics & Branding</h2>
+          <h2 className="font-display text-lg font-semibold text-primary">
+            Step 1: Basics & Branding
+          </h2>
         </div>
-        
+
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-4">
             <Field label="Logo image">
-               <ImageUpload 
+              <ImageUpload
                 value={values.logo_url}
                 onChange={(url) => set("logo_url", url)}
                 folder="tournament-logos"
               />
             </Field>
           </div>
-          
+
           <div className="space-y-4">
             <Field label="Tournament name">
               <Input
@@ -887,7 +991,10 @@ export function TournamentForm({
                 placeholder="Ecluid Summer Classic"
               />
             </Field>
-            <Field label="Public URL slug" hint={`/public/tournament/${values.slug || "your-slug"}`}>
+            <Field
+              label="Public URL slug"
+              hint={`/public/tournament/${values.slug || "your-slug"}`}
+            >
               <Input
                 value={values.slug}
                 onChange={(e) => set("slug", e.target.value)}
@@ -931,7 +1038,9 @@ export function TournamentForm({
           {(isLeague || isGroupKnockout) && (
             <Field
               label={isGroupKnockout ? "Group Stage Legs" : "Legs (times each pair meets)"}
-              hint={isGroupKnockout ? "Group stage pairings." : "1 = single round robin, 2 = double"}
+              hint={
+                isGroupKnockout ? "Group stage pairings." : "1 = single round robin, 2 = double"
+              }
             >
               <Input
                 type="number"
@@ -986,10 +1095,7 @@ export function TournamentForm({
                 )}
               </Field>
 
-              <Field
-                label="Teams per Group"
-                hint="Editing this updates the total number of teams."
-              >
+              <Field label="Teams per Group" hint="Editing this updates the total number of teams.">
                 <Input
                   type="number"
                   min={1}
@@ -1002,7 +1108,6 @@ export function TournamentForm({
                   }}
                 />
               </Field>
-
 
               <div className="col-span-full space-y-3 rounded-lg bg-muted/50 p-4">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -1019,7 +1124,8 @@ export function TournamentForm({
                       {values.group_count} Total Groups
                       {isUnevenGroups ? (
                         <span className="block text-muted-foreground mt-1">
-                          ({remainder} groups of {baseSize + 1}, {values.group_count - remainder} groups of {baseSize})
+                          ({remainder} groups of {baseSize + 1}, {values.group_count - remainder}{" "}
+                          groups of {baseSize})
                         </span>
                       ) : (
                         <span className="block text-muted-foreground mt-1">
@@ -1030,7 +1136,9 @@ export function TournamentForm({
                   </div>
                   <div>
                     <p className="text-muted-foreground">Knockout Stage</p>
-                    <p className={`font-medium ${!(knockoutTeams > 0 && (knockoutTeams & (knockoutTeams - 1)) === 0) ? "text-destructive" : ""}`}>
+                    <p
+                      className={`font-medium ${!(knockoutTeams > 0 && (knockoutTeams & (knockoutTeams - 1)) === 0) ? "text-destructive" : ""}`}
+                    >
                       {knockoutTeams} Teams
                     </p>
                   </div>
@@ -1062,7 +1170,6 @@ export function TournamentForm({
       </div>
     </div>
   );
-
 
   const renderStep3 = () => (
     <div className="space-y-6">
@@ -1109,7 +1216,10 @@ export function TournamentForm({
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(values.venues || []).map((v, idx) => (
-              <div key={idx} className="group relative space-y-3 rounded-lg border border-border bg-muted/30 p-4 transition-colors hover:border-primary/50">
+              <div
+                key={idx}
+                className="group relative space-y-3 rounded-lg border border-border bg-muted/30 p-4 transition-colors hover:border-primary/50"
+              >
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1122,7 +1232,7 @@ export function TournamentForm({
                 >
                   <X className="h-3 w-3" />
                 </Button>
-                
+
                 <Field label="Venue Name">
                   <Input
                     value={v.name}
@@ -1199,13 +1309,12 @@ export function TournamentForm({
           <ChevronLeft className="mr-1.5 h-4 w-4" /> Back
         </Button>
         <Button onClick={next} className="w-full sm:w-auto">
-          {submitLabel} 
+          {submitLabel}
           <ChevronRight className="ml-1.5 h-4 w-4" />
         </Button>
       </div>
     </div>
   );
-
 
   const totalSteps = 3;
   const currentDisplayStep = Math.min(step, totalSteps);
@@ -1215,22 +1324,24 @@ export function TournamentForm({
       <div className="flex items-center gap-4 mb-2 overflow-x-auto py-2 no-scrollbar">
         {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
           <div key={s} className="flex items-center shrink-0">
-            <div 
+            <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                step >= s 
-                  ? "bg-primary text-white ring-4 ring-primary/20 scale-110" 
+                step >= s
+                  ? "bg-primary text-white ring-4 ring-primary/20 scale-110"
                   : "bg-muted text-muted-foreground"
               }`}
             >
               {s}
             </div>
             {s < totalSteps && (
-              <div className={`h-[2px] w-12 mx-2 rounded-full ${step > s ? "bg-primary" : "bg-muted"}`} />
+              <div
+                className={`h-[2px] w-12 mx-2 rounded-full ${step > s ? "bg-primary" : "bg-muted"}`}
+              />
             )}
           </div>
         ))}
       </div>
-      
+
       <div className="mb-6">
         <h2 className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
           Step {currentDisplayStep} of {totalSteps}
@@ -1246,7 +1357,15 @@ export function TournamentForm({
   );
 }
 
-function Badge({ children, variant = "default", className }: { children: React.ReactNode, variant?: "default" | "outline", className?: string }) {
+function Badge({
+  children,
+  variant = "default",
+  className,
+}: {
+  children: React.ReactNode;
+  variant?: "default" | "outline";
+  className?: string;
+}) {
   const variants = {
     default: "bg-primary text-primary-foreground border-transparent",
     outline: "text-muted-foreground border-border",
@@ -1254,11 +1373,13 @@ function Badge({ children, variant = "default", className }: { children: React.R
     destructive: "bg-destructive text-destructive-foreground border-transparent",
   };
   return (
-    <span className={cn(
-      "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-      variants[variant as keyof typeof variants] || variants.default,
-      className
-    )}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        variants[variant as keyof typeof variants] || variants.default,
+        className,
+      )}
+    >
       {children}
     </span>
   );
@@ -1266,9 +1387,13 @@ function Badge({ children, variant = "default", className }: { children: React.R
 
 function Label({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <label className={cn("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", className)}>
+    <label
+      className={cn(
+        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        className,
+      )}
+    >
       {children}
     </label>
   );
 }
-

@@ -7,11 +7,11 @@ export interface AdCampaign {
   owner_id: string;
   name: string;
   advertiser: string | null;
-  status: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
-  priority: 'low' | 'normal' | 'high' | 'guaranteed';
+  status: "draft" | "scheduled" | "active" | "paused" | "completed";
+  priority: "low" | "normal" | "high" | "guaranteed";
   weight: number;
   targeting: any;
-  tournament_targeting_mode: 'all' | 'selected' | 'none';
+  tournament_targeting_mode: "all" | "selected" | "none";
   allow_auto_placement: boolean;
   start_date: string | null;
   end_date: string | null;
@@ -24,9 +24,9 @@ export interface AdCreative {
   owner_id: string;
   campaign_id: string;
   name: string;
-  type: 'image' | 'animated' | 'html';
-  creative_role: 'display' | 'sponsor_identity' | 'native';
-  provider_type: 'direct' | 'adsense' | 'custom_provider';
+  type: "image" | "animated" | "html";
+  creative_role: "display" | "sponsor_identity" | "native";
+  provider_type: "direct" | "adsense" | "custom_provider";
   provider_config: any;
   media_url: string;
   html_content: string | null;
@@ -35,7 +35,7 @@ export interface AdCreative {
   height: number | null;
   size_preset: string | null;
   is_responsive: boolean;
-  status: 'active' | 'disabled';
+  status: "active" | "disabled";
   min_width: number | null;
   max_width: number | null;
   aspect_ratio: string | null;
@@ -49,7 +49,6 @@ export interface AdCreative {
   created_at: string;
   updated_at: string;
 }
-
 
 export interface AdPlacement {
   id: string;
@@ -66,7 +65,7 @@ export interface AdAnalytic {
   creative_id: string;
   placement_id: string | null;
   tournament_id: string | null;
-  type: 'impression' | 'click';
+  type: "impression" | "click";
   page: string | null;
   timestamp: string;
 }
@@ -75,7 +74,7 @@ export interface AdSettings {
   id?: string;
   owner_id?: string;
   auto_placement_enabled: boolean;
-  auto_placement_intensity: 'low' | 'balanced' | 'high';
+  auto_placement_intensity: "low" | "balanced" | "high";
   public_ads_enabled: boolean;
   sponsorships_enabled: boolean;
   native_ads_enabled: boolean;
@@ -91,7 +90,6 @@ export interface CampaignInventoryRow {
   enabled: boolean;
 }
 
-
 // Admin Hooks
 export const useAdCampaigns = () =>
   useQuery({
@@ -103,7 +101,7 @@ export const useAdCampaigns = () =>
           "*, ad_creatives(*), ad_campaign_tournaments(tournament_id), campaign_inventory(id, campaign_id, inventory_key, enabled)",
         )
         .order("created_at", { ascending: false }) as any);
-      
+
       if (error) throw error;
       return data as (AdCampaign & {
         ad_creatives: AdCreative[];
@@ -121,7 +119,7 @@ export const useAdPlacements = () =>
         .from("ad_placements" as any)
         .select("*")
         .order("label") as any);
-      
+
       if (error) throw error;
       return data as AdPlacement[];
     },
@@ -131,20 +129,21 @@ export const useAdStats = () =>
   useQuery({
     queryKey: ["ad-stats"],
     queryFn: async () => {
-      const { data, error } = await (supabase
-        .from("ad_analytics" as any)
-        .select("type") as any);
-      
+      const { data, error } = await (supabase.from("ad_analytics" as any).select("type") as any);
+
       if (error) throw error;
 
-      const stats = (data as any[]).reduce((acc: any, curr) => {
-        const typeKey = curr.type === "impression" ? "impressions" : "clicks";
-        acc[typeKey] = (acc[typeKey] || 0) + 1;
-        return acc;
-      }, { impressions: 0, clicks: 0 });
+      const stats = (data as any[]).reduce(
+        (acc: any, curr) => {
+          const typeKey = curr.type === "impression" ? "impressions" : "clicks";
+          acc[typeKey] = (acc[typeKey] || 0) + 1;
+          return acc;
+        },
+        { impressions: 0, clicks: 0 },
+      );
 
       return stats;
-    }
+    },
   });
 
 export const useAdSettings = () =>
@@ -155,14 +154,14 @@ export const useAdSettings = () =>
         .from("ad_settings" as any)
         .select("*")
         .maybeSingle() as any);
-      
+
       if (error) throw error;
-      
+
       // Default fallback if no settings record exists yet
       if (!data) {
         return {
           auto_placement_enabled: true,
-          auto_placement_intensity: 'balanced',
+          auto_placement_intensity: "balanced",
           public_ads_enabled: true,
           sponsorships_enabled: true,
           native_ads_enabled: true,
@@ -175,14 +174,13 @@ export const useAdSettings = () =>
             standings: true,
             teams: true,
             knockout: true,
-            pool_draw: false
-          }
+            pool_draw: false,
+          },
         } as AdSettings;
-
       }
-      
+
       return data as AdSettings;
-    }
+    },
   });
 
 // Public Hooks
@@ -231,7 +229,9 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
 
         // Inventory selection (when configured) restricts which slots may serve.
         // Legacy campaigns without inventory rows keep serving everywhere.
-        const inv = (c.campaign_inventory || []).filter((i) => i.enabled).map((i) => i.inventory_key);
+        const inv = (c.campaign_inventory || [])
+          .filter((i) => i.enabled)
+          .map((i) => i.inventory_key);
         if (inv.length > 0) {
           if (isAuto) {
             if (!inv.includes("smart-auto")) return false;
@@ -247,7 +247,6 @@ export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto
         }
         return true;
       });
-
     },
     staleTime: 15_000,
     refetchOnMount: "always",
@@ -292,7 +291,11 @@ export const useSetCampaignTournaments = () => {
 
       if (tournamentIds.length > 0) {
         const { error } = await (supabase.from("ad_campaign_tournaments" as any).insert(
-          tournamentIds.map((tournament_id) => ({ campaign_id: campaignId, tournament_id, owner_id })),
+          tournamentIds.map((tournament_id) => ({
+            campaign_id: campaignId,
+            tournament_id,
+            owner_id,
+          })),
         ) as any);
         if (error) throw error;
       }
@@ -317,7 +320,7 @@ export const useRecordAdEvent = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-stats"] });
-    }
+    },
   });
 };
 
@@ -332,14 +335,14 @@ export const useUpdateAdSettings = () => {
       const { error } = await (supabase
         .from("ad_settings" as any)
         .upsert({ ...settings, owner_id }) as any);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-settings"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 
@@ -357,7 +360,7 @@ export const useCreateAdCampaign = () => {
         .insert({ ...campaign, owner_id })
         .select()
         .single() as any);
-      
+
       if (error) throw error;
       return data as AdCampaign;
     },
@@ -365,7 +368,7 @@ export const useCreateAdCampaign = () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 
@@ -377,14 +380,14 @@ export const useUpdateAdCampaign = () => {
         .from("ad_campaigns" as any)
         .update(updates)
         .eq("id", id) as any);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 
@@ -396,14 +399,14 @@ export const useDeleteAdCampaign = () => {
         .from("ad_campaigns" as any)
         .delete()
         .eq("id", id) as any);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 
@@ -421,7 +424,7 @@ export const useCreateAdCreative = () => {
         .insert({ ...creative, owner_id })
         .select()
         .single() as any);
-      
+
       if (error) throw error;
       return data as AdCreative;
     },
@@ -429,7 +432,7 @@ export const useCreateAdCreative = () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 
@@ -441,14 +444,14 @@ export const useDeleteAdCreative = () => {
         .from("ad_creatives" as any)
         .delete()
         .eq("id", id) as any);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 
@@ -460,14 +463,14 @@ export const useUpdateAdCreative = () => {
         .from("ad_creatives" as any)
         .update(updates)
         .eq("id", id) as any);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ad-campaigns"] });
       qc.invalidateQueries({ queryKey: ["active-ads"] });
       qc.invalidateQueries({ queryKey: ["tournament-inventory"] });
-    }
+    },
   });
 };
 

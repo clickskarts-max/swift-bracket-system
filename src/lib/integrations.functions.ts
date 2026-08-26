@@ -44,7 +44,12 @@ export const runIntegrationActionFn = createServerFn({ method: "POST" })
   .inputValidator((input: { integrationId: string; kind: "test" | "sync" }) => input)
   .handler(async ({ data, context }) => {
     const { runIntegrationAction } = await import("@/lib/integrations/service.server");
-    return runIntegrationAction(context.supabase as any, context.userId, data.integrationId, data.kind);
+    return runIntegrationAction(
+      context.supabase as any,
+      context.userId,
+      data.integrationId,
+      data.kind,
+    );
   });
 
 export const disconnectIntegrationFn = createServerFn({ method: "POST" })

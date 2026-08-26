@@ -36,8 +36,7 @@ export function TournamentsPanel({ tab }: { tab: string }) {
   }, [tournaments, tab, search]);
 
   if (isLoading) return <LoadingSkeleton />;
-  if (error)
-    return <p className="text-sm text-destructive">{(error as Error).message}</p>;
+  if (error) return <p className="text-sm text-destructive">{(error as Error).message}</p>;
 
   const counts = {
     total: tournaments.length,

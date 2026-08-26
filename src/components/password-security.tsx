@@ -128,4 +128,3 @@ export function PasswordSecurity({ user }: { user: User | null }) {
     </div>
   );
 }
-

@@ -65,14 +65,25 @@ const schema = z.object({
   logo_url: z.string().trim().max(255).or(z.literal("")).nullable(),
   logo_dark_url: z.string().trim().max(255).or(z.literal("")).nullable(),
   favicon_url: z.string().trim().max(255).or(z.literal("")).nullable(),
-  primary_color: z.string().trim().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Primary color must be a valid HEX color"),
+  primary_color: z
+    .string()
+    .trim()
+    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Primary color must be a valid HEX color"),
   secondary_color: z
     .string()
     .trim()
     .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color")
     .optional(),
-  accent_color: z.string().trim().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Accent color must be a valid HEX color"),
-  contact_email: z.string().trim().email("Please enter a valid email address.").max(255).or(z.literal("")),
+  accent_color: z
+    .string()
+    .trim()
+    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Accent color must be a valid HEX color"),
+  contact_email: z
+    .string()
+    .trim()
+    .email("Please enter a valid email address.")
+    .max(255)
+    .or(z.literal("")),
   contact_phone: z.string().trim().max(20).optional(),
   website: z.string().trim().max(255).optional(),
   custom_domain: z.string().trim().max(255).optional(),
@@ -310,7 +321,10 @@ function SettingsPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <PageHeader title="Settings" description="Organization identity, branding and account security." />
+        <PageHeader
+          title="Settings"
+          description="Organization identity, branding and account security."
+        />
         <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
           <div className="h-64 animate-pulse rounded-2xl bg-muted/50" />
           <div className="h-96 animate-pulse rounded-2xl bg-muted/50" />
@@ -321,7 +335,10 @@ function SettingsPage() {
 
   return (
     <div className="space-y-6 pb-24">
-      <PageHeader title="Settings" description="Organization identity, branding and account security." />
+      <PageHeader
+        title="Settings"
+        description="Organization identity, branding and account security."
+      />
 
       <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
         {/* Settings navigation */}
@@ -385,7 +402,11 @@ function SettingsPage() {
                   hint="Used internally to identify this organization."
                   error={issues["name"]}
                 >
-                  <Input id="org-name" value={draft.name} onChange={(e) => set("name", e.target.value)} />
+                  <Input
+                    id="org-name"
+                    value={draft.name}
+                    onChange={(e) => set("name", e.target.value)}
+                  />
                 </FieldRow>
                 <FieldRow
                   id="brand-name"
@@ -399,7 +420,11 @@ function SettingsPage() {
                     placeholder="e.g. Kirtipur Basketball Association"
                   />
                 </FieldRow>
-                <FieldRow id="short-name" label="Short name" hint="Compact label used where space is tight.">
+                <FieldRow
+                  id="short-name"
+                  label="Short name"
+                  hint="Compact label used where space is tight."
+                >
                   <Input
                     id="short-name"
                     value={draft.short_name || ""}
@@ -422,7 +447,12 @@ function SettingsPage() {
                         Upload image files — no links needed.
                       </p>
                     </div>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setResetOpen(true)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setResetOpen(true)}
+                    >
                       <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reset to platform defaults
                     </Button>
                   </header>
@@ -540,7 +570,11 @@ function SettingsPage() {
                       onChange={(e) => set("contact_phone", e.target.value)}
                     />
                   </FieldRow>
-                  <FieldRow id="website" label="Website" hint="https:// is added automatically if missing.">
+                  <FieldRow
+                    id="website"
+                    label="Website"
+                    hint="https:// is added automatically if missing."
+                  >
                     <Input
                       id="website"
                       value={draft.website || ""}
@@ -556,15 +590,11 @@ function SettingsPage() {
                 <header>
                   <h2 className="text-base font-semibold">Custom domain</h2>
                   <p className="text-sm text-muted-foreground">
-                    Custom domains are not currently configured for this workspace. Saving a domain here
-                    stores it for future use — it does not connect DNS yet.
+                    Custom domains are not currently configured for this workspace. Saving a domain
+                    here stores it for future use — it does not connect DNS yet.
                   </p>
                 </header>
-                <FieldRow
-                  id="custom-domain"
-                  label="Domain"
-                  hint="Example: basketball.client-a.com"
-                >
+                <FieldRow id="custom-domain" label="Domain" hint="Example: basketball.client-a.com">
                   <Input
                     id="custom-domain"
                     value={draft.custom_domain || ""}
@@ -684,8 +714,8 @@ function SettingsPage() {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">Platform owner</p>
                   <p className="text-sm text-muted-foreground">
-                    Manage platform-wide users, access, tournaments, sponsors, advertising and system
-                    administration.
+                    Manage platform-wide users, access, tournaments, sponsors, advertising and
+                    system administration.
                   </p>
                 </div>
               </div>
@@ -708,7 +738,11 @@ function SettingsPage() {
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
             <p className="text-sm font-medium">You have unsaved changes</p>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={() => setDiscardOpen(true)} disabled={save.isPending}>
+              <Button
+                variant="ghost"
+                onClick={() => setDiscardOpen(true)}
+                disabled={save.isPending}
+              >
                 Discard
               </Button>
               <Button onClick={submit} disabled={save.isPending}>
@@ -725,8 +759,8 @@ function SettingsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Reset branding to platform defaults?</AlertDialogTitle>
             <AlertDialogDescription>
-              Logos, favicon and colors return to the Ecluid defaults in this form. Nothing is saved until
-              you choose Save changes.
+              Logos, favicon and colors return to the Ecluid defaults in this form. Nothing is saved
+              until you choose Save changes.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

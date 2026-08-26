@@ -56,7 +56,13 @@ export function ColorField({
           onChange={(e) => onChange(e.target.value)}
           className="font-mono uppercase"
         />
-        <Button type="button" variant="outline" size="icon" onClick={copy} aria-label={`Copy ${label}`}>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={copy}
+          aria-label={`Copy ${label}`}
+        >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
         <Button
@@ -74,7 +80,9 @@ export function ColorField({
         className={`text-xs ${valid ? "text-muted-foreground" : "text-destructive"}`}
         role={valid ? undefined : "alert"}
       >
-        {valid ? hint ?? "Use a HEX value, for example #FF5A00." : `${label} must be a valid HEX color.`}
+        {valid
+          ? (hint ?? "Use a HEX value, for example #FF5A00.")
+          : `${label} must be a valid HEX color.`}
       </p>
     </div>
   );

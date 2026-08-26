@@ -71,15 +71,15 @@ export function ImageUpload({
       >
         <AnimatePresence mode="wait">
           {value ? (
-            <motion.img 
+            <motion.img
               key="image"
-              src={value} 
-              alt="" 
+              src={value}
+              alt=""
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="h-full w-full object-cover" 
+              className="h-full w-full object-cover"
             />
           ) : (
             <motion.div
@@ -93,7 +93,7 @@ export function ImageUpload({
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {busy && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />

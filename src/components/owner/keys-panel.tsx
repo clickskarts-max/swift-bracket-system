@@ -21,7 +21,6 @@ import {
   useRevokeKey,
 } from "@/lib/owner";
 
-
 function maskKey(key: string, reveal: boolean) {
   if (reveal) return key;
   return `${key.slice(0, 8)}…${key.slice(-4)}`;
@@ -32,7 +31,6 @@ export function KeysPanel() {
   const createKey = useCreateKey();
   const revokeKey = useRevokeKey();
   const deleteKey = useDeleteKey();
-
 
   const [plan, setPlan] = useState<string>("1_month");
   const [days, setDays] = useState("");
@@ -226,7 +224,6 @@ export function KeysPanel() {
                     </Button>
                   )}
                 </div>
-
               </div>
             );
           })}

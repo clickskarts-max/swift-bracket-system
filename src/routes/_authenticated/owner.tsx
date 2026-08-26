@@ -42,13 +42,7 @@ import { OWNER_EMAIL } from "@/lib/activation";
 import { cn } from "@/lib/utils";
 
 type SectionKey =
-  | "dashboard"
-  | "tournaments"
-  | "advertising"
-  | "sponsors"
-  | "users"
-  | "platform"
-  | "analytics";
+  "dashboard" | "tournaments" | "advertising" | "sponsors" | "users" | "platform" | "analytics";
 
 const SECTIONS: {
   key: SectionKey;
@@ -219,12 +213,7 @@ function OwnerAdmin() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[auto_minmax(0,1fr)]">
-      <aside
-        className={cn(
-          "hidden shrink-0 lg:block",
-          collapsed ? "w-[68px]" : "w-56",
-        )}
-      >
+      <aside className={cn("hidden shrink-0 lg:block", collapsed ? "w-[68px]" : "w-56")}>
         <div className="sticky top-20 space-y-3 rounded-xl border border-border/60 p-2">
           <div
             className={cn(
@@ -243,7 +232,9 @@ function OwnerAdmin() {
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               onClick={() => setCollapsed((c) => !c)}
             >
-              <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
+              <ChevronLeft
+                className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")}
+              />
             </Button>
           </div>
           {nav(undefined, !collapsed)}
@@ -278,8 +269,7 @@ function OwnerAdmin() {
                 ...(current.key !== "dashboard" && activeTab
                   ? [
                       {
-                        label:
-                          current.tabs.find((t) => t.key === activeTab)?.label ?? activeTab,
+                        label: current.tabs.find((t) => t.key === activeTab)?.label ?? activeTab,
                       },
                     ]
                   : []),

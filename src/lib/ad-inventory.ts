@@ -278,10 +278,7 @@ export const INVENTORY_BY_KEY: Record<string, InventoryDef> = Object.fromEntries
   INVENTORY.map((i) => [i.key, i]),
 );
 
-export const CATEGORY_META: Record<
-  InventoryCategory,
-  { label: string; description: string }
-> = {
+export const CATEGORY_META: Record<InventoryCategory, { label: string; description: string }> = {
   display: {
     label: "Display Advertising",
     description: "Traditional banner inventory served through SmartAdSlot.",

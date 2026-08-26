@@ -6,9 +6,15 @@ import { useBranding } from "@/hooks/use-branding";
 
 export function BrandMark({ className }: { className?: string }) {
   const { data: org } = useBranding();
-  
+
   if (org?.logo_url) {
-    return <img src={org.logo_url} alt={org.name} className={cn("h-9 w-auto shrink-0 object-contain", className)} />;
+    return (
+      <img
+        src={org.logo_url}
+        alt={org.name}
+        className={cn("h-9 w-auto shrink-0 object-contain", className)}
+      />
+    );
   }
 
   return <img src={ecluidIcon} alt="Ecluid" className={cn("h-9 w-auto shrink-0", className)} />;
@@ -30,15 +36,15 @@ export function BrandWordmark({ compact = false }: { compact?: boolean }) {
       <span className="flex items-center gap-2.5">
         {logoUrl ? (
           <>
-            <img 
-              src={logoDarkUrl || logoUrl} 
-              alt={displayName} 
-              className="h-7 w-auto shrink-0 object-contain light:hidden" 
+            <img
+              src={logoDarkUrl || logoUrl}
+              alt={displayName}
+              className="h-7 w-auto shrink-0 object-contain light:hidden"
             />
-            <img 
-              src={logoUrl} 
-              alt={displayName} 
-              className="hidden h-7 w-auto shrink-0 object-contain light:block" 
+            <img
+              src={logoUrl}
+              alt={displayName}
+              className="hidden h-7 w-auto shrink-0 object-contain light:block"
             />
           </>
         ) : (
