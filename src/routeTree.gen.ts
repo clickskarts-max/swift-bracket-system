@@ -21,6 +21,7 @@ import { Route as AuthenticatedTournamentsIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedTournamentsNewRouteImport } from './routes/_authenticated/tournaments.new'
 import { Route as PublicTournamentSlugRouteImport } from './routes/public.tournament.$slug'
 import { Route as AuthenticatedAdvertisingCampaignIdRouteImport } from './routes/_authenticated/advertising_.campaign.$id'
+import { Route as ApiPublicIntegrationsProviderRouteImport } from './routes/api/public/integrations/$provider'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,6 +86,12 @@ const AuthenticatedAdvertisingCampaignIdRoute =
     path: '/advertising/campaign/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicIntegrationsProviderRoute =
+  ApiPublicIntegrationsProviderRouteImport.update({
+    id: '/api/public/integrations/$provider',
+    path: '/api/public/integrations/$provider',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
   '/advertising/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
+  '/api/public/integrations/$provider': typeof ApiPublicIntegrationsProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -111,6 +119,7 @@ export interface FileRoutesByTo {
   '/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
   '/advertising/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
+  '/api/public/integrations/$provider': typeof ApiPublicIntegrationsProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -126,6 +135,7 @@ export interface FileRoutesById {
   '/_authenticated/tournaments/new': typeof AuthenticatedTournamentsNewRoute
   '/public/tournament/$slug': typeof PublicTournamentSlugRoute
   '/_authenticated/advertising_/campaign/$id': typeof AuthenticatedAdvertisingCampaignIdRoute
+  '/api/public/integrations/$provider': typeof ApiPublicIntegrationsProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/tournaments/new'
     | '/public/tournament/$slug'
     | '/advertising/campaign/$id'
+    | '/api/public/integrations/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/tournaments/new'
     | '/public/tournament/$slug'
     | '/advertising/campaign/$id'
+    | '/api/public/integrations/$provider'
   id:
     | '__root__'
     | '/'
@@ -168,6 +180,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tournaments/new'
     | '/public/tournament/$slug'
     | '/_authenticated/advertising_/campaign/$id'
+    | '/api/public/integrations/$provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,6 +189,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   PublicTournamentSlugRoute: typeof PublicTournamentSlugRoute
+  ApiPublicIntegrationsProviderRoute: typeof ApiPublicIntegrationsProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -264,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdvertisingCampaignIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/integrations/$provider': {
+      id: '/api/public/integrations/$provider'
+      path: '/api/public/integrations/$provider'
+      fullPath: '/api/public/integrations/$provider'
+      preLoaderRoute: typeof ApiPublicIntegrationsProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -297,6 +318,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   PublicTournamentSlugRoute: PublicTournamentSlugRoute,
+  ApiPublicIntegrationsProviderRoute: ApiPublicIntegrationsProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

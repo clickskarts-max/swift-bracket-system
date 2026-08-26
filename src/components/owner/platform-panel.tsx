@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useBranding } from "@/hooks/use-branding";
 import { KpiCard, SectionCard } from "@/components/owner/owner-ui";
+import { IntegrationsPanel } from "@/components/owner/integrations-panel";
 
 const COPY: Record<string, { title: string; description: string; body: string }> = {
   general: {
@@ -39,6 +40,23 @@ const COPY: Record<string, { title: string; description: string; body: string }>
 export function PlatformPanel({ tab }: { tab: string }) {
   const { data: org } = useBranding();
   const copy = COPY[tab] ?? COPY["general"]!;
+
+  if (tab === "integrations") {
+    return (
+      <div className="space-y-5">
+        <SectionCard
+          title="Integrations"
+          description="Connect Ecluid Basketball to external services. Credentials are stored securely on the server."
+        >
+          <p className="text-sm text-muted-foreground">
+            Connect, test, sync, enable/disable or disconnect each service below. AdSense and
+            external ad providers remain configured per creative inside a campaign.
+          </p>
+        </SectionCard>
+        <IntegrationsPanel />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
