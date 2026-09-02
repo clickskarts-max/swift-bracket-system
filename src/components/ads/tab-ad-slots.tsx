@@ -105,16 +105,32 @@ export function TabAdBlock({
  * Wraps a list and injects inline units at the configured interval,
  * capped by the tab's max (top/bottom units already consume budget).
  */
-export function useInlineAdSlots(tab: PublicTabKey, itemCount: number) {
-  const rule = useTabRule(tab);
+/** Rules + master toggle for a tournament owner (call at page level). */
+export function usePlacementRules(ownerId?: string | undefined) {
+  const { data: settings } = usePublicAdSettings(ownerId);
+  return useMemo(
+    () => ({
+      rules: (settings?.slot_rules ?? {}) as SlotRules,
+      publicAdsEnabled: settings?.public_ads_enabled !== false,
+    }),
+    [settings],
+  );
+}
+
+/**
+ * Indexes in a list where an inline unit should render, capped by the tab's
+ * max budget (top/bottom/native units are reserved first).
+ */
+export function computeInlineIndexes(
+  ctx: { rules: SlotRules; publicAdsEnabled: boolean },
+  tab: PublicTabKey,
+  itemCount: number,
+) {
+  const rule = resolveTabRule(ctx.rules, tab);
+  if (!ctx.publicAdsEnabled || !rule.enabled) return new Set<number>();
   const reserved = (rule.top ? 1 : 0) + (rule.bottom ? 1 : 0) + (rule.native ? 1 : 0);
   const budget = Math.max(0, rule.max - reserved);
-  const indexes = useMemo(
-    () => new Set(inlineSlotIndexes(rule, itemCount, rule.active ? budget : 0)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rule.active, rule.inline, rule.interval, rule.max, itemCount, budget],
-  );
-  return indexes;
+  return new Set(inlineSlotIndexes(rule, itemCount, budget));
 }
 
 export function InlineAd({

@@ -18,7 +18,8 @@ import {
   PlacementRulesProvider,
   TabAdBlock,
   InlineAd,
-  useInlineAdSlots,
+  usePlacementRules,
+  computeInlineIndexes,
 } from "@/components/ads/tab-ad-slots";
 import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
@@ -65,6 +66,7 @@ function PublicTournament() {
   const { data: players = [] } = usePublicPlayers(tournament?.id ?? "");
   const { data: venues = [] } = useVenues(tournament?.id ?? "");
   const { data: org } = useBranding();
+  const placement = usePlacementRules(tournament?.owner_id);
 
   // Update document title for SEO
   useEffect(() => {
@@ -107,6 +109,8 @@ function PublicTournament() {
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = matches.filter((m) => m.status !== "completed");
   const results = matches.filter((m) => m.status === "completed");
+  const fixtureAdIndexes = computeInlineIndexes(placement, "fixtures", upcoming.length);
+  const resultAdIndexes = computeInlineIndexes(placement, "results", results.length);
 
   const matchdayLabel = (m: (typeof matches)[number]) => {
     if (!m.scheduled_at) return "Unscheduled";
