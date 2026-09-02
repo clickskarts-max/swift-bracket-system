@@ -69,10 +69,14 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
     );
   }
 
-  if (tab === "settings" || tab === "analytics") {
+  if (tab === "settings") {
+    return <AdvertisingSettings />;
+  }
+
+  if (tab === "analytics") {
     return (
       <SectionCard
-        title={tab === "settings" ? "Advertising settings" : "Advertising analytics"}
+        title="Advertising analytics"
         description="Managed in the Ads & Sponsors workspace."
         action={
           <Button asChild size="sm" variant="outline">
