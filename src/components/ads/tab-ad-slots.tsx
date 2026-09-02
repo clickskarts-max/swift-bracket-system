@@ -4,7 +4,7 @@
  * Everything here reads the owner's backend placement rules
  * (ad_settings.slot_rules) so nothing is hardcoded on the page.
  */
-import { createContext, useContext, useMemo, useRef } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { usePublicAdSettings } from "@/lib/ads.functions";
 import {
   PUBLIC_TABS,
@@ -47,22 +47,6 @@ export function useTabRule(tab: PublicTabKey): TabPlacementRule & { active: bool
   const { rules, publicAdsEnabled } = useContext(PlacementCtx);
   const rule = resolveTabRule(rules, tab);
   return { ...rule, active: publicAdsEnabled && rule.enabled };
-}
-
-/** Tracks how many units a tab has already rendered so `max` is respected. */
-function useBudget(tab: PublicTabKey, rule: TabPlacementRule & { active: boolean }) {
-  const used = useRef<Record<string, number>>({});
-  return {
-    take(id: string) {
-      if (!rule.active) return false;
-      const total = Object.values(used.current).reduce((a, b) => a + b, 0);
-      if (used.current[id]) return true;
-      if (total >= rule.max) return false;
-      used.current[id] = 1;
-      return true;
-    },
-    tab,
-  };
 }
 
 const sponsorInventoryFor = (tab: PublicTabKey) =>
@@ -144,5 +128,3 @@ export function InlineAd({
     <SmartAdSlot placement="tournament-content" tournamentId={tournamentId} className={className} />
   );
 }
-
-export { useBudget };
