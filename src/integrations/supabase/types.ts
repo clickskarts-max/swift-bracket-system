@@ -362,6 +362,7 @@ export type Database = {
           owner_id: string
           page_rules: Json | null
           public_ads_enabled: boolean | null
+          slot_rules: Json
           sponsorships_enabled: boolean
           sticky_mobile_enabled: boolean
           updated_at: string | null
@@ -376,6 +377,7 @@ export type Database = {
           owner_id: string
           page_rules?: Json | null
           public_ads_enabled?: boolean | null
+          slot_rules?: Json
           sponsorships_enabled?: boolean
           sticky_mobile_enabled?: boolean
           updated_at?: string | null
@@ -390,6 +392,7 @@ export type Database = {
           owner_id?: string
           page_rules?: Json | null
           public_ads_enabled?: boolean | null
+          slot_rules?: Json
           sponsorships_enabled?: boolean
           sticky_mobile_enabled?: boolean
           updated_at?: string | null

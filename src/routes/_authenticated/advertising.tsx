@@ -66,6 +66,7 @@ import { ImageUpload } from "@/components/image-upload";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { PlacementRulesPanel } from "@/components/ads/placement-rules-panel";
 
 export const Route = createFileRoute("/_authenticated/advertising")({
   component: AdvertisingPage,
@@ -285,6 +286,7 @@ function AdvertisingPage() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
+          <PlacementRulesPanel />
           <div className="surface-card p-6 space-y-5">
             <div>
               <h3 className="font-semibold">Master switches</h3>

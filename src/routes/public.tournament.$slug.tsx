@@ -13,10 +13,14 @@ import { EmptyState, ScoreLine, StatusPill, TeamChip } from "@/components/data-b
 import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { MatchBreakdown } from "@/components/match-breakdown";
-import { SmartAdSlot } from "@/components/ads/smart-ad-slot";
-import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 import { SponsorSlot } from "@/components/ads/sponsor-slot";
-import { NativeAdSlot } from "@/components/ads/native-ad-slot";
+import {
+  PlacementRulesProvider,
+  TabAdBlock,
+  InlineAd,
+  usePlacementRules,
+  computeInlineIndexes,
+} from "@/components/ads/tab-ad-slots";
 import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
 import { formatDate, formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
@@ -62,6 +66,7 @@ function PublicTournament() {
   const { data: players = [] } = usePublicPlayers(tournament?.id ?? "");
   const { data: venues = [] } = useVenues(tournament?.id ?? "");
   const { data: org } = useBranding();
+  const placement = usePlacementRules(tournament?.owner_id);
 
   // Update document title for SEO
   useEffect(() => {
@@ -104,6 +109,8 @@ function PublicTournament() {
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = matches.filter((m) => m.status !== "completed");
   const results = matches.filter((m) => m.status === "completed");
+  const fixtureAdIndexes = computeInlineIndexes(placement, "fixtures", upcoming.length);
+  const resultAdIndexes = computeInlineIndexes(placement, "results", results.length);
 
   const matchdayLabel = (m: (typeof matches)[number]) => {
     if (!m.scheduled_at) return "Unscheduled";
@@ -217,6 +224,7 @@ function PublicTournament() {
   };
 
   return (
+    <PlacementRulesProvider ownerId={tournament.owner_id}>
     <div className="min-h-screen">
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
@@ -308,17 +316,8 @@ function PublicTournament() {
       </section>
 
       <div className="mx-auto max-w-5xl px-4 pt-6 space-y-4">
-        <SmartAdSlot
-          placement="tournament-header"
-          tournamentId={tournament.id}
-          className="w-full"
-        />
-        <NativeAdSlot tournamentId={tournament.id} />
-        <AutoAdRegion
-          context="tournament_overview"
-          tournamentId={tournament.id}
-          className="w-full"
-        />
+        <TabAdBlock tab="overview" position="top" tournamentId={tournament.id} />
+        <TabAdBlock tab="overview" position="bottom" tournamentId={tournament.id} />
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
@@ -334,8 +333,9 @@ function PublicTournament() {
           </div>
 
           <TabsContent value="fixtures">
-            <SponsorSlot
-              inventory="fixtures-sponsor"
+            <TabAdBlock
+              tab="fixtures"
+              position="top"
               tournamentId={tournament.id}
               title="Fixtures"
               className="mb-4"
@@ -356,30 +356,23 @@ function PublicTournament() {
                       {list.map((m, idx) => (
                         <div key={m.id} className="space-y-4">
                           <MatchRow m={m} />
-                          {idx === 2 && list.length > 3 && (
-                            <SmartAdSlot
-                              placement="tournament-content"
-                              tournamentId={tournament.id}
-                              className="py-2"
-                            />
+                          {fixtureAdIndexes.has(idx) && (
+                            <InlineAd tournamentId={tournament.id} className="py-2" />
                           )}
                         </div>
                       ))}
                     </div>
-                    <AutoAdRegion
-                      context="fixtures"
-                      tournamentId={tournament.id}
-                      className="py-6"
-                    />
                   </div>
                 ))}
+                <TabAdBlock tab="fixtures" position="bottom" tournamentId={tournament.id} />
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="results">
-            <SponsorSlot
-              inventory="results-sponsor"
+            <TabAdBlock
+              tab="results"
+              position="top"
               tournamentId={tournament.id}
               title="Results"
               className="mb-4"
@@ -397,42 +390,53 @@ function PublicTournament() {
                       {label}
                     </h3>
                     <div className="space-y-2">
-                      {list.map((m) => (
-                        <MatchRow key={m.id} m={m} />
+                      {list.map((m, idx) => (
+                        <div key={m.id} className="space-y-4">
+                          <MatchRow m={m} />
+                          {resultAdIndexes.has(idx) && (
+                            <InlineAd tournamentId={tournament.id} className="py-2" />
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
                 ))}
+                <TabAdBlock tab="results" position="bottom" tournamentId={tournament.id} />
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="standings">
             <div className="space-y-6">
-              <SponsorSlot
-                inventory="standings-sponsor"
+              <TabAdBlock
+                tab="standings"
+                position="top"
                 tournamentId={tournament.id}
                 title="Standings"
               />
               <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
-              <SmartAdSlot
-                placement="sidebar"
-                tournamentId={tournament.id}
-                className="w-full max-w-sm mx-auto"
-              />
-              <AutoAdRegion context="standings" tournamentId={tournament.id} className="pt-4" />
+              <TabAdBlock tab="standings" position="bottom" tournamentId={tournament.id} />
             </div>
           </TabsContent>
           <TabsContent value="bracket">
-            <SponsorSlot
-              inventory="bracket-sponsor"
+            <TabAdBlock
+              tab="bracket"
+              position="top"
               tournamentId={tournament.id}
-              title="Knockout"
+              title="Playoffs"
               className="mb-4"
             />
             <BracketTab teams={teams} matches={matches} />
+            <TabAdBlock tab="bracket" position="bottom" tournamentId={tournament.id} className="mt-6" />
           </TabsContent>
           <TabsContent value="teams">
+            <TabAdBlock
+              tab="teams"
+              position="top"
+              tournamentId={tournament.id}
+              title="Teams"
+              className="mb-4"
+            />
             {teams.length === 0 ? (
               <EmptyState title="No teams announced" />
             ) : (
@@ -447,6 +451,7 @@ function PublicTournament() {
                 ))}
               </div>
             )}
+            <TabAdBlock tab="teams" position="bottom" tournamentId={tournament.id} className="mt-6" />
           </TabsContent>
         </Tabs>
       </main>
@@ -504,5 +509,6 @@ function PublicTournament() {
       </footer>
       <StickyMobileAd tournamentId={tournament.id} />
     </div>
+    </PlacementRulesProvider>
   );
 }

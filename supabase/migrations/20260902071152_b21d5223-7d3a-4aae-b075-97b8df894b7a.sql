@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_settings ADD COLUMN IF NOT EXISTS slot_rules jsonb NOT NULL DEFAULT '{}'::jsonb;

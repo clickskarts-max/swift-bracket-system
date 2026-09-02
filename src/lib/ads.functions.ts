@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { SlotRules } from "./ad-placement-rules";
 
 // Define manual types until Supabase types are regenerated
 export interface AdCampaign {
@@ -81,6 +82,8 @@ export interface AdSettings {
   sticky_mobile_enabled: boolean;
   adsense_fallback_enabled: boolean;
   page_rules: Record<string, boolean>;
+  /** Per-tab public placement rules (see @/lib/ad-placement-rules). */
+  slot_rules?: SlotRules;
 }
 
 export interface CampaignInventoryRow {
@@ -176,10 +179,28 @@ export const useAdSettings = () =>
             knockout: true,
             pool_draw: false,
           },
+          slot_rules: {},
         } as AdSettings;
       }
 
       return data as AdSettings;
+    },
+  });
+
+/** Public (anon-safe) settings for a specific tournament owner. */
+export const usePublicAdSettings = (ownerId?: string) =>
+  useQuery({
+    queryKey: ["public-ad-settings", ownerId],
+    enabled: !!ownerId,
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from("ad_settings" as any)
+        .select("*")
+        .eq("owner_id", ownerId)
+        .maybeSingle() as any);
+
+      if (error) throw error;
+      return (data ?? null) as AdSettings | null;
     },
   });
 
