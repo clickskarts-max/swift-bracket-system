@@ -212,13 +212,14 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       const key = bucket === "results" ? resultGroupKey(m) : listGroupKey(m);
       map.set(key, [...(map.get(key) ?? []), m]);
     }
+    const desc = bucket === "results";
     const compareMatch = (a: Match, b: Match) => {
       const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
       const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Number.POSITIVE_INFINITY;
-      return (
+      const base =
         ta - tb ||
-        (a.match_no ?? Number.POSITIVE_INFINITY) - (b.match_no ?? Number.POSITIVE_INFINITY)
-      );
+        (a.match_no ?? Number.POSITIVE_INFINITY) - (b.match_no ?? Number.POSITIVE_INFINITY);
+      return desc ? -base : base;
     };
 
     const entries = [...map.entries()].map(
@@ -231,8 +232,11 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         ),
       );
 
-    // Sort groups by earliest tip-off time (ascending). Unscheduled groups naturally go last.
-    return entries.sort(([, la], [, lb]) => groupTime(la) - groupTime(lb));
+    // Completed matches: newest first. Upcoming: earliest tip-off first.
+    return entries.sort(([, la], [, lb]) =>
+      desc ? groupTime(lb) - groupTime(la) : groupTime(la) - groupTime(lb),
+    );
+
   }, [matches, bucket, matchdayByDate]);
 
   const completedCount = matches.filter((m) => m.status === "completed").length;
