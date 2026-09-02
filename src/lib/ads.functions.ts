@@ -187,6 +187,23 @@ export const useAdSettings = () =>
     },
   });
 
+/** Public (anon-safe) settings for a specific tournament owner. */
+export const usePublicAdSettings = (ownerId?: string) =>
+  useQuery({
+    queryKey: ["public-ad-settings", ownerId],
+    enabled: !!ownerId,
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from("ad_settings" as any)
+        .select("*")
+        .eq("owner_id", ownerId)
+        .maybeSingle() as any);
+
+      if (error) throw error;
+      return (data ?? null) as AdSettings | null;
+    },
+  });
+
 // Public Hooks
 export const useActiveAds = (placementKey: string, tournamentId?: string, isAuto = false) =>
   useQuery({
