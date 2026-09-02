@@ -4,7 +4,16 @@ import { MoreVertical, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAdCampaigns, useAdStats } from "@/lib/ads.functions";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import {
+  useAdCampaigns,
+  useAdStats,
+  useAdSettings,
+  useUpdateAdSettings,
+  type AdSettings,
+} from "@/lib/ads.functions";
+import { PlacementRulesPanel } from "@/components/ads/placement-rules-panel";
 import { CATEGORY_META, inventoryByCategory, type InventoryCategory } from "@/lib/ad-inventory";
 import {
   EmptyState,
