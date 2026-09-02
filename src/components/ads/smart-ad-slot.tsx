@@ -24,7 +24,11 @@ export function SmartAdSlot({
 
   // ResizeObserver to detect container size
   useEffect(() => {
-    if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    // Measure immediately so selection can happen on first paint.
+    setContainerSize({ w: el.offsetWidth, h: el.offsetHeight });
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -36,7 +40,7 @@ export function SmartAdSlot({
       }
     });
 
-    observer.observe(containerRef.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
@@ -98,55 +102,57 @@ export function SmartAdSlot({
     }
   };
 
-  if (isLoading)
-    return (
-      <div className={cn("w-full h-24 bg-secondary/20 animate-pulse rounded-lg", className)} />
-    );
-  if (!selectedCreative) return null;
+  const ready = !isLoading && !!selectedCreative;
 
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "relative overflow-hidden rounded-lg transition-opacity duration-250 ease-transitions",
-        className,
-      )}
-      style={{
-        aspectRatio:
-          selectedCreative.width && selectedCreative.height
-            ? `${selectedCreative.width}/${selectedCreative.height}`
-            : "auto",
-        maxWidth: selectedCreative.width ? `${selectedCreative.width}px` : "100%",
-        margin: "0 auto",
-      }}
+      className={cn("w-full", className)}
+      style={{ margin: "0 auto" }}
+      aria-hidden={!ready}
     >
-      {selectedCreative.provider_type === "adsense" ? (
-        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-xs text-center p-4">
-          <div>
-            <p className="font-semibold">Google AdSense</p>
-            <p className="opacity-60">{selectedCreative.size_preset || "Responsive"}</p>
-            <p className="text-[10px] mt-2 italic">AdSense will render here in production</p>
-          </div>
-        </div>
-      ) : selectedCreative.type === "html" ? (
-        <iframe
-          srcDoc={selectedCreative.html_content || ""}
-          sandbox="allow-scripts"
-          className="w-full h-full border-0"
-          title={selectedCreative.name}
-        />
-      ) : (
-        <button
-          onClick={handleClick}
-          className="block w-full h-full p-0 border-0 bg-transparent cursor-pointer group"
+      {isLoading && !selectedCreative ? (
+        <div className="h-24 w-full animate-pulse rounded-lg bg-secondary/20" />
+      ) : !selectedCreative ? null : (
+        <div
+          className="relative mx-auto overflow-hidden rounded-lg transition-opacity duration-250 ease-transitions"
+          style={{
+            aspectRatio:
+              selectedCreative.width && selectedCreative.height
+                ? `${selectedCreative.width}/${selectedCreative.height}`
+                : "auto",
+            maxWidth: selectedCreative.width ? `${selectedCreative.width}px` : "100%",
+          }}
         >
-          <img
-            src={selectedCreative.media_url}
-            alt={selectedCreative.name}
-            className="w-full h-full object-contain transition-transform duration-250 ease-transitions group-hover:scale-[1.02]"
-            loading="lazy"
-          />
-        </button>
+          {selectedCreative.provider_type === "adsense" ? (
+            <div className="flex h-full w-full items-center justify-center bg-muted p-4 text-center text-xs text-muted-foreground">
+              <div>
+                <p className="font-semibold">Google AdSense</p>
+                <p className="opacity-60">{selectedCreative.size_preset || "Responsive"}</p>
+                <p className="mt-2 text-[10px] italic">AdSense will render here in production</p>
+              </div>
+            </div>
+          ) : selectedCreative.type === "html" ? (
+            <iframe
+              srcDoc={selectedCreative.html_content || ""}
+              sandbox="allow-scripts"
+              className="h-full w-full border-0"
+              title={selectedCreative.name}
+            />
+          ) : (
+            <button
+              onClick={handleClick}
+              className="group block h-full w-full cursor-pointer border-0 bg-transparent p-0"
+            >
+              <img
+                src={selectedCreative.media_url}
+                alt={selectedCreative.alt_text || selectedCreative.name}
+                className="h-full w-full object-contain transition-transform duration-250 ease-transitions group-hover:scale-[1.02]"
+                loading="lazy"
+              />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

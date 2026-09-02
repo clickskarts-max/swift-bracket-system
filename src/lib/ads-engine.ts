@@ -119,26 +119,34 @@ export class SmartPlacementEngine {
 
     // 2. Filter by width compatibility
     const compatible = allCreatives.filter((c) => {
+      if (c.status && c.status !== "active") return false;
       if (c.is_responsive || c.size_preset === "responsive") return true;
       if (!c.width) return true; // Fallback for older data
       return c.width <= containerWidth;
     });
 
-    if (compatible.length === 0) return null;
+    // Never drop an ad just because the container is narrower than the creative:
+    // images render with object-contain, so oversized creatives simply scale down.
+    const pool =
+      compatible.length > 0
+        ? compatible
+        : [...allCreatives].sort((a, b) => (a.width || 0) - (b.width || 0));
+
+    if (pool.length === 0) return null;
 
     // 3. Rank by priority
     const priorityMap = { guaranteed: 4, high: 3, normal: 2, low: 1 };
-    compatible.sort((a, b) => {
+    pool.sort((a, b) => {
       const pA = a.priority as keyof typeof priorityMap;
       const pB = b.priority as keyof typeof priorityMap;
       return (priorityMap[pB] || 0) - (priorityMap[pA] || 0);
     });
 
-    const firstItem = compatible[0];
+    const firstItem = pool[0];
     if (!firstItem) return null;
 
     const highestPriority = firstItem.priority;
-    const topTier = compatible.filter((c) => c.priority === highestPriority);
+    const topTier = pool.filter((c) => c.priority === highestPriority);
 
     // 4. Weighted selection within top tier
     const totalWeight = topTier.reduce((sum, c) => sum + (c.weight || 10), 0);
