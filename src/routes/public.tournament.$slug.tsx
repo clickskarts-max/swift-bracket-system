@@ -224,6 +224,7 @@ function PublicTournament() {
   };
 
   return (
+    <PlacementRulesProvider ownerId={tournament.owner_id}>
     <div className="min-h-screen">
       <header className="border-b border-border/60">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
@@ -508,5 +509,6 @@ function PublicTournament() {
       </footer>
       <StickyMobileAd tournamentId={tournament.id} />
     </div>
+    </PlacementRulesProvider>
   );
 }
