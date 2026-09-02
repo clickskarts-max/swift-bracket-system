@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { SlotRules } from "./ad-placement-rules";
 
 // Define manual types until Supabase types are regenerated
 export interface AdCampaign {
@@ -81,6 +82,8 @@ export interface AdSettings {
   sticky_mobile_enabled: boolean;
   adsense_fallback_enabled: boolean;
   page_rules: Record<string, boolean>;
+  /** Per-tab public placement rules (see @/lib/ad-placement-rules). */
+  slot_rules?: SlotRules;
 }
 
 export interface CampaignInventoryRow {
@@ -176,6 +179,7 @@ export const useAdSettings = () =>
             knockout: true,
             pool_draw: false,
           },
+          slot_rules: {},
         } as AdSettings;
       }
 
