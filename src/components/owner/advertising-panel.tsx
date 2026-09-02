@@ -4,7 +4,16 @@ import { MoreVertical, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAdCampaigns, useAdStats } from "@/lib/ads.functions";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import {
+  useAdCampaigns,
+  useAdStats,
+  useAdSettings,
+  useUpdateAdSettings,
+  type AdSettings,
+} from "@/lib/ads.functions";
+import { PlacementRulesPanel } from "@/components/ads/placement-rules-panel";
 import { CATEGORY_META, inventoryByCategory, type InventoryCategory } from "@/lib/ad-inventory";
 import {
   EmptyState,
@@ -69,10 +78,14 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
     );
   }
 
-  if (tab === "settings" || tab === "analytics") {
+  if (tab === "settings") {
+    return <AdvertisingSettings />;
+  }
+
+  if (tab === "analytics") {
     return (
       <SectionCard
-        title={tab === "settings" ? "Advertising settings" : "Advertising analytics"}
+        title="Advertising analytics"
         description="Managed in the Ads & Sponsors workspace."
         action={
           <Button asChild size="sm" variant="outline">
@@ -183,6 +196,64 @@ export function AdvertisingPanel({ tab }: { tab: string }) {
           )}
         </div>
       </SectionCard>
+    </div>
+  );
+}
+
+const MASTER_TOGGLES: { key: keyof AdSettings; label: string; hint: string }[] = [
+  { key: "public_ads_enabled", label: "Public ads", hint: "Master switch for all public pages" },
+  { key: "sponsorships_enabled", label: "Sponsorships", hint: "Sponsor identity strips" },
+  { key: "native_ads_enabled", label: "Native ads", hint: "Sponsored cards inside content" },
+  { key: "sticky_mobile_enabled", label: "Sticky mobile", hint: "Anchored bottom unit on phones" },
+  { key: "adsense_fallback_enabled", label: "AdSense fallback", hint: "Fill unsold inventory" },
+];
+
+function AdvertisingSettings() {
+  const { data: settings } = useAdSettings();
+  const update = useUpdateAdSettings();
+
+  const setFlag = (key: keyof AdSettings, value: boolean) => {
+    update.mutate(
+      { ...(settings as AdSettings), [key]: value },
+      {
+        onSuccess: () => toast.success("Settings updated"),
+        onError: (e: any) => toast.error(e?.message ?? "Update failed"),
+      },
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <SectionCard
+        title="Global ad controls"
+        description="Master switches applied across every public page."
+        action={
+          <Button asChild size="sm" variant="outline">
+            <Link to="/advertising">Open workspace</Link>
+          </Button>
+        }
+      >
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {MASTER_TOGGLES.map((t) => (
+            <div
+              key={t.key as string}
+              className="flex items-start justify-between gap-3 rounded-lg border border-border/60 p-3"
+            >
+              <div>
+                <p className="text-sm font-medium">{t.label}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{t.hint}</p>
+              </div>
+              <Switch
+                checked={Boolean(settings?.[t.key])}
+                disabled={!settings || update.isPending}
+                onCheckedChange={(v) => setFlag(t.key, v)}
+              />
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <PlacementRulesPanel />
     </div>
   );
 }
