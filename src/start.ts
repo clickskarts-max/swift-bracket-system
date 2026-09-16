@@ -1,11 +1,7 @@
-// Import middleware primitives from their implementation package instead of
-// the React facade. Some production bundlers can evaluate the facade's
-// re-export cycle before createCsrfMiddleware has been initialized.
-import {
-  createCsrfMiddleware,
-  createMiddleware,
-  createStart,
-} from "@tanstack/start-client-core";
+import { createMiddleware, createStart } from "@tanstack/react-start";
+// Import CSRF directly from its implementation package. This avoids an
+// unstable re-export cycle seen in some production Node bundlers.
+import { createCsrfMiddleware } from "@tanstack/start-client-core";
 
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
