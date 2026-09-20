@@ -577,7 +577,17 @@ function MatchDialog({
           )}
           {mode === "score" && (
             <>
-              <Field label="Home score">
+              <div className="space-y-1.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="truncate text-base font-bold">
+                    {teams.find((t) => t.id === draft.team_a_id)?.name ??
+                      draft.placeholder_a ??
+                      "Home team"}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Home
+                  </span>
+                </div>
                 <Input
                   type="number"
                   min={0}
@@ -585,8 +595,18 @@ function MatchDialog({
                   value={usePeriods ? totalA : (draft.score_a ?? "")}
                   onChange={(e) => set("score_a", e.target.value ? Number(e.target.value) : null)}
                 />
-              </Field>
-              <Field label="Away score">
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="truncate text-base font-bold">
+                    {teams.find((t) => t.id === draft.team_b_id)?.name ??
+                      draft.placeholder_b ??
+                      "Away team"}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Away
+                  </span>
+                </div>
                 <Input
                   type="number"
                   min={0}
@@ -594,7 +614,7 @@ function MatchDialog({
                   value={usePeriods ? totalB : (draft.score_b ?? "")}
                   onChange={(e) => set("score_b", e.target.value ? Number(e.target.value) : null)}
                 />
-              </Field>
+              </div>
             </>
           )}
           {mode === "game" && (
