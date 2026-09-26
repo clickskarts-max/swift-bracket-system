@@ -15,13 +15,12 @@ const unwrap = <T>({ data, error }: { data: T; error: { message: string } | null
   return data;
 };
 
+/** Tournaments the signed-in user may access (owned, workspace role, or tournament role). */
 export const useTournaments = () =>
   useQuery({
     queryKey: ["tournaments"],
     queryFn: async () =>
-      unwrap(
-        await supabase.from("tournaments").select("*").order("created_at", { ascending: false }),
-      ) as Tournament[],
+      (unwrap(await supabase.rpc("my_accessible_tournaments")) ?? []) as Tournament[],
   });
 
 export const useTournament = (id: string) =>
