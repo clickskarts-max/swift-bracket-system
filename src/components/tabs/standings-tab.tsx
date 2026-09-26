@@ -343,7 +343,7 @@ export function StandingsTable({
   const winPoints = 2;
   const lossPoints = isLeague ? 1 : 0;
   const showMarkers = matches.some(
-    (m) => m.status === "completed" && m.score_a != null && m.score_b != null,
+    (m) => (m.status === "completed" || m.status === "forfeit") && m.score_a != null && m.score_b != null,
   );
 
   return (

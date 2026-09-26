@@ -49,6 +49,7 @@ const STATUS_STYLES: Record<string, string> = {
   archived: "bg-muted text-muted-foreground border-border",
   postponed: "bg-warning/15 text-warning border-warning/40",
   cancelled: "bg-muted text-muted-foreground border-border",
+  forfeit: "bg-destructive/15 text-destructive border-destructive/40",
 };
 
 export function StatusPill({ status }: { status: string }) {
@@ -64,7 +65,7 @@ export function StatusPill({ status }: { status: string }) {
           aria-hidden="true"
         />
       )}
-      {status === "completed" ? "Final" : live ? "Live" : status}
+      {status === "completed" ? "Final" : status === "forfeit" ? "Forfeit" : live ? "Live" : status}
     </Badge>
   );
 }

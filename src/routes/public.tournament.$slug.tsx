@@ -107,8 +107,8 @@ function PublicTournament() {
     };
   const header = sponsors.filter((s) => s.placement === "public_header");
   const footer = sponsors.filter((s) => s.placement !== "public_header");
-  const upcoming = matches.filter((m) => m.status !== "completed");
-  const results = matches.filter((m) => m.status === "completed");
+  const upcoming = matches.filter((m) => !isFinalStatus(m.status));
+  const results = matches.filter((m) => isFinalStatus(m.status));
   const fixtureAdIndexes = computeInlineIndexes(placement, "fixtures", upcoming.length);
   const resultAdIndexes = computeInlineIndexes(placement, "results", results.length);
 
@@ -191,9 +191,9 @@ function PublicTournament() {
             className="min-w-0"
           />
           <div className="flex flex-col items-center gap-1.5">
-            <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={m.status === "completed"} />
+            <ScoreLine scoreA={m.score_a} scoreB={m.score_b} final={isFinalStatus(m.status)} />
             <span className="text-center text-xs text-muted-foreground">
-              {m.status === "completed" ? (
+              {isFinalStatus(m.status) ? (
                 formatDate(m.scheduled_at)
               ) : (
                 <TipoffCountdown scheduledAt={m.scheduled_at} />
