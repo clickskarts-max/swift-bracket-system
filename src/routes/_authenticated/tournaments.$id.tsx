@@ -12,7 +12,7 @@ import { ScheduleTab } from "@/components/tabs/schedule-tab";
 import { StandingsTab } from "@/components/tabs/standings-tab";
 import { BracketTab } from "@/components/tabs/bracket-tab";
 import { SponsorsTab } from "@/components/tabs/sponsors-tab";
-import { formatDateRangeInline } from "@/lib/app";
+import { formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useMatches, usePlayers, useTeams, useTournament, useUpsert } from "@/lib/queries";
 
@@ -54,7 +54,7 @@ function TournamentDetail() {
       />
     );
 
-  const played = matches.filter((m) => m.status === "completed").length;
+  const played = matches.filter((m) => isFinalStatus(m.status)).length;
 
   return (
     <div>

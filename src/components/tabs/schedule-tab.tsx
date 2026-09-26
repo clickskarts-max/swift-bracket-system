@@ -37,7 +37,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components/data-bits";
 import { TipoffCountdown } from "@/components/tipoff-countdown";
-import { formatDate, MATCH_STATUSES, toLocalInput } from "@/lib/app";
+import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import {
   QUARTERS,
@@ -504,6 +504,66 @@ function MatchDialog({
         <div className="grid gap-4 sm:grid-cols-2">
           {mode === "game" && (
             <>
+              <div className="rounded-lg border border-border p-3 sm:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Forfeit (FIBA Art. 20)
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Opponent wins 20–0. The forfeiting team gets 0 classification points.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(["a", "b"] as const).map((side) => {
+                    const id = side === "a" ? draft.team_a_id : draft.team_b_id;
+                    const name =
+                      teams.find((t) => t.id === id)?.name ??
+                      (side === "a" ? draft.placeholder_a : draft.placeholder_b) ??
+                      (side === "a" ? "Home" : "Away");
+                    const active =
+                      draft.status === "forfeit" &&
+                      (side === "a" ? draft.score_a === 0 : draft.score_b === 0);
+                    return (
+                      <Button
+                        key={side}
+                        type="button"
+                        size="sm"
+                        variant={active ? "destructive" : "outline"}
+                        disabled={!draft.team_a_id || !draft.team_b_id}
+                        onClick={() => {
+                          setDraft((d) =>
+                            d
+                              ? {
+                                  ...d,
+                                  status: "forfeit",
+                                  score_a: side === "a" ? 0 : 20,
+                                  score_b: side === "a" ? 20 : 0,
+                                }
+                              : d,
+                          );
+                          setPeriods(emptyPeriods());
+                          setStats([]);
+                          setPotm(null);
+                        }}
+                      >
+                        {name} forfeits
+                      </Button>
+                    );
+                  })}
+                  {draft.status === "forfeit" && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setDraft((d) =>
+                          d ? { ...d, status: "scheduled", score_a: null, score_b: null } : d,
+                        )
+                      }
+                    >
+                      Clear forfeit
+                    </Button>
+                  )}
+                </div>
+              </div>
               <Field label="Match number">
                 <Input
                   type="number"

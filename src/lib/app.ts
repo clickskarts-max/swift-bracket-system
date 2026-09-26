@@ -25,9 +25,14 @@ export const MATCH_STATUSES = [
   { value: "scheduled", label: "Scheduled" },
   { value: "live", label: "Live" },
   { value: "completed", label: "Final" },
+  { value: "forfeit", label: "Forfeit (20–0)" },
   { value: "postponed", label: "Postponed" },
   { value: "cancelled", label: "Cancelled" },
 ] as const;
+
+/** A match with a decided result: played to the end, or awarded by forfeit (FIBA Art. 20). */
+export const isFinalStatus = (status: string | null | undefined) =>
+  status === "completed" || status === "forfeit";
 
 export const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
 
