@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_audit_log: {
+        Row: {
+          account_id: string | null
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          new_role: string | null
+          old_role: string | null
+          target_email: string | null
+          target_user_id: string | null
+          tournament_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_role?: string | null
+          old_role?: string | null
+          target_email?: string | null
+          target_user_id?: string | null
+          tournament_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_role?: string | null
+          old_role?: string | null
+          target_email?: string | null
+          target_user_id?: string | null
+          tournament_id?: string | null
+        }
+        Relationships: []
+      }
+      account_memberships: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          invited_by: string | null
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          role: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       activation_keys: {
         Row: {
           assigned_email: string | null
@@ -659,6 +731,65 @@ export type Database = {
         }
         Relationships: []
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          account_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          message: string | null
+          role: string
+          status: string
+          token_hash: string
+          tournament_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          account_id: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          message?: string | null
+          role: string
+          status?: string
+          token_hash: string
+          tournament_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          account_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          message?: string | null
+          role?: string
+          status?: string
+          token_hash?: string
+          tournament_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           court: string | null
@@ -926,6 +1057,24 @@ export type Database = {
           },
         ]
       }
+      role_permissions: {
+        Row: {
+          permission: string
+          role: string
+          scope: string
+        }
+        Insert: {
+          permission: string
+          role: string
+          scope: string
+        }
+        Update: {
+          permission?: string
+          role?: string
+          scope?: string
+        }
+        Relationships: []
+      }
       sponsors: {
         Row: {
           amount: number | null
@@ -1034,6 +1183,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "teams_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_memberships: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          role: string
+          status: string
+          tournament_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          role: string
+          status?: string
+          tournament_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          status?: string
+          tournament_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_memberships_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
@@ -1168,6 +1358,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: Json }
+      can_manage_invitation: {
+        Args: { _inv: Database["public"]["Tables"]["invitations"]["Row"] }
+        Returns: boolean
+      }
+      create_invitation: {
+        Args: {
+          _account_id: string
+          _days?: number
+          _email: string
+          _message?: string
+          _role: string
+          _tournament_id: string
+        }
+        Returns: Json
+      }
       ensure_app_user: {
         Args: never
         Returns: {
@@ -1186,6 +1392,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_invitation: { Args: { _token: string }; Returns: Json }
       get_public_branding: {
         Args: { p_hostname: string }
         Returns: {
@@ -1221,7 +1428,33 @@ export type Database = {
           updated_at: string
         }[]
       }
+      has_account_permission: {
+        Args: { _account_id: string; _perm: string }
+        Returns: boolean
+      }
+      has_tournament_permission: {
+        Args: { _perm: string; _tournament_id: string }
+        Returns: boolean
+      }
       is_app_owner: { Args: never; Returns: boolean }
+      list_account_access: { Args: { _account_id: string }; Returns: Json }
+      list_my_accounts: { Args: never; Returns: Json }
+      list_tournament_access: {
+        Args: { _tournament_id: string }
+        Returns: Json
+      }
+      log_access_event: {
+        Args: {
+          _account: string
+          _action: string
+          _email: string
+          _new: string
+          _old: string
+          _target: string
+          _tournament: string
+        }
+        Returns: undefined
+      }
       log_owner_action: {
         Args: {
           p_action: string
@@ -1232,6 +1465,44 @@ export type Database = {
           p_target_type?: string
         }
         Returns: undefined
+      }
+      my_accessible_tournaments: {
+        Args: never
+        Returns: {
+          archived: boolean
+          banner_url: string | null
+          config: Json
+          created_at: string
+          description: string | null
+          end_date: string | null
+          format: string
+          group_count: number
+          id: string
+          is_public: boolean
+          legs: number
+          logo_url: string | null
+          name: string
+          owner_id: string
+          playoff_format: string
+          qualifiers_per_group: number
+          slug: string
+          start_date: string | null
+          status: string
+          team_count: number
+          updated_at: string
+          venue: string | null
+          venue_map_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tournaments"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      my_tournament_permissions: {
+        Args: { _tournament_id: string }
+        Returns: string[]
       }
       owner_create_activation_key: {
         Args: { input_plan: string }
@@ -1279,6 +1550,27 @@ export type Database = {
         Returns: undefined
       }
       redeem_activation_key: { Args: { input_key: string }; Returns: string }
+      remove_account_member: {
+        Args: { _account_id: string; _user_id: string }
+        Returns: undefined
+      }
+      remove_tournament_member: {
+        Args: { _tournament_id: string; _user_id: string }
+        Returns: undefined
+      }
+      resend_invitation: {
+        Args: { _days?: number; _id: string }
+        Returns: string
+      }
+      revoke_invitation: { Args: { _id: string }; Returns: undefined }
+      set_account_member_role: {
+        Args: { _account_id: string; _role: string; _user_id: string }
+        Returns: undefined
+      }
+      set_tournament_member_role: {
+        Args: { _role: string; _tournament_id: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
