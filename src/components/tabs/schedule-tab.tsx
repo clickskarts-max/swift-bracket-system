@@ -37,7 +37,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components/data-bits";
 import { TipoffCountdown } from "@/components/tipoff-countdown";
-import { formatDate, MATCH_STATUSES, toLocalInput } from "@/lib/app";
+import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import {
   QUARTERS,

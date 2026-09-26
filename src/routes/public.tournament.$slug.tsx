@@ -22,7 +22,7 @@ import {
   computeInlineIndexes,
 } from "@/components/ads/tab-ad-slots";
 import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
-import { formatDate, formatDateRangeInline } from "@/lib/app";
+import { formatDate, formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useBranding } from "@/hooks/use-branding";
 import {
