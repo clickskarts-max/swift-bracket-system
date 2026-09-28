@@ -154,7 +154,7 @@ export function InviteDialog({
                 </Select>
               </Field>
             )}
-            <Field label="Role" hint={roles.find((r) => r.value === role)?.hint}>
+            <Field label="Role" hint={roles.find((r) => r.value === role)?.hint ?? ""}>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger>
                   <SelectValue />
