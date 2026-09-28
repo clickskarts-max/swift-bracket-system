@@ -15,6 +15,10 @@ import { SponsorsTab } from "@/components/tabs/sponsors-tab";
 import { formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useMatches, usePlayers, useTeams, useTournament, useUpsert } from "@/lib/queries";
+import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { computeProgression } from "@/lib/progression";
 
 export const Route = createFileRoute("/_authenticated/tournaments/$id")({
   head: () => ({
@@ -39,6 +43,28 @@ function TournamentDetail() {
   const { data: players = [] } = usePlayers(id);
   const { data: matches = [] } = useMatches(id);
   const update = useUpsert("tournaments", [["tournaments"], ["tournament", id]]);
+  const qc = useQueryClient();
+  const syncing = useRef(false);
+
+  useEffect(() => {
+    if (!tournament || syncing.current || !matches.length) return;
+    const updates = computeProgression(teams, matches, tournament.format);
+    if (!updates.length) return;
+    syncing.current = true;
+    (async () => {
+      let ok = 0;
+      for (const { id: mid, ...patch } of updates) {
+        const { error } = await supabase.from("matches").update(patch).eq("id", mid);
+        if (!error) ok++;
+      }
+      if (ok) {
+        toast.success(`Playoff schedule updated (${ok} match${ok > 1 ? "es" : ""})`);
+        await qc.invalidateQueries({ queryKey: ["matches", id] });
+      }
+      syncing.current = false;
+    })();
+  }, [matches, teams, tournament, id, qc]);
+
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Loading tournament…</p>;
   if (!tournament)
