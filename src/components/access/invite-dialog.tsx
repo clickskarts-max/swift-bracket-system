@@ -84,7 +84,7 @@ export function InviteDialog({
       _message: message,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     const res = data as { status: string; token: string | null };
     invalidate();
     if (res.status === "added") {

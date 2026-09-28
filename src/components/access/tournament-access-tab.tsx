@@ -68,7 +68,7 @@ export function TournamentAccessTab({
 
   const run = async (fn: PromiseLike<{ error: { message: string } | null }>, ok: string) => {
     const { error } = await fn;
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(ok);
     invalidate();
   };
@@ -97,7 +97,7 @@ export function TournamentAccessTab({
 
   const resend = async (id: string) => {
     const { data, error } = await supabase.rpc("resend_invitation", { _id: id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setResentToken(data as string);
     invalidate();
   };
