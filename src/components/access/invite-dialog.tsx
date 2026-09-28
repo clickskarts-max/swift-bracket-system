@@ -84,7 +84,7 @@ export function InviteDialog({
       _message: message,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     const res = data as { status: string; token: string | null };
     invalidate();
     if (res.status === "added") {
@@ -154,7 +154,7 @@ export function InviteDialog({
                 </Select>
               </Field>
             )}
-            <Field label="Role" hint={roles.find((r) => r.value === role)?.hint}>
+            <Field label="Role" hint={roles.find((r) => r.value === role)?.hint ?? ""}>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger>
                   <SelectValue />
