@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Signed-in users can read role map" ON public.role_permissions;
