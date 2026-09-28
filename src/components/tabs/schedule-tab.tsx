@@ -339,10 +339,10 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                           <ScoreLine
                             scoreA={m.score_a}
                             scoreB={m.score_b}
-                            final={m.status === "completed"}
+                            final={isFinalStatus(m.status)}
                           />
                           <span className="text-center text-xs text-muted-foreground">
-                            {m.status === "completed" ? (
+                            {isFinalStatus(m.status) ? (
                               formatDate(m.scheduled_at)
                             ) : (
                               <TipoffCountdown scheduledAt={m.scheduled_at} />
