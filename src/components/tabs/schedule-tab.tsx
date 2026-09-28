@@ -206,7 +206,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const grouped = useMemo(() => {
     const map = new Map<string, Match[]>();
     const pool = matches.filter((m) =>
-      bucket === "results" ? m.status === "completed" : m.status !== "completed",
+      bucket === "results" ? isFinalStatus(m.status) : !isFinalStatus(m.status),
     );
     for (const m of pool) {
       const key = bucket === "results" ? resultGroupKey(m) : listGroupKey(m);
@@ -239,7 +239,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
   }, [matches, bucket, matchdayByDate]);
 
-  const completedCount = matches.filter((m) => m.status === "completed").length;
+  const completedCount = matches.filter((m) => isFinalStatus(m.status)).length;
 
   return (
     <div className="space-y-4">
