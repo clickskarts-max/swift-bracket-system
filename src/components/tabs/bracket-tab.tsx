@@ -52,11 +52,20 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
               {list.map((m) => {
                 const aWin = m.score_a != null && m.score_b != null && m.score_a > m.score_b;
                 const bWin = m.score_a != null && m.score_b != null && m.score_b > m.score_a;
+                const qualifier = m.round_name?.match(/\(([^)]+)\)\s*$/)?.[1] ?? null;
+                const cardLabel = m.round_name?.replace(/\s*\([^)]+\)\s*$/, "") ?? null;
                 return (
                   <div key={m.id} className="surface-card animate-rise divide-y divide-border p-0">
-                    {showPerCardName && m.round_name && (
-                      <div className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        {m.round_name}
+                    {showPerCardName && cardLabel && (
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 pt-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          {cardLabel}
+                        </span>
+                        {qualifier && (
+                          <span className="rounded-full border border-border bg-muted px-1.5 py-px text-[9px] font-medium normal-case tracking-normal text-muted-foreground">
+                            {qualifier}
+                          </span>
+                        )}
                       </div>
                     )}
                     <div
