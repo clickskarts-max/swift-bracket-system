@@ -91,7 +91,8 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
                 );
               })}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <AutoAdRegion context="knockout" className="pt-8" />
