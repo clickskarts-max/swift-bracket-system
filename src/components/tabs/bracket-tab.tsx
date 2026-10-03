@@ -37,16 +37,28 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
     <div className="space-y-8">
       <div className="overflow-x-auto pb-2">
         <div className="flex min-w-max gap-6">
-          {rounds.map(([roundIndex, list]) => (
+          {rounds.map(([roundIndex, list]) => {
+            const names = new Set(list.map((m) => m.round_name));
+            const baseName = (list[0]?.round_name ?? `Round ${roundIndex}`).replace(
+              /\s*·\s*Game\s*\d+.*$/i,
+              "",
+            );
+            const showPerCardName = names.size > 1;
+            return (
             <div key={roundIndex} className="flex w-64 flex-col justify-around gap-4">
               <h3 className="font-display text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                {list[0]?.round_name ?? `Round ${roundIndex}`}
+                {baseName}
               </h3>
               {list.map((m) => {
                 const aWin = m.score_a != null && m.score_b != null && m.score_a > m.score_b;
                 const bWin = m.score_a != null && m.score_b != null && m.score_b > m.score_a;
                 return (
                   <div key={m.id} className="surface-card animate-rise divide-y divide-border p-0">
+                    {showPerCardName && m.round_name && (
+                      <div className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        {m.round_name}
+                      </div>
+                    )}
                     <div
                       className={`flex items-center justify-between px-3 py-2 text-sm ${aWin ? "font-semibold text-primary" : ""}`}
                     >
