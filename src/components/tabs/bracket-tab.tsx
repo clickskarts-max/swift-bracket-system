@@ -69,6 +69,12 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
                       />
                       <span className="tabular-nums">{m.score_b ?? "–"}</span>
                     </div>
+                    {!isFinalStatus(m.status) && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground">
+                        <CalendarDays className="h-3 w-3 shrink-0" />
+                        <TipoffCountdown scheduledAt={m.scheduled_at} />
+                      </div>
+                    )}
                   </div>
                 );
               })}
