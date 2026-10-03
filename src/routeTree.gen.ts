@@ -9,27 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthenticatedAdvertisingRouteImport } from './routes/_authenticated/advertising'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedTournamentsIdRouteImport } from './routes/_authenticated/tournaments.$id'
-import { Route as AuthenticatedTournamentsNewRouteImport } from './routes/_authenticated/tournaments.new'
+import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAdvertisingRouteImport } from './routes/_authenticated/advertising'
 import { Route as PublicTournamentSlugRouteImport } from './routes/public.tournament.$slug'
-import { Route as AuthenticatedAdvertisingCampaignIdRouteImport } from './routes/_authenticated/advertising_.campaign.$id'
+import { Route as AuthenticatedTournamentsNewRouteImport } from './routes/_authenticated/tournaments.new'
+import { Route as AuthenticatedTournamentsIdRouteImport } from './routes/_authenticated/tournaments.$id'
 import { Route as ApiPublicIntegrationsProviderRouteImport } from './routes/api/public/integrations/$provider'
+import { Route as AuthenticatedAdvertisingCampaignIdRouteImport } from './routes/_authenticated/advertising_.campaign.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -37,20 +33,18 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdvertisingRoute =
-  AuthenticatedAdvertisingRouteImport.update({
-    id: '/advertising',
-    path: '/advertising',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
@@ -58,21 +52,15 @@ const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
   path: '/owner',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedTournamentsIdRoute =
-  AuthenticatedTournamentsIdRouteImport.update({
-    id: '/tournaments/$id',
-    path: '/tournaments/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTournamentsNewRoute =
-  AuthenticatedTournamentsNewRouteImport.update({
-    id: '/tournaments/new',
-    path: '/tournaments/new',
+const AuthenticatedAdvertisingRoute =
+  AuthenticatedAdvertisingRouteImport.update({
+    id: '/advertising',
+    path: '/advertising',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const PublicTournamentSlugRoute = PublicTournamentSlugRouteImport.update({
@@ -80,10 +68,16 @@ const PublicTournamentSlugRoute = PublicTournamentSlugRouteImport.update({
   path: '/public/tournament/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdvertisingCampaignIdRoute =
-  AuthenticatedAdvertisingCampaignIdRouteImport.update({
-    id: '/advertising_/campaign/$id',
-    path: '/advertising/campaign/$id',
+const AuthenticatedTournamentsNewRoute =
+  AuthenticatedTournamentsNewRouteImport.update({
+    id: '/tournaments/new',
+    path: '/tournaments/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTournamentsIdRoute =
+  AuthenticatedTournamentsIdRouteImport.update({
+    id: '/tournaments/$id',
+    path: '/tournaments/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicIntegrationsProviderRoute =
@@ -91,6 +85,12 @@ const ApiPublicIntegrationsProviderRoute =
     id: '/api/public/integrations/$provider',
     path: '/api/public/integrations/$provider',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAdvertisingCampaignIdRoute =
+  AuthenticatedAdvertisingCampaignIdRouteImport.update({
+    id: '/advertising_/campaign/$id',
+    path: '/advertising/campaign/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -194,18 +194,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -215,25 +208,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/advertising': {
-      id: '/_authenticated/advertising'
-      path: '/advertising'
-      fullPath: '/advertising'
-      preLoaderRoute: typeof AuthenticatedAdvertisingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/owner': {
@@ -243,25 +236,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/tournaments/$id': {
-      id: '/_authenticated/tournaments/$id'
-      path: '/tournaments/$id'
-      fullPath: '/tournaments/$id'
-      preLoaderRoute: typeof AuthenticatedTournamentsIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/tournaments/new': {
-      id: '/_authenticated/tournaments/new'
-      path: '/tournaments/new'
-      fullPath: '/tournaments/new'
-      preLoaderRoute: typeof AuthenticatedTournamentsNewRouteImport
+    '/_authenticated/advertising': {
+      id: '/_authenticated/advertising'
+      path: '/advertising'
+      fullPath: '/advertising'
+      preLoaderRoute: typeof AuthenticatedAdvertisingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/public/tournament/$slug': {
@@ -271,11 +257,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicTournamentSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/advertising_/campaign/$id': {
-      id: '/_authenticated/advertising_/campaign/$id'
-      path: '/advertising/campaign/$id'
-      fullPath: '/advertising/campaign/$id'
-      preLoaderRoute: typeof AuthenticatedAdvertisingCampaignIdRouteImport
+    '/_authenticated/tournaments/new': {
+      id: '/_authenticated/tournaments/new'
+      path: '/tournaments/new'
+      fullPath: '/tournaments/new'
+      preLoaderRoute: typeof AuthenticatedTournamentsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tournaments/$id': {
+      id: '/_authenticated/tournaments/$id'
+      path: '/tournaments/$id'
+      fullPath: '/tournaments/$id'
+      preLoaderRoute: typeof AuthenticatedTournamentsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/integrations/$provider': {
@@ -284,6 +277,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/integrations/$provider'
       preLoaderRoute: typeof ApiPublicIntegrationsProviderRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/advertising_/campaign/$id': {
+      id: '/_authenticated/advertising_/campaign/$id'
+      path: '/advertising/campaign/$id'
+      fullPath: '/advertising/campaign/$id'
+      preLoaderRoute: typeof AuthenticatedAdvertisingCampaignIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
