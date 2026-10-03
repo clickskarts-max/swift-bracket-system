@@ -1,6 +1,9 @@
 import { useMemo } from "react";
+import { CalendarDays } from "lucide-react";
 import { EmptyState, TeamChip } from "@/components/data-bits";
+import { TipoffCountdown } from "@/components/tipoff-countdown";
 import type { Match, Team } from "@/lib/queries";
+import { isFinalStatus } from "@/lib/app";
 import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 
 type BracketTeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color">;
