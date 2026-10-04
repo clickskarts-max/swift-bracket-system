@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatDate, formatCountdownMs } from "@/lib/app";
 
-export function TipoffCountdown({ scheduledAt }: { scheduledAt?: string | null }) {
+export function TipoffCountdown({
+  scheduledAt,
+  showDate = true,
+}: {
+  scheduledAt?: string | null;
+  showDate?: boolean;
+}) {
   const target = useMemo(() => (scheduledAt ? new Date(scheduledAt) : null), [scheduledAt]);
   const [now, setNow] = useState(() => Date.now());
 
@@ -15,7 +21,8 @@ export function TipoffCountdown({ scheduledAt }: { scheduledAt?: string | null }
   const ms = target.getTime() - now;
   return (
     <span>
-      {formatDate(scheduledAt)} · {formatCountdownMs(ms)}
+      {showDate ? `${formatDate(scheduledAt)} · ` : ""}
+      {formatCountdownMs(ms)}
     </span>
   );
 }
