@@ -3,12 +3,19 @@ import { CalendarDays } from "lucide-react";
 import { EmptyState, TeamChip } from "@/components/data-bits";
 import { TipoffCountdown } from "@/components/tipoff-countdown";
 import type { Match, Team } from "@/lib/queries";
-import { isFinalStatus } from "@/lib/app";
+import { formatDate, isFinalStatus } from "@/lib/app";
 import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 
 type BracketTeamLike = Pick<Team, "id" | "name" | "logo_url" | "jersey_color">;
 
 const KNOCKOUT_STAGES = new Set(["knockout", "playoff", "final", "losers", "winners"]);
+
+const formatGameTime = (scheduledAt?: string | null) => {
+  if (!scheduledAt) return null;
+  const date = new Date(scheduledAt);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+};
 
 export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; matches: Match[] }) {
   const rounds = useMemo(() => {
@@ -52,17 +59,21 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
               {list.map((m) => {
                 const aWin = m.score_a != null && m.score_b != null && m.score_a > m.score_b;
                 const bWin = m.score_a != null && m.score_b != null && m.score_b > m.score_a;
-                const qualifier = m.round_name?.match(/\(([^)]+)\)\s*$/)?.[1] ?? null;
+                const isConditional = /\bif\s+(?:needed|necessary)\b/i.test(m.round_name ?? "");
+                const qualifier = isConditional
+                  ? "If necessary"
+                  : (m.round_name?.match(/\(([^)]+)\)\s*$/)?.[1] ?? null);
                 const cardLabel = m.round_name?.replace(/\s*\([^)]+\)\s*$/, "") ?? null;
+                const gameTime = formatGameTime(m.scheduled_at);
                 return (
                   <div key={m.id} className="surface-card animate-rise divide-y divide-border p-0">
-                    {showPerCardName && cardLabel && (
+                    {(showPerCardName || isConditional) && cardLabel && (
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 pt-2">
                         <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                           {cardLabel}
                         </span>
                         {qualifier && (
-                          <span className="rounded-full border border-border bg-muted px-1.5 py-px text-[9px] font-medium normal-case tracking-normal text-muted-foreground">
+                          <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-px text-[9px] font-semibold normal-case tracking-normal text-primary">
                             {qualifier}
                           </span>
                         )}
@@ -90,12 +101,18 @@ export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; match
                       />
                       <span className="tabular-nums">{m.score_b ?? "–"}</span>
                     </div>
-                    {!isFinalStatus(m.status) && (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground">
-                        <CalendarDays className="h-3 w-3 shrink-0" />
-                        <TipoffCountdown scheduledAt={m.scheduled_at} />
-                      </div>
-                    )}
+                    <div className="flex items-start gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground">
+                      <CalendarDays className="mt-0.5 h-3 w-3 shrink-0" />
+                      <span className="flex flex-col">
+                        <span>
+                          {formatDate(m.scheduled_at)}
+                          {gameTime ? ` · ${gameTime}` : ""}
+                        </span>
+                        {!isFinalStatus(m.status) && (
+                          <TipoffCountdown scheduledAt={m.scheduled_at} showDate={false} />
+                        )}
+                      </span>
+                    </div>
                   </div>
                 );
               })}
