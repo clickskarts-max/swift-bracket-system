@@ -1,7 +1,4 @@
-import { createMiddleware, createStart } from "@tanstack/react-start";
-// Import CSRF directly from its implementation package. This avoids an
-// unstable re-export cycle seen in some production Node bundlers.
-import { createCsrfMiddleware } from "@tanstack/start-client-core";
+import { createCsrfMiddleware, createMiddleware, createStart } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
