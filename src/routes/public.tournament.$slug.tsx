@@ -22,6 +22,7 @@ import {
   computeInlineIndexes,
 } from "@/components/ads/tab-ad-slots";
 import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
+import { TournamentChampion } from "@/components/tournament-champion";
 import { formatDate, formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { useBranding } from "@/hooks/use-branding";
@@ -45,6 +46,8 @@ export const Route = createFileRoute("/public/tournament/$slug")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
       ],
     };
   },
@@ -78,14 +81,21 @@ function PublicTournament() {
 
   const venueById = useMemo(() => new Map(venues.map((v) => [v.id, v])), [venues]);
 
+  const visibleMatches = useMemo(
+    () => matches.filter((match) => match.status !== "cancelled"),
+    [matches],
+  );
+
   const matchdayByDate = useMemo(() => {
     const keys = [
       ...new Set(
-        matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)),
+        visibleMatches
+          .filter((m) => !!m.scheduled_at)
+          .map((m) => dayKeyFromIso(m.scheduled_at as string)),
       ),
     ].sort();
     return new Map(keys.map((k, i) => [k, i + 1]));
-  }, [matches]);
+  }, [visibleMatches]);
 
   if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading tournament…</p>;
   if (!tournament || !tournament.is_public)
@@ -107,8 +117,8 @@ function PublicTournament() {
     };
   const header = sponsors.filter((s) => s.placement === "public_header");
   const footer = sponsors.filter((s) => s.placement !== "public_header");
-  const upcoming = matches.filter((m) => !isFinalStatus(m.status));
-  const results = matches.filter((m) => isFinalStatus(m.status));
+  const upcoming = visibleMatches.filter((m) => !isFinalStatus(m.status));
+  const results = visibleMatches.filter((m) => isFinalStatus(m.status));
   const fixtureAdIndexes = computeInlineIndexes(placement, "fixtures", upcoming.length);
   const resultAdIndexes = computeInlineIndexes(placement, "results", results.length);
 
@@ -321,6 +331,7 @@ function PublicTournament() {
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
+        <TournamentChampion tournament={tournament} teams={teams} matches={matches} />
         <Tabs defaultValue="fixtures">
           <div className="-mx-4 mb-4 overflow-x-auto px-4">
             <TabsList className="w-max">

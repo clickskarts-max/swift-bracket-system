@@ -19,6 +19,7 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { computeProgression } from "@/lib/progression";
+import { TournamentChampion } from "@/components/tournament-champion";
 
 export const Route = createFileRoute("/_authenticated/tournaments/$id")({
   head: () => ({
@@ -80,7 +81,8 @@ function TournamentDetail() {
       />
     );
 
-  const played = matches.filter((m) => isFinalStatus(m.status)).length;
+  const visibleMatches = matches.filter((m) => m.status !== "cancelled");
+  const played = visibleMatches.filter((m) => isFinalStatus(m.status)).length;
 
   return (
     <div>
@@ -127,11 +129,13 @@ function TournamentDetail() {
         </span>
       </div>
 
+      <TournamentChampion tournament={tournament} teams={teams} matches={matches} />
+
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Teams" value={teams.length} />
         <StatCard label="Players" value={players.length} />
-        <StatCard label="Matches" value={matches.length} />
-        <StatCard label="Played" value={`${played}/${matches.length}`} />
+        <StatCard label="Matches" value={visibleMatches.length} />
+        <StatCard label="Played" value={`${played}/${visibleMatches.length}`} />
       </div>
 
       <Tabs defaultValue="schedule">

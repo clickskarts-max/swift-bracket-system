@@ -10,3 +10,5 @@
 > the editor, so keep the branch in a working state.
 
 <!-- LOVABLE:END -->
+
+- Tournament champions are stored in `tournaments.config.champion_team_id`; cancelled conditional games remain historical records but are excluded from active schedule and bracket displays, preserving history without showing unnecessary fixtures.
