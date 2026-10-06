@@ -19,7 +19,9 @@ const formatGameTime = (scheduledAt?: string | null) => {
 
 export function BracketTab({ teams, matches }: { teams: BracketTeamLike[]; matches: Match[] }) {
   const rounds = useMemo(() => {
-    const ko = matches.filter((m) => KNOCKOUT_STAGES.has(m.stage));
+    const ko = matches.filter(
+      (m) => KNOCKOUT_STAGES.has(m.stage) && m.status !== "cancelled",
+    );
     const map = new Map<number, Match[]>();
     ko.forEach((m) => map.set(m.round_index, [...(map.get(m.round_index) ?? []), m]));
     return [...map.entries()].sort((a, b) => a[0] - b[0]);

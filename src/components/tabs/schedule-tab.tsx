@@ -86,6 +86,10 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [editing, setEditing] = useState<Match | null>(null);
   const [mode, setMode] = useState<"game" | "score">("game");
   const [busy, setBusy] = useState(false);
+  const visibleMatches = useMemo(
+    () => matches.filter((match) => match.status !== "cancelled"),
+    [matches],
+  );
 
   const teamById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
 
@@ -161,11 +165,13 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const matchdayByDate = useMemo(() => {
     const keys = [
       ...new Set(
-        matches.filter((m) => !!m.scheduled_at).map((m) => dayKeyFromIso(m.scheduled_at as string)),
+        visibleMatches
+          .filter((m) => !!m.scheduled_at)
+          .map((m) => dayKeyFromIso(m.scheduled_at as string)),
       ),
     ].sort();
     return new Map(keys.map((k, i) => [k, i + 1]));
-  }, [matches]);
+  }, [visibleMatches]);
 
   const listGroupKey = (m: Match) => {
     const base = stripMatchday(m.round_name ?? `Round ${m.round_index}`);
@@ -205,7 +211,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
   const grouped = useMemo(() => {
     const map = new Map<string, Match[]>();
-    const pool = matches.filter((m) =>
+    const pool = visibleMatches.filter((m) =>
       bucket === "results" ? isFinalStatus(m.status) : !isFinalStatus(m.status),
     );
     for (const m of pool) {
@@ -237,15 +243,15 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       desc ? groupTime(lb) - groupTime(la) : groupTime(la) - groupTime(lb),
     );
 
-  }, [matches, bucket, matchdayByDate]);
+  }, [visibleMatches, bucket, matchdayByDate]);
 
-  const completedCount = matches.filter((m) => isFinalStatus(m.status)).length;
+  const completedCount = visibleMatches.filter((m) => isFinalStatus(m.status)).length;
 
   return (
     <div className="space-y-4">
       <Tabs value={bucket} onValueChange={(v) => setBucket(v as "fixtures" | "results")}>
         <TabsList>
-          <TabsTrigger value="fixtures">Upcoming ({matches.length - completedCount})</TabsTrigger>
+          <TabsTrigger value="fixtures">Upcoming ({visibleMatches.length - completedCount})</TabsTrigger>
           <TabsTrigger value="results">Completed ({completedCount})</TabsTrigger>
         </TabsList>
       </Tabs>
