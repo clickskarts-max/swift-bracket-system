@@ -6,7 +6,7 @@ type ChampionTeam = Pick<Team, "id" | "name" | "logo_url" | "jersey_color">;
 
 const configuredChampionId = (config: Tournament["config"]) => {
   if (!config || typeof config !== "object" || Array.isArray(config)) return null;
-  const value = (config as Record<string, unknown>).champion_team_id;
+  const value = (config as Record<string, unknown>)["champion_team_id"];
   return typeof value === "string" ? value : null;
 };
 
