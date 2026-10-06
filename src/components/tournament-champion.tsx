@@ -24,7 +24,8 @@ const finalSeriesLeader = (matches: Match[]) => {
         match.score_a !== match.score_b,
     )
     .forEach((match) => {
-      const winnerId = match.score_a! > match.score_b! ? match.team_a_id : match.team_b_id;
+      if (match.score_a == null || match.score_b == null) return;
+      const winnerId = match.score_a > match.score_b ? match.team_a_id : match.team_b_id;
       if (winnerId) wins.set(winnerId, (wins.get(winnerId) ?? 0) + 1);
     });
 
