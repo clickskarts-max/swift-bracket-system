@@ -20,3 +20,4 @@
 - Individual fixture order changes swap scheduled timestamps atomically with stale-date checks; day shifts keep the selected game's local time, and the movement planner rejects rest and prerequisite conflicts.
 - The compact fixture sheet reuses ScheduleTab mutations and its match dialog; alternate views must not introduce separate score or movement write paths.
 - Display fixture numbers through a shared chronological map over all active games; preserve stored match numbers so knockout prerequisites and historical references remain intact.
+- Derive organizer multi-game-day notices from existing fixture data using the same local calendar as the schedule; count completed games toward days with games still due, exclude non-played results and unresolved participants, and never alter fixtures.

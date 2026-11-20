@@ -45,6 +45,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components/data-bits";
 import { TipoffCountdown } from "@/components/tipoff-countdown";
 import { FixtureSheet } from "@/components/tabs/fixture-sheet";
+import { TeamDayNotice } from "@/components/tabs/team-day-notice";
 import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import { scheduleFixtureDates } from "@/lib/fixture-timing";
@@ -415,6 +416,8 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         </TabsList>
       </Tabs>
       </div>
+
+      {bucket === "fixtures" && <TeamDayNotice matches={matches} teams={teams} displayNumbers={displayNumbers} matchdayByDate={matchdayByDate} />}
 
       {grouped.length === 0 ? (
         <EmptyState

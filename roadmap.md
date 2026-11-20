@@ -36,3 +36,6 @@
 - [x] Display fixture numbers in chronological playing order without changing stored references
 - [x] Add a small matchday separator in the fixture sheet
 - [x] Test numbering and verify the signed-in fixture views
+
+- [x] Add organizer-only daily notices listing teams playing multiple games, counts and tip-off times
+- [x] Test daily team counts and verify notices update with fixture changes
