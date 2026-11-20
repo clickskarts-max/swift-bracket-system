@@ -8,6 +8,8 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  SlidersHorizontal,
+  Save,
   X,
   MapPin,
 } from "lucide-react";
@@ -40,6 +42,7 @@ import { TipoffCountdown } from "@/components/tipoff-countdown";
 import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import { scheduleFixtureDates } from "@/lib/fixture-timing";
+import { readFixtureSettings, withFixtureSettings } from "@/lib/fixture-settings";
 import {
   QUARTERS,
   emptyPeriods,
@@ -88,15 +91,18 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [mode, setMode] = useState<"game" | "score">("game");
   const [busy, setBusy] = useState(false);
   const [generationOpen, setGenerationOpen] = useState(false);
-  const [startDate, setStartDate] = useState(tournament.start_date ?? "");
-  const [startTime, setStartTime] = useState("09:00");
-  const [leagueLimit, setLeagueLimit] = useState(2);
-  const [knockoutLimit, setKnockoutLimit] = useState(1);
-  const [restHours, setRestHours] = useState(24);
-  const [durationMinutes, setDurationMinutes] = useState(90);
-  const [timingMode, setTimingMode] = useState("daily");
-  const [leagueDays, setLeagueDays] = useState(4);
-  const [knockoutDays, setKnockoutDays] = useState(2);
+  const [settingsOnly, setSettingsOnly] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [savedSettings] = useState(() => readFixtureSettings(tournament.config, tournament.start_date));
+  const [startDate, setStartDate] = useState(savedSettings.startDate);
+  const [startTime, setStartTime] = useState(savedSettings.startTime);
+  const [leagueLimit, setLeagueLimit] = useState(savedSettings.leagueLimit);
+  const [knockoutLimit, setKnockoutLimit] = useState(savedSettings.knockoutLimit);
+  const [restHours, setRestHours] = useState(savedSettings.restHours);
+  const [durationMinutes, setDurationMinutes] = useState(savedSettings.durationMinutes);
+  const [timingMode, setTimingMode] = useState<string>(savedSettings.timingMode);
+  const [leagueDays, setLeagueDays] = useState(savedSettings.leagueDays);
+  const [knockoutDays, setKnockoutDays] = useState(savedSettings.knockoutDays);
   const generationPreview = useMemo(() => {
     if (timingMode !== "fixed") return null;
     try {
@@ -151,6 +157,30 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         jersey_color: null,
       }
     );
+  };
+
+  const applySettings = async () => {
+    setApplying(true);
+    try {
+      if (generationPreview?.error) throw new Error(generationPreview.error);
+      if (timingMode !== "daily" && timingMode !== "fixed") throw new Error("Choose a scheduling plan");
+      if (timingMode === "daily") scheduleFixtureDates([], teams, {
+        startDate, startTime, leagueMatchesPerDay: leagueLimit, knockoutMatchesPerDay: knockoutLimit,
+        minimumRestHours: restHours, matchDurationMinutes: durationMinutes,
+      });
+      const current = await supabase.from("tournaments").select("config").eq("id", tournamentId).single();
+      if (current.error) throw new Error(current.error.message);
+      const config = withFixtureSettings(current.data.config, {
+        timingMode, startDate, startTime, leagueLimit, knockoutLimit, restHours, durationMinutes, leagueDays, knockoutDays,
+      });
+      const updated = await supabase.from("tournaments").update({ config }).eq("id", tournamentId).select("id").single();
+      if (updated.error) throw new Error(updated.error.message);
+      await qc.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+      setGenerationOpen(false);
+      toast.success("Fixture settings applied — existing matches unchanged");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not apply fixture settings");
+    } finally { setApplying(false); }
   };
 
   const regenerate = async () => {
@@ -296,18 +326,21 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           <List className="h-4 w-4" />
           <span>Rounds</span>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => { setSettingsOnly(true); setGenerationOpen(true); }}>
+          <SlidersHorizontal className="mr-1.5 h-4 w-4" /> Fixture settings
+        </Button>
         <AlertDialog open={generationOpen} onOpenChange={setGenerationOpen}>
           <AlertDialogTrigger asChild>
-            <Button size="sm" disabled={busy}>
+            <Button size="sm" disabled={busy} onClick={() => setSettingsOnly(false)}>
               <RefreshCw className="mr-1.5 h-4 w-4" /> Generate schedule
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
             <AlertDialogHeader>
-              <AlertDialogTitle>Regenerate the full schedule?</AlertDialogTitle>
+              <AlertDialogTitle>{settingsOnly ? "Fixture settings" : "Regenerate the full schedule?"}</AlertDialogTitle>
               <AlertDialogDescription>
-                All existing matches, scores and match details for this tournament will be replaced
-                by a fresh fixture list.
+                {settingsOnly ? "Applying settings keeps all current matches and scores unchanged." : "All existing matches, scores and match details for this tournament will be replaced by a fresh fixture list."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Field label="Scheduling plan">
@@ -339,10 +372,11 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
             </div>}
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <Button disabled={busy || !!generationPreview?.error} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>
+              {settingsOnly ? <Button disabled={applying || !!generationPreview?.error} onClick={applySettings}><Save className="mr-1.5 h-4 w-4" />{applying ? "Applying…" : "Apply settings"}</Button> : <Button disabled={busy || !!generationPreview?.error} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        </div>
       </div>
 
       {grouped.length === 0 ? (

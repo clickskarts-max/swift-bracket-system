@@ -13,3 +13,6 @@
 - [x] Validate deadlines, rest, and duplicate fixtures before replacing schedules
 - [x] Test and verify fixed-window generation
 - [x] Provide the tested settings for 20 league games over four days
+
+- [x] Add Apply settings independently of fixture generation
+- [x] Verify saved settings reload without changing existing matches
