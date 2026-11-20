@@ -26,7 +26,20 @@ export function scheduleFixtureDates(drafts: MatchDraft[], teams: TeamRef[], opt
   const rest = minimumRestHours * 3_600_000;
   if (options.phaseDays) return scheduleWithinDays(drafts, teams, options, start, duration, rest);
   const isLeague = (m: MatchDraft) => m.stage === "league" || m.stage === "group";
-  const ordered = [...drafts].sort((a, b) => Number(!isLeague(a)) - Number(!isLeague(b)) || a.round_index - b.round_index || a.match_no - b.match_no);
+  const sorted = [...drafts].sort((a, b) => Number(!isLeague(a)) - Number(!isLeague(b)) || a.round_index - b.round_index || a.match_no - b.match_no);
+  const pools = new Map<string, MatchDraft[]>();
+  for (const match of sorted.filter(isLeague)) {
+    const group = match.group_label ?? "league";
+    pools.set(group, [...(pools.get(group) ?? []), match]);
+  }
+  const ordered: MatchDraft[] = [];
+  while ([...pools.values()].some((pool) => pool.length)) {
+    for (const pool of pools.values()) {
+      const match = pool.shift();
+      if (match) ordered.push(match);
+    }
+  }
+  ordered.push(...sorted.filter((match) => !isLeague(match)));
   const participants = new Map<number, Set<string>>();
   const ends = new Map<number, number>();
   const lastEnd = new Map<string, number>();
@@ -104,6 +117,7 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
   const sourcePaths = new Map<number, Set<string>>();
   const result: (MatchDraft & { scheduled_at: string })[] = [];
   let leagueEnd = start.getTime();
+  let previousGroup: string | null = null;
   const readyFor = (m: MatchDraft, isLeague: boolean) => {
     let ready = isLeague ? start.getTime() : leagueEnd + rest;
     const paths = new Set<string>();
@@ -148,9 +162,10 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
           if (!data) return [];
           const time = Math.max(cursor, data.ready);
           return time + duration <= closing.getTime() ? [{ match, time, paths: data.paths }] : [];
-        }).sort((a, b) => a.time - b.time || a.match.round_index - b.match.round_index || a.match.match_no - b.match.match_no);
+        }).sort((a, b) => a.time - b.time || Number(a.match.group_label === previousGroup) - Number(b.match.group_label === previousGroup) || a.match.round_index - b.match.round_index || a.match.match_no - b.match.match_no);
         const chosen = candidates[0];
         if (!chosen) break;
+        previousGroup = chosen.match.group_label;
         const end = chosen.time + duration;
         chosen.paths.forEach((path) => lastEnd.set(path, end));
         sourceEnd.set(chosen.match.match_no, end);

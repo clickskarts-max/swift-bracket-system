@@ -8,6 +8,13 @@
       "when": 1795189483786,
       "tag": "0000_update_existing_fixture_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795190080203,
+      "tag": "0001_move_individual_fixture_slots",
+      "breakpoints": true
     }
   ]
 }

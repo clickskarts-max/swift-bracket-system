@@ -23,3 +23,8 @@
 
 - [x] Add a date-only update action for existing fixtures without regenerating matchups
 - [x] Verify current fixture dates update and persist, with historical games protected
+
+- [x] Show group labels inside fixtures under shared matchday headings
+- [x] Mix group game times during fixture scheduling
+- [x] Add individual move-up/down and previous/next-day controls
+- [x] Test and verify persistent fixture movement and mixed-group display

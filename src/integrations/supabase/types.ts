@@ -1466,6 +1466,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      move_fixture_slots: {
+        Args: { _moves: Json; _tournament_id: string }
+        Returns: number
+      }
       my_accessible_tournaments: {
         Args: never
         Returns: {

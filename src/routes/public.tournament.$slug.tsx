@@ -173,6 +173,7 @@ function PublicTournament() {
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
           <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             {m.match_no ? `M${m.match_no}` : m.round_name || "—"}
+            {m.group_label && <span className="ml-2 font-semibold text-primary">Group {m.group_label}</span>}
           </span>
           {venue && (
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">

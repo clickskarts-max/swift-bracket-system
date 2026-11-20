@@ -4,6 +4,8 @@ import {
   ArrowLeftRight,
   ChevronDown,
   ChevronUp,
+  CalendarArrowUp,
+  CalendarArrowDown,
   List,
   Pencil,
   Plus,
@@ -17,6 +19,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -44,6 +47,7 @@ import { generateSchedule } from "@/lib/formats";
 import { scheduleFixtureDates } from "@/lib/fixture-timing";
 import { readFixtureSettings, withFixtureSettings } from "@/lib/fixture-settings";
 import { planFixtureDateUpdates } from "@/lib/fixture-date-updates";
+import { planFixtureMove, type FixtureMove } from "@/lib/fixture-movement";
 import {
   QUARTERS,
   emptyPeriods,
@@ -72,12 +76,6 @@ const dayKeyFromIso = (iso: string) => {
   const d = new Date(iso);
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 };
-
-const stripMatchday = (label: string) =>
-  label
-    .replace(/\s*·\s*matchday\s*\d+\s*/gi, "")
-    .replace(/\bmatchday\s*\d+\b/gi, "")
-    .trim();
 
 export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const tournamentId = tournament.id;
@@ -266,30 +264,24 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   }, [visibleMatches]);
 
   const listGroupKey = (m: Match) => {
-    const base = stripMatchday(m.round_name ?? `Round ${m.round_index}`);
-    if (!m.scheduled_at) return base;
+    if (!m.scheduled_at) return "Unscheduled";
     const md = matchdayByDate.get(dayKeyFromIso(m.scheduled_at)) ?? 1;
-    return `${base} · Matchday ${md}`;
+    return `Matchday ${md} · ${formatDate(m.scheduled_at)}`;
   };
 
-  const moveMatchDay = async (list: Match[], deltaDays: number) => {
-    const scheduled = list.filter((m) => !!m.scheduled_at);
-    if (scheduled.length === 0) return;
+  const moveIndividualMatch = async (match: Match, direction: FixtureMove) => {
     setBusy(true);
     try {
-      const updates = await Promise.all(
-        scheduled.map(async (m) => {
-          const d = new Date(m.scheduled_at as string);
-          d.setDate(d.getDate() + deltaDays);
-          return supabase.from("matches").update({ scheduled_at: d.toISOString() }).eq("id", m.id);
-        }),
-      );
-      const firstError = updates.map((u) => u.error).find(Boolean);
-      if (firstError) throw new Error(firstError.message);
+      const current = await supabase.from("matches").select("*").eq("tournament_id", tournamentId);
+      if (current.error) throw new Error(current.error.message);
+      const settings = readFixtureSettings(tournament.config, tournament.start_date);
+      const updates = planFixtureMove(current.data, match.id, direction, settings.restHours, settings.durationMinutes);
+      const result = await supabase.rpc("move_fixture_slots", { _tournament_id: tournamentId, _moves: updates });
+      if (result.error) throw new Error(result.error.message);
       await qc.invalidateQueries({ queryKey: ["matches", tournamentId] });
-      toast.success(`Moved ${scheduled.length} matches`);
+      toast.success(direction === "up" || direction === "down" ? "Match order updated" : "Match day updated");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not move this match day");
+      toast.error(e instanceof Error ? e.message : "Could not move this game");
     } finally {
       setBusy(false);
     }
@@ -427,38 +419,17 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                 <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                   {round}
                 </h3>
-                {list.some((m) => !!m.scheduled_at) && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      aria-label="Move match day earlier"
-                      disabled={busy}
-                      onClick={() => moveMatchDay(list, -1)}
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      aria-label="Move match day later"
-                      disabled={busy}
-                      onClick={() => moveMatchDay(list, 1)}
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
               </div>
               <div className="space-y-2">
                 {list.map((m) => {
                   const a = label(m, "a");
                   const b = label(m, "b");
                   return (
-                    <div key={m.id} className="surface-card p-4">
+                    <div key={m.id} data-match-id={m.id} className="surface-card p-4">
                       <div className="mb-2 flex items-center justify-between gap-2">
                         <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
                           M{m.match_no ?? "—"}
+                          {m.group_label ? <span className="ml-2 font-semibold text-primary">Group {m.group_label}</span> : <span className="ml-2">{m.round_name ?? m.stage}</span>}
                         </span>
                         <StatusPill status={m.status} />
                       </div>
@@ -482,6 +453,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                               <TipoffCountdown scheduledAt={m.scheduled_at} />
                             )}
                           </span>
+                          {m.scheduled_at && <span className="text-xs font-medium text-muted-foreground">{new Date(m.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
                         </div>
                         <TeamChip
                           name={b.name}
@@ -490,7 +462,23 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                           className="min-w-0 flex-row-reverse justify-start text-right"
                         />
                       </div>
-                      <div className="mt-2 flex items-center justify-end gap-1">
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                        <TooltipProvider delayDuration={150}>
+                          <div className="flex items-center gap-1">
+                            {m.status === "scheduled" && ([
+                              { direction: "up", label: "Move game up", Icon: ChevronUp },
+                              { direction: "down", label: "Move game down", Icon: ChevronDown },
+                              { direction: "previous-day", label: "Move game to previous day", Icon: CalendarArrowUp },
+                              { direction: "next-day", label: "Move game to next day", Icon: CalendarArrowDown },
+                            ] as const).map(({ direction, label: controlLabel, Icon }) => (
+                              <Tooltip key={direction}>
+                                <TooltipTrigger asChild><Button size="icon" variant="ghost" aria-label={`${controlLabel} M${m.match_no}`} disabled={busy || !m.scheduled_at} onClick={() => moveIndividualMatch(m, direction)}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
+                                <TooltipContent>{controlLabel}</TooltipContent>
+                              </Tooltip>
+                            ))}
+                          </div>
+                        </TooltipProvider>
+                        <div className="flex items-center gap-1">
                         <Button
                           size="icon"
                           variant="ghost"
@@ -520,6 +508,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                         >
                           Score
                         </Button>
+                        </div>
                       </div>
                     </div>
                   );

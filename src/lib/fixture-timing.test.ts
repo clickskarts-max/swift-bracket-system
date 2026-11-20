@@ -116,3 +116,18 @@ test("duplicate knockout matchups are rejected", () => {
   ok(semi);
   throws(() => scheduleFixtureDates([...source, { ...semi, match_no: 99 }], tenTeams, sixDayOptions), /Duplicate knockout/);
 });
+
+test("fixed-day scheduling mixes Group A and B time slots while preserving daily totals", () => {
+  const firstDay = scheduleFixtureDates(sixDayDrafts(), tenTeams, sixDayOptions).filter((m) => m.stage === "group" && new Date(m.scheduled_at).getDate() === 1);
+  strictEqual(firstDay.length, 5);
+  strictEqual(firstDay[0]?.group_label, "A");
+  strictEqual(firstDay[1]?.group_label, "B");
+  strictEqual(firstDay[2]?.group_label, "A");
+});
+
+test("daily-limit scheduling also alternates Group A and B games", () => {
+  const fixtures = scheduleFixtureDates(sixDayDrafts(), tenTeams, { ...options, leagueMatchesPerDay: 5, minimumRestHours: 2 });
+  strictEqual(fixtures[0]?.group_label, "A");
+  strictEqual(fixtures[1]?.group_label, "B");
+  strictEqual(fixtures[2]?.group_label, "A");
+});
