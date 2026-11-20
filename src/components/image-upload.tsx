@@ -26,6 +26,7 @@ export function ImageUpload({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const compact = className?.includes("!gap-0") ?? false;
 
   const pick = async (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -61,10 +62,11 @@ export function ImageUpload({
   };
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex min-w-0 max-w-full items-center gap-3", !compact && "flex-wrap", className)}>
       <div
         className={cn(
-          "relative group flex h-full w-full shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40 cursor-pointer hover:border-primary/40 transition-all duration-300 ease-transitions",
+          "relative group flex shrink-0 items-center justify-center overflow-hidden border border-border bg-muted/40 cursor-pointer hover:border-primary/40 transition-all duration-300 ease-transitions",
+          compact ? "h-full w-full" : "h-20 w-20",
           rounded,
         )}
         onClick={() => inputRef.current?.click()}
@@ -100,8 +102,8 @@ export function ImageUpload({
           </div>
         )}
       </div>
-      <div className="flex flex-wrap gap-2 empty:hidden">
-        {className?.includes("!gap-0") ? null : (
+      <div className="flex min-w-0 flex-wrap gap-2 empty:hidden">
+        {compact ? null : (
           <>
             <Button
               type="button"
