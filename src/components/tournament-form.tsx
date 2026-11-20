@@ -43,6 +43,8 @@ import { PoolDraw } from "@/components/pool-draw";
 import { TOURNAMENT_FORMATS, PLAYOFF_FORMATS, calculateGroupCapacities } from "@/lib/formats";
 import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
+import type { Json } from "@/integrations/supabase/types";
+import { readGroupCapacities } from "@/lib/tournament-payload";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -92,6 +94,7 @@ export type TournamentValues = {
   teams?: TeamValue[];
   venues?: VenueValue[];
   group_capacities?: Record<string, number> | null;
+  config?: Json;
 };
 
 const schema = z.object({
@@ -164,6 +167,8 @@ export function TournamentForm({
           banner_url: initial.banner_url,
           description: initial.description,
           is_public: initial.is_public,
+          config: initial.config,
+          group_capacities: readGroupCapacities(initial.config),
           teams: [], // Handled separately if needed, but usually creation only
         }
       : { ...empty(), qualifiers_per_group: 2 },
