@@ -13,4 +13,4 @@
 
 - Tournament champions are stored in `tournaments.config.champion_team_id`; cancelled conditional games remain historical records but are excluded from active schedule and bracket displays, preserving history without showing unnecessary fixtures.
 - Serialize tournament form collections before database writes: store group capacities in existing config JSON, preserve other config keys, and exclude teams/venues from tournament columns to avoid schema-cache errors.
-- Assign generated fixture dates through the pure fixture-timing scheduler; enforce daily phase limits and rest after game end, conservatively including every possible knockout participant before teams are known.
+- Assign generated dates through the pure fixture-timing scheduler; enforce rest after game end and daily or fixed phase windows, reject deadline overflow before writes, and use distinct seed paths plus prerequisite games to protect unknown knockout participants without conflating mutually exclusive seeds.

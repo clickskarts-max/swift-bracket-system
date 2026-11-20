@@ -66,3 +66,49 @@ test("group knockout scheduling respects dependencies with uneven groups", () =>
 test("late daily start that cannot fit a game is rejected", () => {
   throws(() => scheduleFixtureDates(drafts(), teams, { ...options, startTime: "23:30" }));
 });
+
+const tenTeams: TeamRef[] = Array.from({ length: 10 }, (_, i) => ({ id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, "0")}`, name: `Team ${i + 1}`, group_label: i < 5 ? "A" : "B" }));
+const sixDayDrafts = () => generateSchedule({ format: "group_knockout", legs: 1, qualifiersPerGroup: 2, playoffFormat: "none", teams: tenTeams });
+const sixDayOptions: FixtureTiming = { ...options, leagueMatchesPerDay: 5, knockoutMatchesPerDay: 2, minimumRestHours: 2, phaseDays: { league: 4, knockout: 2 } };
+
+test("10 teams: 20 league games occupy days 1–4 and 3 knockout games occupy days 5–6", () => {
+  const fixtures = scheduleFixtureDates(sixDayDrafts(), tenTeams, sixDayOptions);
+  strictEqual(fixtures.length, 23);
+  const counts = new Map<number, number>();
+  for (const m of fixtures) {
+    const day = new Date(m.scheduled_at).getDate();
+    if (m.stage === "group") ok(day >= 1 && day <= 4);
+    else ok(day === 5 || day === 6);
+    counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+  strictEqual(JSON.stringify([...counts]), JSON.stringify([[1, 5], [2, 5], [3, 5], [4, 5], [5, 2], [6, 1]]));
+  strictEqual(new Set(fixtures.map((m) => m.match_no)).size, 23);
+});
+
+test("fixed-window league teams and advancing teams receive 2 hours rest after game end", () => {
+  const fixtures = scheduleFixtureDates(sixDayDrafts(), tenTeams, sixDayOptions);
+  const ends = new Map<string, number>();
+  for (const m of fixtures) {
+    for (const id of [m.team_a_id, m.team_b_id]) {
+      if (!id) continue;
+      const last = ends.get(id);
+      if (last !== undefined) ok(Date.parse(m.scheduled_at) - last >= 2 * 3_600_000);
+      ends.set(id, Date.parse(m.scheduled_at) + 90 * 60_000);
+    }
+  }
+  const final = fixtures.find((m) => m.stage === "final");
+  ok(final);
+  for (const semi of fixtures.filter((m) => m.stage === "knockout"))
+    ok(Date.parse(final.scheduled_at) - Date.parse(semi.scheduled_at) >= 90 * 60_000 + 2 * 3_600_000);
+});
+
+test("impossible six-day rest constraints fail instead of spilling past day 6", () => {
+  throws(() => scheduleFixtureDates(sixDayDrafts(), tenTeams, { ...sixDayOptions, minimumRestHours: 72 }), /Cannot fit/);
+});
+
+test("duplicate knockout matchups are rejected", () => {
+  const source = sixDayDrafts();
+  const semi = source.find((m) => m.stage === "knockout");
+  ok(semi);
+  throws(() => scheduleFixtureDates([...source, { ...semi, match_no: 99 }], tenTeams, sixDayOptions), /Duplicate knockout/);
+});

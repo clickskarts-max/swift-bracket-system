@@ -94,6 +94,27 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [knockoutLimit, setKnockoutLimit] = useState(1);
   const [restHours, setRestHours] = useState(24);
   const [durationMinutes, setDurationMinutes] = useState(90);
+  const [timingMode, setTimingMode] = useState("daily");
+  const [leagueDays, setLeagueDays] = useState(4);
+  const [knockoutDays, setKnockoutDays] = useState(2);
+  const generationPreview = useMemo(() => {
+    if (timingMode !== "fixed") return null;
+    try {
+      const drafts = generateSchedule({ format: tournament.format, legs: tournament.legs, qualifiersPerGroup: tournament.qualifiers_per_group, playoffFormat: tournament.playoff_format, teams });
+      const leagueCount = drafts.filter((m) => m.stage === "league" || m.stage === "group").length;
+      const fixtures = scheduleFixtureDates(drafts, teams, {
+        startDate, startTime, leagueMatchesPerDay: Math.max(1, Math.ceil(leagueCount / leagueDays)),
+        knockoutMatchesPerDay: Math.max(1, Math.ceil((drafts.length - leagueCount) / knockoutDays)),
+        minimumRestHours: restHours, matchDurationMinutes: durationMinutes,
+        phaseDays: { league: leagueDays, knockout: knockoutDays },
+      });
+      const daily = new Map<string, number>();
+      fixtures.forEach((m) => { const key = dayKeyFromIso(m.scheduled_at); daily.set(key, (daily.get(key) ?? 0) + 1); });
+      return { fixtures, daily: [...daily], error: "" };
+    } catch (error) {
+      return { fixtures: [], daily: [], error: error instanceof Error ? error.message : "Cannot fit the schedule" };
+    }
+  }, [timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, restHours, durationMinutes]);
   const visibleMatches = useMemo(
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
@@ -154,7 +175,8 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           seed: t.seed,
         })),
       });
-      const drafts = scheduleFixtureDates(untimedDrafts, teams, {
+      if (generationPreview?.error) throw new Error(generationPreview.error);
+      const drafts = generationPreview?.fixtures ?? scheduleFixtureDates(untimedDrafts, teams, {
         startDate, startTime, leagueMatchesPerDay: leagueLimit,
         knockoutMatchesPerDay: knockoutLimit, minimumRestHours: restHours,
         matchDurationMinutes: durationMinutes,
@@ -280,7 +302,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
               <RefreshCw className="mr-1.5 h-4 w-4" /> Generate schedule
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
             <AlertDialogHeader>
               <AlertDialogTitle>Regenerate the full schedule?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -288,17 +310,36 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                 by a fresh fixture list.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <Field label="Scheduling plan">
+              <Select value={timingMode} onValueChange={(value) => { setTimingMode(value); }}>
+                <SelectTrigger aria-label="Scheduling plan"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily match limits</SelectItem>
+                  <SelectItem value="fixed">Fixed tournament days</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="First match date"><Input aria-label="First match date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></Field>
               <Field label="Daily start time"><Input aria-label="Daily start time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} /></Field>
-              <Field label="League matches per day"><Input aria-label="League matches per day" type="number" min={1} max={24} value={leagueLimit} onChange={(e) => setLeagueLimit(Number(e.target.value))} /></Field>
-              <Field label="Knockout matches per day"><Input aria-label="Knockout matches per day" type="number" min={1} max={24} value={knockoutLimit} onChange={(e) => setKnockoutLimit(Number(e.target.value))} /></Field>
+              {timingMode === "fixed" ? <>
+                <Field label="League days"><Input aria-label="League days" type="number" min={1} max={60} value={leagueDays} onChange={(e) => setLeagueDays(Number(e.target.value))} /></Field>
+                <Field label="Knockout days"><Input aria-label="Knockout days" type="number" min={1} max={60} value={knockoutDays} onChange={(e) => setKnockoutDays(Number(e.target.value))} /></Field>
+              </> : <>
+                <Field label="League matches per day"><Input aria-label="League matches per day" type="number" min={1} max={24} value={leagueLimit} onChange={(e) => setLeagueLimit(Number(e.target.value))} /></Field>
+                <Field label="Knockout matches per day"><Input aria-label="Knockout matches per day" type="number" min={1} max={24} value={knockoutLimit} onChange={(e) => setKnockoutLimit(Number(e.target.value))} /></Field>
+              </>}
               <Field label="Minimum team rest (hours)"><Input aria-label="Minimum team rest (hours)" type="number" min={0} max={168} value={restHours} onChange={(e) => setRestHours(Number(e.target.value))} /></Field>
               <Field label="Game duration (minutes)"><Input aria-label="Game duration (minutes)" type="number" min={30} max={240} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} /></Field>
             </div>
+            {generationPreview && <div className="space-y-2 text-sm">
+              <p className="font-semibold">{leagueDays + knockoutDays} days · League days 1–{leagueDays} · Knockout days {leagueDays + 1}–{leagueDays + knockoutDays}</p>
+              {generationPreview.error ? <p role="alert" className="text-destructive">{generationPreview.error}</p> :
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">{generationPreview.daily.map(([date, count]) => <p key={date}>{formatDate(date)} · {count} matches</p>)}</div>}
+            </div>}
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <Button disabled={busy} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>
+              <Button disabled={busy || !!generationPreview?.error} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
