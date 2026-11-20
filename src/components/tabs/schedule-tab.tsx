@@ -43,6 +43,7 @@ import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/a
 import { generateSchedule } from "@/lib/formats";
 import { scheduleFixtureDates } from "@/lib/fixture-timing";
 import { readFixtureSettings, withFixtureSettings } from "@/lib/fixture-settings";
+import { planFixtureDateUpdates } from "@/lib/fixture-date-updates";
 import {
   QUARTERS,
   emptyPeriods,
@@ -93,6 +94,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [generationOpen, setGenerationOpen] = useState(false);
   const [settingsOnly, setSettingsOnly] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [updatingDates, setUpdatingDates] = useState(false);
   const [savedSettings] = useState(() => readFixtureSettings(tournament.config, tournament.start_date));
   const [startDate, setStartDate] = useState(savedSettings.startDate);
   const [startTime, setStartTime] = useState(savedSettings.startTime);
@@ -106,7 +108,12 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const generationPreview = useMemo(() => {
     if (timingMode !== "fixed") return null;
     try {
-      const drafts = generateSchedule({ format: tournament.format, legs: tournament.legs, qualifiersPerGroup: tournament.qualifiers_per_group, playoffFormat: tournament.playoff_format, teams });
+      const drafts = settingsOnly && matches.length
+        ? matches.filter((m) => m.status !== "cancelled").map((m) => {
+            if (m.match_no === null) throw new Error("Give every fixture a match number before updating dates.");
+            return { ...m, match_no: m.match_no, round_name: m.round_name ?? "" };
+          })
+        : generateSchedule({ format: tournament.format, legs: tournament.legs, qualifiersPerGroup: tournament.qualifiers_per_group, playoffFormat: tournament.playoff_format, teams });
       const fixtures = scheduleFixtureDates(drafts, teams, {
         startDate, startTime, leagueMatchesPerDay: leagueLimit,
         knockoutMatchesPerDay: knockoutLimit,
@@ -119,7 +126,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
     } catch (error) {
       return { fixtures: [], daily: [], error: error instanceof Error ? error.message : "Cannot fit the schedule" };
     }
-  }, [timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, leagueLimit, knockoutLimit, restHours, durationMinutes]);
+  }, [settingsOnly, matches, timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, leagueLimit, knockoutLimit, restHours, durationMinutes]);
   const visibleMatches = useMemo(
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
@@ -180,6 +187,26 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not apply fixture settings");
     } finally { setApplying(false); }
+  };
+
+  const updateFixtureDates = async () => {
+    setUpdatingDates(true);
+    try {
+      const current = await supabase.from("matches").select("*").eq("tournament_id", tournamentId);
+      if (current.error) throw new Error(current.error.message);
+      const dates = planFixtureDateUpdates(current.data, teams, {
+        startDate, startTime, leagueMatchesPerDay: leagueLimit, knockoutMatchesPerDay: knockoutLimit,
+        minimumRestHours: restHours, matchDurationMinutes: durationMinutes,
+        ...(timingMode === "fixed" ? { phaseDays: { league: leagueDays, knockout: knockoutDays } } : {}),
+      });
+      const result = await supabase.rpc("update_fixture_dates", { _tournament_id: tournamentId, _dates: dates });
+      if (result.error) throw new Error(result.error.message);
+      await qc.invalidateQueries({ queryKey: ["matches", tournamentId] });
+      setGenerationOpen(false);
+      toast.success(`${result.data} fixture dates updated — matchups and scores unchanged`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update fixture dates");
+    } finally { setUpdatingDates(false); }
   };
 
   const regenerate = async () => {
@@ -333,7 +360,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
             <AlertDialogHeader>
               <AlertDialogTitle>{settingsOnly ? "Fixture settings" : "Regenerate the full schedule?"}</AlertDialogTitle>
               <AlertDialogDescription>
-                {settingsOnly ? "Applying settings keeps all current matches and scores unchanged." : "All existing matches, scores and match details for this tournament will be replaced by a fresh fixture list."}
+                {settingsOnly ? "Apply settings saves the plan only. Update fixture dates applies this plan to current games without replacing matchups or scores." : "All existing matches, scores and match details for this tournament will be replaced by a fresh fixture list."}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Field label="Scheduling plan">
@@ -365,8 +392,11 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">{generationPreview.daily.map(([date, count]) => <p key={date}>{formatDate(date)} · {count} matches</p>)}</div>}
             </div>}
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              {settingsOnly ? <Button disabled={applying || !!generationPreview?.error} onClick={applySettings}><Save className="mr-1.5 h-4 w-4" />{applying ? "Applying…" : "Apply settings"}</Button> : <Button disabled={busy || !!generationPreview?.error} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>}
+              <AlertDialogCancel disabled={applying || updatingDates}>Cancel</AlertDialogCancel>
+              {settingsOnly ? <>
+                <Button variant="outline" disabled={applying || updatingDates || !!generationPreview?.error} onClick={applySettings}><Save className="mr-1.5 h-4 w-4" />{applying ? "Applying…" : "Apply settings"}</Button>
+                <Button disabled={applying || updatingDates || !visibleMatches.length || !!generationPreview?.error} onClick={updateFixtureDates}><RefreshCw className="mr-1.5 h-4 w-4" />{updatingDates ? "Updating…" : "Update fixture dates"}</Button>
+              </> : <Button disabled={busy || !!generationPreview?.error} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
