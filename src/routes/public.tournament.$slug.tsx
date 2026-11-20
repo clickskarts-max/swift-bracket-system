@@ -366,7 +366,7 @@ function PublicTournament() {
                     </h3>
                     <div className="space-y-2">
                       {list.map((m, idx) => (
-                        <div key={m.id} className="space-y-4">
+                        <div key={m.id} className="space-y-2 [&>div:empty]:m-0 [&>div:empty]:p-0">
                           <MatchRow m={m} />
                           {fixtureAdIndexes.has(idx) && (
                             <InlineAd tournamentId={tournament.id} className="py-2" />
@@ -403,7 +403,7 @@ function PublicTournament() {
                     </h3>
                     <div className="space-y-2">
                       {list.map((m, idx) => (
-                        <div key={m.id} className="space-y-4">
+                        <div key={m.id} className="space-y-2 [&>div:empty]:m-0 [&>div:empty]:p-0">
                           <MatchRow m={m} />
                           {resultAdIndexes.has(idx) && (
                             <InlineAd tournamentId={tournament.id} className="py-2" />

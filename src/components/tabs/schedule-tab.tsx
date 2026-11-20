@@ -7,6 +7,8 @@ import {
   CalendarArrowUp,
   CalendarArrowDown,
   List,
+  Table2,
+  LayoutList,
   Pencil,
   Plus,
   RefreshCw,
@@ -42,6 +44,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components/data-bits";
 import { TipoffCountdown } from "@/components/tipoff-countdown";
+import { FixtureSheet } from "@/components/tabs/fixture-sheet";
 import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import { scheduleFixtureDates } from "@/lib/fixture-timing";
@@ -86,6 +89,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const save = useUpsert("matches", [["matches", tournamentId]]);
   const qc = useQueryClient();
   const [bucket, setBucket] = useState<"fixtures" | "results">("fixtures");
+  const [view, setView] = useState("cards");
   const [editing, setEditing] = useState<Match | null>(null);
   const [mode, setMode] = useState<"game" | "score">("game");
   const [busy, setBusy] = useState(false);
@@ -332,7 +336,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const completedCount = visibleMatches.filter((m) => isFinalStatus(m.status)).length;
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 max-w-full space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex items-center gap-2 font-semibold">
           <List className="h-4 w-4 text-primary" />
@@ -395,12 +399,20 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-2">
       <Tabs value={bucket} onValueChange={(v) => setBucket(v as "fixtures" | "results")}>
         <TabsList>
           <TabsTrigger value="fixtures">Upcoming ({visibleMatches.length - completedCount})</TabsTrigger>
           <TabsTrigger value="results">Completed ({completedCount})</TabsTrigger>
         </TabsList>
       </Tabs>
+      <Tabs value={view} onValueChange={setView}>
+        <TabsList aria-label="Fixture view">
+          <TabsTrigger value="cards"><LayoutList className="mr-1.5 h-4 w-4" />Cards</TabsTrigger>
+          <TabsTrigger value="sheet"><Table2 className="mr-1.5 h-4 w-4" />Sheet</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      </div>
 
       {grouped.length === 0 ? (
         <EmptyState
@@ -411,6 +423,11 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
               : "Generate the fixture list from your teams and format."
           }
         />
+      ) : view === "sheet" ? (
+        <FixtureSheet grouped={grouped} label={label} venues={venues} busy={busy || save.isPending}
+          onMove={moveIndividualMatch} onSwap={swapSides}
+          onEdit={(match) => { setMode("game"); setEditing(match); }}
+          onScore={(match) => { setMode("score"); setEditing(match); }} />
       ) : (
         <div className="space-y-6">
           {grouped.map(([round, list]) => (

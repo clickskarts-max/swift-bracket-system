@@ -18,3 +18,4 @@
 - Fixed-day fixture previews and generation use the saved explicit daily limits, never calculated replacements, so user-selected capacity and phase deadlines are enforced together.
 - Redate existing fixtures through a date-only planner and an atomic permission-checked database operation; never regenerate matchups or alter started, completed, forfeited, or cancelled records.
 - Individual fixture order changes swap scheduled timestamps atomically with stale-date checks; day shifts keep the selected game's local time, and the movement planner rejects rest and prerequisite conflicts.
+- The compact fixture sheet reuses ScheduleTab mutations and its match dialog; alternate views must not introduce separate score or movement write paths.

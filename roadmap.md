@@ -28,3 +28,7 @@
 - [x] Mix group game times during fixture scheduling
 - [x] Add individual move-up/down and previous/next-day controls
 - [x] Test and verify persistent fixture movement and mixed-group display
+
+- [x] Remove empty ad spacing between same-day public games
+- [x] Add a compact searchable fixture sheet with existing management actions
+- [x] Verify signed-in sheet controls and mobile layout
