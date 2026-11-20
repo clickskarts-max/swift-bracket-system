@@ -25,6 +25,7 @@ import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
 import { TournamentChampion } from "@/components/tournament-champion";
 import { formatDate, formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
+import { fixtureDisplayNumbers } from "@/lib/fixture-display";
 import { useBranding } from "@/hooks/use-branding";
 import {
   useMatches,
@@ -85,6 +86,7 @@ function PublicTournament() {
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
   );
+  const displayNumbers = useMemo(() => fixtureDisplayNumbers(matches), [matches]);
 
   const matchdayByDate = useMemo(() => {
     const keys = [
@@ -172,7 +174,7 @@ function PublicTournament() {
       <div className="surface-card p-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
           <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {m.match_no ? `M${m.match_no}` : m.round_name || "—"}
+            {`M${displayNumbers.get(m.id) ?? "—"}`}
             {m.group_label && <span className="ml-2 font-semibold text-primary">Group {m.group_label}</span>}
           </span>
           {venue && (

@@ -32,3 +32,7 @@
 - [x] Remove empty ad spacing between same-day public games
 - [x] Add a compact searchable fixture sheet with existing management actions
 - [x] Verify signed-in sheet controls and mobile layout
+
+- [x] Display fixture numbers in chronological playing order without changing stored references
+- [x] Add a small matchday separator in the fixture sheet
+- [x] Test numbering and verify the signed-in fixture views

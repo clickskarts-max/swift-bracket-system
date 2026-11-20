@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { ArrowLeftRight, CalendarArrowDown, CalendarArrowUp, ChevronDown, ChevronUp, Pencil, Search, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,9 @@ import type { FixtureMove } from "@/lib/fixture-movement";
 
 type Side = { name: string; logo_url: string | null; jersey_color: string | null };
 
-export function FixtureSheet({ grouped, label, venues, busy, onMove, onSwap, onEdit, onScore }: {
+export function FixtureSheet({ grouped, displayNumbers, label, venues, busy, onMove, onSwap, onEdit, onScore }: {
   grouped: [string, Match[]][];
+  displayNumbers: Map<string, number>;
   label: (match: Match, side: "a" | "b") => Side;
   venues: Venue[];
   busy: boolean;
@@ -24,7 +25,7 @@ export function FixtureSheet({ grouped, label, venues, busy, onMove, onSwap, onE
   const [search, setSearch] = useState("");
   const query = search.trim().toLowerCase();
   const rows = grouped.flatMap(([day, matches]) => matches.map(match => ({ day, match }))).filter(({ day, match }) =>
-    [day, `M${match.match_no}`, label(match, "a").name, label(match, "b").name, match.group_label ? `Group ${match.group_label}` : match.round_name, match.status]
+    [day, `M${displayNumbers.get(match.id)}`, label(match, "a").name, label(match, "b").name, match.group_label ? `Group ${match.group_label}` : match.round_name, match.status]
       .some(value => value?.toLowerCase().includes(query))
   );
 
@@ -44,7 +45,7 @@ export function FixtureSheet({ grouped, label, venues, busy, onMove, onSwap, onE
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map(({ day, match: m }) => {
+          {rows.map(({ day, match: m }, index) => {
             const a = label(m, "a");
             const b = label(m, "b");
             const actions = [
@@ -58,8 +59,10 @@ export function FixtureSheet({ grouped, label, venues, busy, onMove, onSwap, onE
               { title: "Edit match", Icon: Pencil, run: () => onEdit(m), disabled: busy },
               { title: "Enter score", Icon: SquarePen, run: () => onScore(m), disabled: busy },
             ];
-            return <TableRow key={m.id} data-match-id={m.id}>
-              <TableCell className="font-semibold tabular-nums">M{m.match_no ?? "—"}</TableCell>
+            return <Fragment key={m.id}>
+              {index > 0 && rows[index - 1]?.day !== day && <TableRow aria-hidden="true" className="border-0 bg-muted/30 hover:bg-muted/30"><TableCell colSpan={9} className="h-3 !p-0" /></TableRow>}
+              <TableRow data-match-id={m.id}>
+              <TableCell className="font-semibold tabular-nums">M{displayNumbers.get(m.id) ?? "—"}</TableCell>
               <TableCell className="whitespace-nowrap text-xs">
                 <div className="font-medium">{day.split(" · ")[0]}</div>
                 <div className="text-muted-foreground">{m.scheduled_at ? `${formatDate(m.scheduled_at)} · ${new Date(m.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "TBD"}</div>
@@ -73,12 +76,12 @@ export function FixtureSheet({ grouped, label, venues, busy, onMove, onSwap, onE
               <TableCell>
                 <div className="flex items-center">
                   {actions.map(({ title, Icon, run, disabled }) => <Tooltip key={title}>
-                    <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`${title} M${m.match_no}`} disabled={disabled} onClick={run}><Icon className="h-3.5 w-3.5" /></Button></TooltipTrigger>
+                    <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`${title} M${displayNumbers.get(m.id)}`} disabled={disabled} onClick={run}><Icon className="h-3.5 w-3.5" /></Button></TooltipTrigger>
                     <TooltipContent>{title}</TooltipContent>
                   </Tooltip>)}
                 </div>
               </TableCell>
-            </TableRow>;
+            </TableRow></Fragment>;
           })}
           {!rows.length && <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">No matching games</TableCell></TableRow>}
         </TableBody>

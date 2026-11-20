@@ -51,6 +51,7 @@ import { scheduleFixtureDates } from "@/lib/fixture-timing";
 import { readFixtureSettings, withFixtureSettings } from "@/lib/fixture-settings";
 import { planFixtureDateUpdates } from "@/lib/fixture-date-updates";
 import { planFixtureMove, type FixtureMove } from "@/lib/fixture-movement";
+import { fixtureDisplayNumbers } from "@/lib/fixture-display";
 import {
   QUARTERS,
   emptyPeriods,
@@ -133,6 +134,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
   );
+  const displayNumbers = useMemo(() => fixtureDisplayNumbers(matches), [matches]);
 
   const teamById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
 
@@ -424,7 +426,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           }
         />
       ) : view === "sheet" ? (
-        <FixtureSheet grouped={grouped} label={label} venues={venues} busy={busy || save.isPending}
+        <FixtureSheet grouped={grouped} displayNumbers={displayNumbers} label={label} venues={venues} busy={busy || save.isPending}
           onMove={moveIndividualMatch} onSwap={swapSides}
           onEdit={(match) => { setMode("game"); setEditing(match); }}
           onScore={(match) => { setMode("score"); setEditing(match); }} />
@@ -445,7 +447,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                     <div key={m.id} data-match-id={m.id} className="surface-card p-4">
                       <div className="mb-2 flex items-center justify-between gap-2">
                         <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                          M{m.match_no ?? "—"}
+                          M{displayNumbers.get(m.id) ?? "—"}
                           {m.group_label ? <span className="ml-2 font-semibold text-primary">Group {m.group_label}</span> : <span className="ml-2">{m.round_name ?? m.stage}</span>}
                         </span>
                         <StatusPill status={m.status} />
@@ -489,7 +491,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                               { direction: "next-day", label: "Move game to next day", Icon: CalendarArrowDown },
                             ] as const).map(({ direction, label: controlLabel, Icon }) => (
                               <Tooltip key={direction}>
-                                <TooltipTrigger asChild><Button size="icon" variant="ghost" aria-label={`${controlLabel} M${m.match_no}`} disabled={busy || !m.scheduled_at} onClick={() => moveIndividualMatch(m, direction)}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
+                                <TooltipTrigger asChild><Button size="icon" variant="ghost" aria-label={`${controlLabel} M${displayNumbers.get(m.id)}`} disabled={busy || !m.scheduled_at} onClick={() => moveIndividualMatch(m, direction)}><Icon className="h-4 w-4" /></Button></TooltipTrigger>
                                 <TooltipContent>{controlLabel}</TooltipContent>
                               </Tooltip>
                             ))}
@@ -538,6 +540,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
       <MatchDialog
         match={editing}
+        displayNumber={editing ? displayNumbers.get(editing.id) ?? null : null}
         mode={mode}
         teams={teams.map((t) => ({ id: t.id, name: t.name }))}
         venues={venues}
@@ -565,6 +568,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
 function MatchDialog({
   match,
+  displayNumber,
   mode,
   teams,
   venues,
@@ -574,6 +578,7 @@ function MatchDialog({
   pending,
 }: {
   match: Match | null;
+  displayNumber: number | null;
   mode: "game" | "score";
   teams: { id: string; name: string }[];
   venues: Venue[];
@@ -638,7 +643,7 @@ function MatchDialog({
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "score" ? "Score data" : "Game data"} · Match {draft.match_no ?? ""}
+            {mode === "score" ? "Score data" : "Game data"} · Match {displayNumber ?? draft.match_no ?? ""}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -704,7 +709,7 @@ function MatchDialog({
                   )}
                 </div>
               </div>
-              <Field label="Match number">
+              <Field label="Reference match number">
                 <Input
                   type="number"
                   min={1}
