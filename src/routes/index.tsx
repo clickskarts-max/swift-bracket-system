@@ -18,6 +18,16 @@ import { AutoAdRegion } from "@/components/ads/auto-ad-region";
 import { NativeAdSlot } from "@/components/ads/native-ad-slot";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Ecluid Basketball — Tournament management" },
+      { name: "description", content: "Manage basketball tournaments, teams, fixtures, live results and standings with Ecluid Basketball." },
+      { property: "og:title", content: "Ecluid Basketball — Tournament management" },
+      { property: "og:description", content: "Basketball tournament management with fixture planning, live results and public standings." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 

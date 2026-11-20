@@ -16,3 +16,7 @@
 
 - [x] Add Apply settings independently of fixture generation
 - [x] Verify saved settings reload without changing existing matches
+
+- [x] Make Fixture settings prominent above the schedule
+- [x] Expose and enforce daily limits in fixed-day plans, with capacity totals
+- [x] Test and verify applying five matches per day for four days

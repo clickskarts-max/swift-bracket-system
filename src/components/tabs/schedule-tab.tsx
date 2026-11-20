@@ -107,10 +107,9 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
     if (timingMode !== "fixed") return null;
     try {
       const drafts = generateSchedule({ format: tournament.format, legs: tournament.legs, qualifiersPerGroup: tournament.qualifiers_per_group, playoffFormat: tournament.playoff_format, teams });
-      const leagueCount = drafts.filter((m) => m.stage === "league" || m.stage === "group").length;
       const fixtures = scheduleFixtureDates(drafts, teams, {
-        startDate, startTime, leagueMatchesPerDay: Math.max(1, Math.ceil(leagueCount / leagueDays)),
-        knockoutMatchesPerDay: Math.max(1, Math.ceil((drafts.length - leagueCount) / knockoutDays)),
+        startDate, startTime, leagueMatchesPerDay: leagueLimit,
+        knockoutMatchesPerDay: knockoutLimit,
         minimumRestHours: restHours, matchDurationMinutes: durationMinutes,
         phaseDays: { league: leagueDays, knockout: knockoutDays },
       });
@@ -120,7 +119,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
     } catch (error) {
       return { fixtures: [], daily: [], error: error instanceof Error ? error.message : "Cannot fit the schedule" };
     }
-  }, [timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, restHours, durationMinutes]);
+  }, [timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, leagueLimit, knockoutLimit, restHours, durationMinutes]);
   const visibleMatches = useMemo(
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
@@ -315,24 +314,18 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
 
   return (
     <div className="space-y-4">
-      <Tabs value={bucket} onValueChange={(v) => setBucket(v as "fixtures" | "results")}>
-        <TabsList>
-          <TabsTrigger value="fixtures">Upcoming ({visibleMatches.length - completedCount})</TabsTrigger>
-          <TabsTrigger value="results">Completed ({completedCount})</TabsTrigger>
-        </TabsList>
-      </Tabs>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <List className="h-4 w-4" />
-          <span>Rounds</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+        <div className="flex items-center gap-2 font-semibold">
+          <List className="h-4 w-4 text-primary" />
+          <span>Fixtures</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" variant="outline" disabled={busy} onClick={() => { setSettingsOnly(true); setGenerationOpen(true); }}>
+        <Button variant="outline" disabled={busy} onClick={() => { setSettingsOnly(true); setGenerationOpen(true); }}>
           <SlidersHorizontal className="mr-1.5 h-4 w-4" /> Fixture settings
         </Button>
         <AlertDialog open={generationOpen} onOpenChange={setGenerationOpen}>
           <AlertDialogTrigger asChild>
-            <Button size="sm" disabled={busy} onClick={() => setSettingsOnly(false)}>
+            <Button disabled={busy} onClick={() => setSettingsOnly(false)}>
               <RefreshCw className="mr-1.5 h-4 w-4" /> Generate schedule
             </Button>
           </AlertDialogTrigger>
@@ -358,15 +351,16 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
               {timingMode === "fixed" ? <>
                 <Field label="League days"><Input aria-label="League days" type="number" min={1} max={60} value={leagueDays} onChange={(e) => setLeagueDays(Number(e.target.value))} /></Field>
                 <Field label="Knockout days"><Input aria-label="Knockout days" type="number" min={1} max={60} value={knockoutDays} onChange={(e) => setKnockoutDays(Number(e.target.value))} /></Field>
-              </> : <>
+              </> : null}
                 <Field label="League matches per day"><Input aria-label="League matches per day" type="number" min={1} max={24} value={leagueLimit} onChange={(e) => setLeagueLimit(Number(e.target.value))} /></Field>
                 <Field label="Knockout matches per day"><Input aria-label="Knockout matches per day" type="number" min={1} max={24} value={knockoutLimit} onChange={(e) => setKnockoutLimit(Number(e.target.value))} /></Field>
-              </>}
               <Field label="Minimum team rest (hours)"><Input aria-label="Minimum team rest (hours)" type="number" min={0} max={168} value={restHours} onChange={(e) => setRestHours(Number(e.target.value))} /></Field>
               <Field label="Game duration (minutes)"><Input aria-label="Game duration (minutes)" type="number" min={30} max={240} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} /></Field>
             </div>
             {generationPreview && <div className="space-y-2 text-sm">
               <p className="font-semibold">{leagueDays + knockoutDays} days · League days 1–{leagueDays} · Knockout days {leagueDays + 1}–{leagueDays + knockoutDays}</p>
+              <p>League: {leagueLimit} matches/day × {leagueDays} days = {leagueLimit * leagueDays} match capacity</p>
+              <p>Knockout: {knockoutLimit} matches/day × {knockoutDays} days = {knockoutLimit * knockoutDays} match capacity</p>
               {generationPreview.error ? <p role="alert" className="text-destructive">{generationPreview.error}</p> :
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">{generationPreview.daily.map(([date, count]) => <p key={date}>{formatDate(date)} · {count} matches</p>)}</div>}
             </div>}
@@ -378,6 +372,13 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         </AlertDialog>
         </div>
       </div>
+
+      <Tabs value={bucket} onValueChange={(v) => setBucket(v as "fixtures" | "results")}>
+        <TabsList>
+          <TabsTrigger value="fixtures">Upcoming ({visibleMatches.length - completedCount})</TabsTrigger>
+          <TabsTrigger value="results">Completed ({completedCount})</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {grouped.length === 0 ? (
         <EmptyState

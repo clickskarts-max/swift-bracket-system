@@ -32,6 +32,8 @@ export const Route = createFileRoute("/_authenticated/tournaments/$id")({
       },
       { property: "og:title", content: "Tournament control room — Ecluid Basketball" },
       { property: "og:description", content: "Manage teams, fixtures, results and standings." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: TournamentDetail,

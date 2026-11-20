@@ -15,3 +15,4 @@
 - Serialize tournament form collections before database writes: store group capacities in existing config JSON, preserve other config keys, and exclude teams/venues from tournament columns to avoid schema-cache errors.
 - Assign generated dates through the pure fixture-timing scheduler; enforce rest after game end and daily or fixed phase windows, reject deadline overflow before writes, and use distinct seed paths plus prerequisite games to protect unknown knockout participants without conflating mutually exclusive seeds.
 - Persist fixture settings in tournament config separately from generating matches; merge existing config so applying a plan never replaces fixtures or unrelated tournament configuration.
+- Fixed-day fixture previews and generation use the saved explicit daily limits, never calculated replacements, so user-selected capacity and phase deadlines are enforced together.

@@ -15,3 +15,11 @@ test("applying fixture settings preserves champion and group capacities", () => 
     ...config, fixture_settings: readFixtureSettings(config, "2026-12-01"),
   });
 });
+
+test("fixed settings preserve five league matches per day for four days (20 matches)", () => {
+  const settings = { ...readFixtureSettings({}, "2026-12-01"), leagueLimit: 5, leagueDays: 4 };
+  const reloaded = readFixtureSettings(withFixtureSettings({}, settings), null);
+  strictEqual(reloaded.leagueLimit, 5);
+  strictEqual(reloaded.leagueDays, 4);
+  strictEqual(reloaded.leagueLimit * reloaded.leagueDays, 20);
+});

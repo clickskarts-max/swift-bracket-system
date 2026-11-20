@@ -106,6 +106,10 @@ test("impossible six-day rest constraints fail instead of spilling past day 6", 
   throws(() => scheduleFixtureDates(sixDayDrafts(), tenTeams, { ...sixDayOptions, minimumRestHours: 72 }), /Cannot fit/);
 });
 
+test("four league days cannot fit 20 matches when the daily limit is reduced to four", () => {
+  throws(() => scheduleFixtureDates(sixDayDrafts(), tenTeams, { ...sixDayOptions, leagueMatchesPerDay: 4 }), /League fixtures exceed the daily limit for 4 days/);
+});
+
 test("duplicate knockout matchups are rejected", () => {
   const source = sixDayDrafts();
   const semi = source.find((m) => m.stage === "knockout");
