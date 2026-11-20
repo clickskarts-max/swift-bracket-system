@@ -39,6 +39,7 @@ import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components
 import { TipoffCountdown } from "@/components/tipoff-countdown";
 import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
+import { scheduleFixtureDates } from "@/lib/fixture-timing";
 import {
   QUARTERS,
   emptyPeriods,
@@ -86,6 +87,13 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [editing, setEditing] = useState<Match | null>(null);
   const [mode, setMode] = useState<"game" | "score">("game");
   const [busy, setBusy] = useState(false);
+  const [generationOpen, setGenerationOpen] = useState(false);
+  const [startDate, setStartDate] = useState(tournament.start_date ?? "");
+  const [startTime, setStartTime] = useState("09:00");
+  const [leagueLimit, setLeagueLimit] = useState(2);
+  const [knockoutLimit, setKnockoutLimit] = useState(1);
+  const [restHours, setRestHours] = useState(24);
+  const [durationMinutes, setDurationMinutes] = useState(90);
   const visibleMatches = useMemo(
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
@@ -134,7 +142,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       const { data: userData } = await supabase.auth.getUser();
       const owner_id = userData.user?.id;
       if (!owner_id) throw new Error("Sign in required");
-      const drafts = generateSchedule({
+      const untimedDrafts = generateSchedule({
         format: tournament.format,
         legs: tournament.legs,
         qualifiersPerGroup: tournament.qualifiers_per_group,
@@ -146,6 +154,11 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           seed: t.seed,
         })),
       });
+      const drafts = scheduleFixtureDates(untimedDrafts, teams, {
+        startDate, startTime, leagueMatchesPerDay: leagueLimit,
+        knockoutMatchesPerDay: knockoutLimit, minimumRestHours: restHours,
+        matchDurationMinutes: durationMinutes,
+      });
       if (drafts.length === 0) throw new Error("This configuration produced no matches");
       const del = await supabase.from("matches").delete().eq("tournament_id", tournamentId);
       if (del.error) throw new Error(del.error.message);
@@ -154,6 +167,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
         .insert(drafts.map((d) => ({ ...d, tournament_id: tournamentId, owner_id })));
       if (ins.error) throw new Error(ins.error.message);
       await qc.invalidateQueries({ queryKey: ["matches", tournamentId] });
+      setGenerationOpen(false);
       toast.success(`${drafts.length} matches generated`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate the schedule");
@@ -260,7 +274,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           <List className="h-4 w-4" />
           <span>Rounds</span>
         </div>
-        <AlertDialog>
+        <AlertDialog open={generationOpen} onOpenChange={setGenerationOpen}>
           <AlertDialogTrigger asChild>
             <Button size="sm" disabled={busy}>
               <RefreshCw className="mr-1.5 h-4 w-4" /> Generate schedule
@@ -274,9 +288,17 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                 by a fresh fixture list.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="First match date"><Input aria-label="First match date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></Field>
+              <Field label="Daily start time"><Input aria-label="Daily start time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} /></Field>
+              <Field label="League matches per day"><Input aria-label="League matches per day" type="number" min={1} max={24} value={leagueLimit} onChange={(e) => setLeagueLimit(Number(e.target.value))} /></Field>
+              <Field label="Knockout matches per day"><Input aria-label="Knockout matches per day" type="number" min={1} max={24} value={knockoutLimit} onChange={(e) => setKnockoutLimit(Number(e.target.value))} /></Field>
+              <Field label="Minimum team rest (hours)"><Input aria-label="Minimum team rest (hours)" type="number" min={0} max={168} value={restHours} onChange={(e) => setRestHours(Number(e.target.value))} /></Field>
+              <Field label="Game duration (minutes)"><Input aria-label="Game duration (minutes)" type="number" min={30} max={240} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} /></Field>
+            </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={regenerate}>Generate</AlertDialogAction>
+              <Button disabled={busy} onClick={regenerate}>{busy ? "Generating…" : "Generate"}</Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
