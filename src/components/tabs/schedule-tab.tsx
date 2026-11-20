@@ -383,6 +383,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
               <Field label="Minimum team rest (hours)"><Input aria-label="Minimum team rest (hours)" type="number" min={0} max={168} value={restHours} onChange={(e) => setRestHours(Number(e.target.value))} /></Field>
               <Field label="Game duration (minutes)"><Input aria-label="Game duration (minutes)" type="number" min={30} max={240} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} /></Field>
             </div>
+            <p className="text-xs font-medium text-primary">League: at most 2 games per team in a day, with no team assigned a second double-game day.</p>
             {generationPreview && <div className="space-y-2 text-sm">
               <p className="font-semibold">{leagueDays + knockoutDays} days · League days 1–{leagueDays} · Knockout days {leagueDays + 1}–{leagueDays + knockoutDays}</p>
               <p>League: {leagueLimit} matches/day × {leagueDays} days = {leagueLimit * leagueDays} match capacity</p>

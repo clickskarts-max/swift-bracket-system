@@ -1,4 +1,5 @@
 import type { MatchDraft, TeamRef } from "./formats";
+import { balanceLeagueDates } from "./league-day-balance";
 
 export type FixtureTiming = {
   startDate: string;
@@ -44,6 +45,8 @@ export function scheduleFixtureDates(drafts: MatchDraft[], teams: TeamRef[], opt
   const ends = new Map<number, number>();
   const lastEnd = new Map<string, number>();
   const counts = new Map<string, { league: number; knockout: number }>();
+  const leagueDayTeams = new Map<string, Map<string, number>>();
+  const doubledLeagueTeams = new Set<string>();
   let cursor = start.getTime();
   let leagueEnd = 0;
   const result: (MatchDraft & { scheduled_at: string })[] = [];
@@ -77,11 +80,21 @@ export function scheduleFixtureDates(drafts: MatchDraft[], teams: TeamRef[], opt
       time = Math.max(time, opening.getTime());
       const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
       const day = counts.get(key) ?? { league: 0, knockout: 0 };
+      const teamCounts = leagueDayTeams.get(key) ?? new Map<string, number>();
+      const repeat = isLeague(match) && [...possible].some(id => (teamCounts.get(id) ?? 0) >= 2 || ((teamCounts.get(id) ?? 0) >= 1 && doubledLeagueTeams.has(id)));
       const closing = new Date(opening);
       closing.setHours(24, 0, 0, 0);
-      if (day[kind] < limit && time + duration <= closing.getTime()) {
+      if (!repeat && day[kind] < limit && time + duration <= closing.getTime()) {
         day[kind]++;
         counts.set(key, day);
+        if (isLeague(match)) {
+          possible.forEach(id => {
+            const count = (teamCounts.get(id) ?? 0) + 1;
+            teamCounts.set(id, count);
+            if (count === 2) doubledLeagueTeams.add(id);
+          });
+          leagueDayTeams.set(key, teamCounts);
+        }
         break;
       }
       opening.setDate(opening.getDate() + 1);
@@ -149,6 +162,20 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
   ] as const) {
     const pending = [...pool].sort((a, b) => a.round_index - b.round_index || a.match_no - b.match_no);
     if (pool.length > count * limit) throw new Error(`${phase === "league" ? "League" : "Knockout"} fixtures exceed the daily limit for ${count} days`);
+    if (phase === "league") {
+      const balanced = balanceLeagueDates(pending, start, count, limit, duration, rest);
+      for (const match of balanced) {
+        const paths = new Set([match.team_a_id, match.team_b_id].filter((id): id is string => !!id));
+        const end = Date.parse(match.scheduled_at) + duration;
+        paths.forEach(path => lastEnd.set(path, end));
+        sourceEnd.set(match.match_no, end);
+        sourcePaths.set(match.match_no, paths);
+        leagueEnd = Math.max(leagueEnd, end);
+        previousGroup = match.group_label;
+        result.push(match);
+      }
+      continue;
+    }
     for (let day = 0; day < count; day++) {
       const opening = new Date(start);
       opening.setDate(opening.getDate() + offset + day);
@@ -158,7 +185,7 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
       const target = Math.min(limit, Math.ceil(pending.length / (count - day)));
       for (let slot = 0; slot < target; slot++) {
         const candidates = pending.flatMap((match) => {
-          const data = readyFor(match, phase === "league");
+          const data = readyFor(match, false);
           if (!data) return [];
           const time = Math.max(cursor, data.ready);
           return time + duration <= closing.getTime() ? [{ match, time, paths: data.paths }] : [];
@@ -170,7 +197,6 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
         chosen.paths.forEach((path) => lastEnd.set(path, end));
         sourceEnd.set(chosen.match.match_no, end);
         sourcePaths.set(chosen.match.match_no, chosen.paths);
-        if (phase === "league") leagueEnd = Math.max(leagueEnd, end);
         result.push({ ...chosen.match, scheduled_at: new Date(chosen.time).toISOString() });
         pending.splice(pending.indexOf(chosen.match), 1);
         cursor = end;

@@ -39,3 +39,6 @@
 
 - [x] Add organizer-only daily notices listing teams playing multiple games, counts and tip-off times
 - [x] Test daily team counts and verify notices update with fixture changes
+
+- [x] Prevent repeated league double-game days while preserving limits, rest and phase deadlines
+- [x] Test fair scheduling and apply date-only changes to the unstarted current tournament

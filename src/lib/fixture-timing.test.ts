@@ -131,3 +131,37 @@ test("daily-limit scheduling also alternates Group A and B games", () => {
   strictEqual(fixtures[1]?.group_label, "B");
   strictEqual(fixtures[2]?.group_label, "A");
 });
+
+const assertNoRepeatedDoubleDays = (fixtures: ReturnType<typeof scheduleFixtureDates>) => {
+  const teamDays = new Map<string, Map<string, number>>();
+  for (const match of fixtures.filter(m => m.stage === "group" || m.stage === "league")) {
+    for (const id of [match.team_a_id, match.team_b_id]) {
+      if (!id) continue;
+      const days = teamDays.get(id) ?? new Map<string, number>();
+      const date = new Date(match.scheduled_at).toDateString();
+      days.set(date, (days.get(date) ?? 0) + 1);
+      teamDays.set(id, days);
+    }
+  }
+  for (const days of teamDays.values()) {
+    ok([...days.values()].every(count => count <= 2), "No team plays three league games in a day");
+    ok([...days.values()].filter(count => count === 2).length <= 1, "No team repeats a double-game day");
+  }
+};
+
+test("four league days at five games/day never give Karnali or any team two double-game days", () => {
+  const namedTeams = tenTeams.map((team, i) => ({ ...team, name: i === 5 ? "Karnali" : team.name }));
+  const generated = generateSchedule({ format: "group_knockout", legs: 1, qualifiersPerGroup: 2, playoffFormat: "none", teams: namedTeams });
+  const fixtures = scheduleFixtureDates(generated, namedTeams, sixDayOptions);
+  strictEqual(fixtures.filter(m => m.stage === "group").length, 20);
+  assertNoRepeatedDoubleDays(fixtures);
+});
+
+test("daily mode also avoids repeating a team's double-game day", () => {
+  const { phaseDays: _phaseDays, ...dailyOptions } = sixDayOptions;
+  assertNoRepeatedDoubleDays(scheduleFixtureDates(sixDayDrafts(), tenTeams, dailyOptions));
+});
+
+test("a team with more games than days plus one rejects the fixed plan before any writes", () => {
+  throws(() => scheduleFixtureDates(sixDayDrafts(), tenTeams, { ...sixDayOptions, leagueMatchesPerDay: 10, phaseDays: { league: 2, knockout: 2 } }), /without repeating/);
+});
