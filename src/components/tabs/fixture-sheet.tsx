@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { ArrowLeftRight, CalendarArrowDown, CalendarArrowUp, ChevronDown, ChevronUp, Pencil, Search, SquarePen } from "lucide-react";
+import { ArrowLeftRight, CalendarDays, CalendarArrowDown, CalendarArrowUp, ChevronDown, ChevronUp, Pencil, Search, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,6 +28,8 @@ export function FixtureSheet({ grouped, displayNumbers, label, venues, busy, onM
     [day, `M${displayNumbers.get(match.id)}`, label(match, "a").name, label(match, "b").name, match.group_label ? `Group ${match.group_label}` : match.round_name, match.status]
       .some(value => value?.toLowerCase().includes(query))
   );
+  const dayCounts = new Map<string, number>();
+  rows.forEach(({ day }) => dayCounts.set(day, (dayCounts.get(day) ?? 0) + 1));
 
   return <TooltipProvider delayDuration={150}>
     <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
@@ -60,7 +62,15 @@ export function FixtureSheet({ grouped, displayNumbers, label, venues, busy, onM
               { title: "Enter score", Icon: SquarePen, run: () => onScore(m), disabled: busy },
             ];
             return <Fragment key={m.id}>
-              {index > 0 && rows[index - 1]?.day !== day && <TableRow aria-hidden="true" className="border-0 bg-muted/30 hover:bg-muted/30"><TableCell colSpan={9} className="h-3 !p-0" /></TableRow>}
+              {(index === 0 || rows[index - 1]?.day !== day) && <TableRow data-matchday={day} className="border-y border-primary/30 bg-primary/10 hover:bg-primary/10">
+                <TableCell colSpan={9} className="!py-2.5">
+                  <div className="sticky left-2 flex w-fit max-w-[calc(100vw-4rem)] flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="flex items-center gap-2 text-sm font-bold text-primary"><CalendarDays aria-hidden="true" className="h-4 w-4 shrink-0" />{day.split(" · ")[0]}</span>
+                    {m.scheduled_at && <span className="text-xs font-medium text-foreground">{formatDate(m.scheduled_at)}</span>}
+                    <span className="text-xs text-muted-foreground">{dayCounts.get(day)} {dayCounts.get(day) === 1 ? "match" : "matches"}</span>
+                  </div>
+                </TableCell>
+              </TableRow>}
               <TableRow data-match-id={m.id}>
               <TableCell className="font-semibold tabular-nums">M{displayNumbers.get(m.id) ?? "—"}</TableCell>
               <TableCell className="whitespace-nowrap text-xs">
