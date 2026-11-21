@@ -28,16 +28,46 @@ export type ProviderHandler = {
   }) => Promise<boolean>;
 };
 
+/** Rejects non-HTTPS, internal, loopback and private-network destinations. */
+export function assertSafeOutboundUrl(raw: string) {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    throw new Error("Invalid destination URL");
+  }
+  if (u.protocol !== "https:") throw new Error("Destination must use https");
+  if (u.username || u.password) throw new Error("Destination must not include credentials");
+  if (u.port && u.port !== "443") throw new Error("Destination port is not allowed");
+  const h = u.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const blockedName =
+    h === "localhost" || /\.(localhost|local|internal|lan|home|intranet|corp)$/.test(h) || !h.includes(".") && !h.includes(":");
+  const v4 = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  let privateIp = false;
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    privateIp =
+      a === 0 || a === 10 || a === 127 || a >= 224 || (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
+  } else if (h.includes(":")) {
+    privateIp = h === "::" || h === "::1" || /^(fc|fd|fe8|fe9|fea|feb)/.test(h) || h.startsWith("::ffff:");
+  } else if (/^\d+$/.test(h) || /^0x/.test(h)) {
+    privateIp = true;
+  }
+  if (blockedName || privateIp) throw new Error("Destination address is not allowed");
+}
+
 /** fetch with bounded retries + Retry-After / 429 / 5xx handling. */
 export async function fetchWithRetry(
   url: string,
   init: RequestInit,
   attempts = 3,
 ): Promise<Response> {
+  assertSafeOutboundUrl(url);
   let lastError: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
-      const res = await fetch(url, init);
+      const res = await fetch(url, { ...init, redirect: "manual" });
       if (res.status === 429 || res.status >= 500) {
         const retryAfter = Number(res.headers.get("retry-after"));
         if (i === attempts - 1) return res;

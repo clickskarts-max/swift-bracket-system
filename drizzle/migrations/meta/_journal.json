@@ -29,6 +29,13 @@
       "when": 1795271724477,
       "tag": "0003_require_owner_to_activate_campaigns",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795271810565,
+      "tag": "0004_owner_approval_for_ads_and_activation_for_tournaments",
+      "breakpoints": true
     }
   ]
 }
