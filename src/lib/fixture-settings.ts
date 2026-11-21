@@ -5,11 +5,11 @@ const schema = z.object({
   timingMode: z.enum(["daily", "fixed"]),
   startDate: z.string(),
   startTime: z.string(),
-  leagueLimit: z.number().int().min(1).max(24),
+  leagueLimit: z.number().int().min(0).max(24),
   knockoutLimit: z.number().int().min(1).max(24),
   restHours: z.number().min(0).max(168),
   durationMinutes: z.number().int().min(30).max(240),
-  leagueDays: z.number().int().min(1).max(60),
+  leagueDays: z.number().int().min(0).max(60),
   knockoutDays: z.number().int().min(1).max(60),
 });
 export type FixtureSettings = z.infer<typeof schema>;

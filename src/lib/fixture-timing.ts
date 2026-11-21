@@ -13,7 +13,11 @@ export type FixtureTiming = {
 
 export function scheduleFixtureDates(drafts: MatchDraft[], teams: TeamRef[], options: FixtureTiming) {
   const { leagueMatchesPerDay, knockoutMatchesPerDay, minimumRestHours, matchDurationMinutes } = options;
-  if (![leagueMatchesPerDay, knockoutMatchesPerDay].every((n) => Number.isInteger(n) && n >= 1 && n <= 24))
+  const hasLeague = drafts.some((m) => m.stage === "league" || m.stage === "group");
+  const hasKnockout = drafts.some((m) => m.stage !== "league" && m.stage !== "group");
+  // A phase without games (e.g. knockout-only) may use 0 matches/day.
+  const validLimit = (n: number, needed: boolean) => Number.isInteger(n) && n >= (needed ? 1 : 0) && n <= 24;
+  if (!validLimit(leagueMatchesPerDay, hasLeague) || !validLimit(knockoutMatchesPerDay, hasKnockout))
     throw new Error("Matches per day must be between 1 and 24");
   if (!Number.isFinite(minimumRestHours) || minimumRestHours < 0 || minimumRestHours > 168)
     throw new Error("Minimum rest must be between 0 and 168 hours");
@@ -115,10 +119,11 @@ export function scheduleFixtureDates(drafts: MatchDraft[], teams: TeamRef[], opt
 function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: FixtureTiming, start: Date, duration: number, rest: number) {
   const days = options.phaseDays;
   if (!days) throw new Error("Choose the days for each phase");
-  if (![days.league, days.knockout].every((n) => Number.isInteger(n) && n >= 1 && n <= 60))
-    throw new Error("Each phase must have between 1 and 60 days");
   const league = drafts.filter((m) => m.stage === "league" || m.stage === "group");
   const knockout = drafts.filter((m) => m.stage !== "league" && m.stage !== "group");
+  const validDays = (n: number, needed: boolean) => Number.isInteger(n) && n >= (needed ? 1 : 0) && n <= 60;
+  if (!validDays(days.league, league.length > 0) || !validDays(days.knockout, knockout.length > 0))
+    throw new Error("Each phase must have between 1 and 60 days");
   const duplicateKeys = new Set<string>();
   for (const match of knockout) {
     const key = [match.team_a_id ?? match.placeholder_a ?? "", match.team_b_id ?? match.placeholder_b ?? ""].sort().join("|");
@@ -162,6 +167,7 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
   ] as const) {
     const pending = [...pool].sort((a, b) => a.round_index - b.round_index || a.match_no - b.match_no);
     if (pool.length > count * limit) throw new Error(`${phase === "league" ? "League" : "Knockout"} fixtures exceed the daily limit for ${count} days`);
+    if (!pool.length) continue;
     if (phase === "league") {
       const balanced = balanceLeagueDates(pending, start, count, limit, duration, rest);
       for (const match of balanced) {
@@ -182,11 +188,13 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
       const closing = new Date(opening);
       closing.setHours(24, 0, 0, 0);
       let cursor = opening.getTime();
+      // Knockout: each team (or advancement path) plays at most one game per day.
+      const playedToday = new Set<string>();
       const target = Math.min(limit, Math.ceil(pending.length / (count - day)));
       for (let slot = 0; slot < target; slot++) {
         const candidates = pending.flatMap((match) => {
           const data = readyFor(match, false);
-          if (!data) return [];
+          if (!data || [...data.paths].some((path) => playedToday.has(path))) return [];
           const time = Math.max(cursor, data.ready);
           return time + duration <= closing.getTime() ? [{ match, time, paths: data.paths }] : [];
         }).sort((a, b) => a.time - b.time || Number(a.match.group_label === previousGroup) - Number(b.match.group_label === previousGroup) || a.match.round_index - b.match.round_index || a.match.match_no - b.match.match_no);
@@ -194,7 +202,7 @@ function scheduleWithinDays(drafts: MatchDraft[], teams: TeamRef[], options: Fix
         if (!chosen) break;
         previousGroup = chosen.match.group_label;
         const end = chosen.time + duration;
-        chosen.paths.forEach((path) => lastEnd.set(path, end));
+        chosen.paths.forEach((path) => { lastEnd.set(path, end); playedToday.add(path); });
         sourceEnd.set(chosen.match.match_no, end);
         sourcePaths.set(chosen.match.match_no, chosen.paths);
         result.push({ ...chosen.match, scheduled_at: new Date(chosen.time).toISOString() });

@@ -375,17 +375,17 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
               <Field label="First match date"><Input aria-label="First match date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} /></Field>
               <Field label="Daily start time"><Input aria-label="Daily start time" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} /></Field>
               {timingMode === "fixed" ? <>
-                <Field label="League days"><Input aria-label="League days" type="number" min={1} max={60} value={leagueDays} onChange={(e) => setLeagueDays(Number(e.target.value))} /></Field>
+                <Field label="League days"><Input aria-label="League days" type="number" min={0} max={60} value={leagueDays} onChange={(e) => setLeagueDays(Number(e.target.value))} /></Field>
                 <Field label="Knockout days"><Input aria-label="Knockout days" type="number" min={1} max={60} value={knockoutDays} onChange={(e) => setKnockoutDays(Number(e.target.value))} /></Field>
               </> : null}
-                <Field label="League matches per day"><Input aria-label="League matches per day" type="number" min={1} max={24} value={leagueLimit} onChange={(e) => setLeagueLimit(Number(e.target.value))} /></Field>
+                <Field label="League matches per day"><Input aria-label="League matches per day" type="number" min={0} max={24} value={leagueLimit} onChange={(e) => setLeagueLimit(Number(e.target.value))} /></Field>
                 <Field label="Knockout matches per day"><Input aria-label="Knockout matches per day" type="number" min={1} max={24} value={knockoutLimit} onChange={(e) => setKnockoutLimit(Number(e.target.value))} /></Field>
               <Field label="Minimum team rest (hours)"><Input aria-label="Minimum team rest (hours)" type="number" min={0} max={168} value={restHours} onChange={(e) => setRestHours(Number(e.target.value))} /></Field>
               <Field label="Game duration (minutes)"><Input aria-label="Game duration (minutes)" type="number" min={30} max={240} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} /></Field>
             </div>
             <p className="text-xs font-medium text-primary">League: at most 2 games per team in a day, with no team assigned a second double-game day.</p>
             {generationPreview && <div className="space-y-2 text-sm">
-              <p className="font-semibold">{leagueDays + knockoutDays} days · League days 1–{leagueDays} · Knockout days {leagueDays + 1}–{leagueDays + knockoutDays}</p>
+              <p className="font-semibold">{leagueDays + knockoutDays} days · {leagueDays > 0 ? `League days 1–${leagueDays} · ` : "Knockout only · "}Knockout days {leagueDays + 1}–{leagueDays + knockoutDays}</p>
               <p>League: {leagueLimit} matches/day × {leagueDays} days = {leagueLimit * leagueDays} match capacity</p>
               <p>Knockout: {knockoutLimit} matches/day × {knockoutDays} days = {knockoutLimit * knockoutDays} match capacity</p>
               {generationPreview.error ? <p role="alert" className="text-destructive">{generationPreview.error}</p> :
