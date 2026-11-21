@@ -17,16 +17,31 @@ export function planFixtureMove(matches: MovableFixture[], id: string, move: Fix
   const match = ordered[index];
   if (!match?.scheduled_at || match.status !== "scheduled") throw new Error("Only scheduled games with a date can be moved.");
   const updates = [{ id, expected_at: match.scheduled_at, scheduled_at: match.scheduled_at }];
-  if (move === "up" || move === "down") {
-    const other = ordered[index + (move === "up" ? -1 : 1)];
-    if (!other?.scheduled_at) throw new Error("This game is already at the end of the schedule.");
-    if (other.status !== "scheduled") throw new Error("Cannot swap with a game that has already started.");
-    if (other.scheduled_at === match.scheduled_at) throw new Error("Set distinct game times before reordering these games.");
-    updates[0] = { id, expected_at: match.scheduled_at, scheduled_at: other.scheduled_at };
-    updates.push({ id: other.id, expected_at: other.scheduled_at, scheduled_at: match.scheduled_at });
+  const dayOf = (iso: string) => new Date(iso).toDateString();
+  const matchDay = dayOf(match.scheduled_at);
+  const days = [...new Set(ordered.map((m) => dayOf(m.scheduled_at ?? "")))];
+  const dayIndex = days.indexOf(matchDay);
+  const step = move === "up" || move === "previous-day" ? -1 : 1;
+  const neighbour = ordered[index + step];
+  if ((move === "up" || move === "down") && neighbour?.scheduled_at && dayOf(neighbour.scheduled_at) === matchDay) {
+    if (neighbour.status !== "scheduled") throw new Error("Cannot swap with a game that has already started.");
+    if (neighbour.scheduled_at === match.scheduled_at) throw new Error("Set distinct game times before reordering these games.");
+    updates[0] = { id, expected_at: match.scheduled_at, scheduled_at: neighbour.scheduled_at };
+    updates.push({ id: neighbour.id, expected_at: neighbour.scheduled_at, scheduled_at: match.scheduled_at });
+  } else if (move === "up" || move === "down") {
+    // At a matchday edge: move the game into the adjacent matchday, after that day's last game.
+    const targetDay = days[dayIndex + step];
+    if (!targetDay) throw new Error("This game is already at the end of the schedule.");
+    const dayGames = ordered.filter((m) => m.id !== id && dayOf(m.scheduled_at ?? "") === targetDay);
+    const last = dayGames[dayGames.length - 1]!;
+    updates[0] = { id, expected_at: match.scheduled_at, scheduled_at: new Date(Date.parse(last.scheduled_at ?? "") + durationMinutes * 60_000).toISOString() };
   } else {
+    const targetDay = days[dayIndex + step];
     const date = new Date(match.scheduled_at);
-    date.setDate(date.getDate() + (move === "previous-day" ? -1 : 1));
+    if (targetDay) {
+      const t = new Date(targetDay);
+      date.setFullYear(t.getFullYear(), t.getMonth(), t.getDate());
+    } else date.setDate(date.getDate() + step);
     updates[0] = { id, expected_at: match.scheduled_at, scheduled_at: date.toISOString() };
   }
   const changed = new Map(updates.map((m) => [m.id, m.scheduled_at]));

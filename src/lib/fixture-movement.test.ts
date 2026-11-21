@@ -22,3 +22,13 @@ test("movement protects started games and minimum rest", () => {
   const repeated = matches.map((m) => ({ ...m, team_a_id: "same-team" }));
   throws(() => planFixtureMove(repeated, "a", "down", 2, 90), /minimum rest/);
 });
+test("moving down past the last game of a day joins the next matchday", () => {
+  const base = { status: "scheduled", team_a_id: null, team_b_id: null };
+  const ms: MovableFixture[] = [
+    { ...base, id: "x", match_no: 1, scheduled_at: "2026-11-27T08:15:00.000Z", placeholder_a: "1st Group C", placeholder_b: "2nd Group D" },
+    { ...base, id: "y", match_no: 2, scheduled_at: "2026-11-28T03:15:00.000Z", placeholder_a: "1st Group B", placeholder_b: "2nd Group A" },
+  ];
+  const u = planFixtureMove(ms, "x", "down", 2, 90);
+  strictEqual(u.length, 1);
+  strictEqual(u[0]?.scheduled_at, "2026-11-28T04:45:00.000Z");
+});
