@@ -15,6 +15,13 @@
       "when": 1795190080203,
       "tag": "0001_move_individual_fixture_slots",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795269542608,
+      "tag": "0002_restrict_public_branding",
+      "breakpoints": true
     }
   ]
 }
