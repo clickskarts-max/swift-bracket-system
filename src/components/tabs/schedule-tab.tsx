@@ -109,6 +109,8 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
   const [timingMode, setTimingMode] = useState<string>(savedSettings.timingMode);
   const [leagueDays, setLeagueDays] = useState(savedSettings.leagueDays);
   const [knockoutDays, setKnockoutDays] = useState(savedSettings.knockoutDays);
+  const [restDates, setRestDates] = useState<string[]>(savedSettings.restDates ?? []);
+  const [restInput, setRestInput] = useState("");
   const generationPreview = useMemo(() => {
     if (timingMode !== "fixed") return null;
     try {
@@ -121,7 +123,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       const fixtures = scheduleFixtureDates(drafts, teams, {
         startDate, startTime, leagueMatchesPerDay: leagueLimit,
         knockoutMatchesPerDay: knockoutLimit,
-        minimumRestHours: restHours, matchDurationMinutes: durationMinutes,
+        minimumRestHours: restHours, matchDurationMinutes: durationMinutes, restDates,
         phaseDays: { league: leagueDays, knockout: knockoutDays },
       });
       const daily = new Map<string, number>();
@@ -130,7 +132,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
     } catch (error) {
       return { fixtures: [], daily: [], error: error instanceof Error ? error.message : "Cannot fit the schedule" };
     }
-  }, [settingsOnly, matches, timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, leagueLimit, knockoutLimit, restHours, durationMinutes]);
+  }, [settingsOnly, matches, timingMode, teams, tournament, startDate, startTime, leagueDays, knockoutDays, leagueLimit, knockoutLimit, restHours, durationMinutes, restDates]);
   const visibleMatches = useMemo(
     () => matches.filter((match) => match.status !== "cancelled"),
     [matches],
@@ -182,7 +184,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       const current = await supabase.from("tournaments").select("config").eq("id", tournamentId).single();
       if (current.error) throw new Error(current.error.message);
       const config = withFixtureSettings(current.data.config, {
-        timingMode, startDate, startTime, leagueLimit, knockoutLimit, restHours, durationMinutes, leagueDays, knockoutDays,
+        timingMode, startDate, startTime, leagueLimit, knockoutLimit, restHours, durationMinutes, leagueDays, knockoutDays, restDates,
       });
       const updated = await supabase.from("tournaments").update({ config }).eq("id", tournamentId).select("id").single();
       if (updated.error) throw new Error(updated.error.message);
@@ -201,7 +203,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       if (current.error) throw new Error(current.error.message);
       const dates = planFixtureDateUpdates(current.data, teams, {
         startDate, startTime, leagueMatchesPerDay: leagueLimit, knockoutMatchesPerDay: knockoutLimit,
-        minimumRestHours: restHours, matchDurationMinutes: durationMinutes,
+        minimumRestHours: restHours, matchDurationMinutes: durationMinutes, restDates,
         ...(timingMode === "fixed" ? { phaseDays: { league: leagueDays, knockout: knockoutDays } } : {}),
       });
       const result = await supabase.rpc("update_fixture_dates", { _tournament_id: tournamentId, _dates: dates });
@@ -240,7 +242,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
       const drafts = generationPreview?.fixtures ?? scheduleFixtureDates(untimedDrafts, teams, {
         startDate, startTime, leagueMatchesPerDay: leagueLimit,
         knockoutMatchesPerDay: knockoutLimit, minimumRestHours: restHours,
-        matchDurationMinutes: durationMinutes,
+        matchDurationMinutes: durationMinutes, restDates,
       });
       if (drafts.length === 0) throw new Error("This configuration produced no matches");
       const del = await supabase.from("matches").delete().eq("tournament_id", tournamentId);
@@ -382,6 +384,17 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
                 <Field label="Knockout matches per day"><Input aria-label="Knockout matches per day" type="number" min={1} max={24} value={knockoutLimit} onChange={(e) => setKnockoutLimit(Number(e.target.value))} /></Field>
               <Field label="Minimum team rest (hours)"><Input aria-label="Minimum team rest (hours)" type="number" min={0} max={168} value={restHours} onChange={(e) => setRestHours(Number(e.target.value))} /></Field>
               <Field label="Game duration (minutes)"><Input aria-label="Game duration (minutes)" type="number" min={30} max={240} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value))} /></Field>
+            </div>
+            <div className="space-y-2 rounded-lg border border-border p-3">
+              <p className="text-sm font-semibold">Rest days (no matches)</p>
+              <p className="text-xs text-muted-foreground">Games skip these dates and continue on the next day.</p>
+              <div className="flex gap-2">
+                <Input aria-label="Rest day date" type="date" value={restInput} onChange={(e) => setRestInput(e.target.value)} />
+                <Button type="button" variant="outline" disabled={!restInput || restDates.includes(restInput)} onClick={() => { setRestDates([...restDates, restInput].sort()); setRestInput(""); }}>Add rest day</Button>
+              </div>
+              {restDates.length ? <div className="flex flex-wrap gap-2">{restDates.map((d) => (
+                <button key={d} type="button" aria-label={`Remove rest day ${d}`} className="rounded-full border border-border bg-muted px-3 py-1 text-xs hover:bg-accent" onClick={() => setRestDates(restDates.filter((x) => x !== d))}>{formatDate(d)} · No match ✕</button>
+              ))}</div> : <p className="text-xs text-muted-foreground">No rest days set.</p>}
             </div>
             <p className="text-xs font-medium text-primary">League: at most 2 games per team in a day, with no team assigned a second double-game day.</p>
             {generationPreview && <div className="space-y-2 text-sm">

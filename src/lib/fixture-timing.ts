@@ -9,9 +9,44 @@ export type FixtureTiming = {
   minimumRestHours: number;
   matchDurationMinutes: number;
   phaseDays?: { league: number; knockout: number };
+  /** Calendar dates (YYYY-MM-DD) with no games; schedule days skip over them. */
+  restDates?: string[];
 };
 
+const localKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** Shift each scheduled game past rest days, keeping its time and day order. */
+export function skipRestDates<T extends { scheduled_at: string }>(fixtures: T[], startDate: string, restDates: string[]): T[] {
+  const rest = new Set(restDates.filter(Boolean));
+  if (!rest.size) return fixtures;
+  const origin = new Date(`${startDate}T00:00`);
+  const mapped: Date[] = [];
+  const dayFor = (offset: number) => {
+    while (mapped.length <= offset) {
+      const d = mapped.length ? new Date(mapped[mapped.length - 1]!) : new Date(origin);
+      if (mapped.length) d.setDate(d.getDate() + 1);
+      while (rest.has(localKey(d))) d.setDate(d.getDate() + 1);
+      mapped.push(d);
+    }
+    return mapped[offset]!;
+  };
+  return fixtures.map((f) => {
+    const at = new Date(f.scheduled_at);
+    const day = new Date(at.getFullYear(), at.getMonth(), at.getDate());
+    const offset = Math.round((day.getTime() - origin.getTime()) / 86_400_000);
+    if (offset < 0) return f;
+    const target = dayFor(offset);
+    at.setFullYear(target.getFullYear(), target.getMonth(), target.getDate());
+    return { ...f, scheduled_at: at.toISOString() };
+  });
+}
+
 export function scheduleFixtureDates(drafts: MatchDraft[], teams: TeamRef[], options: FixtureTiming) {
+  const planned = scheduleFixtureDatesRaw(drafts, teams, options);
+  return skipRestDates(planned, options.startDate, options.restDates ?? []);
+}
+
+function scheduleFixtureDatesRaw(drafts: MatchDraft[], teams: TeamRef[], options: FixtureTiming) {
   const { leagueMatchesPerDay, knockoutMatchesPerDay, minimumRestHours, matchDurationMinutes } = options;
   const hasLeague = drafts.some((m) => m.stage === "league" || m.stage === "group");
   const hasKnockout = drafts.some((m) => m.stage !== "league" && m.stage !== "group");

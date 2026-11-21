@@ -11,6 +11,7 @@ const schema = z.object({
   durationMinutes: z.number().int().min(30).max(240),
   leagueDays: z.number().int().min(0).max(60),
   knockoutDays: z.number().int().min(1).max(60),
+  restDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(60).default([]),
 });
 export type FixtureSettings = z.infer<typeof schema>;
 
@@ -20,7 +21,7 @@ export function readFixtureSettings(config: Json, startDate: string | null): Fix
   return parsed.success ? parsed.data : {
     timingMode: "fixed", startDate: startDate ?? "", startTime: "09:00",
     leagueLimit: 5, knockoutLimit: 2, restHours: 2, durationMinutes: 90,
-    leagueDays: 4, knockoutDays: 2,
+    leagueDays: 4, knockoutDays: 2, restDates: [],
   };
 }
 
