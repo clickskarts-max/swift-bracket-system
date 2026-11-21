@@ -45,6 +45,7 @@ import { STATUSES, mapsUrl, uniqueSlug } from "@/lib/app";
 import type { Tournament } from "@/lib/queries";
 import type { Json } from "@/integrations/supabase/types";
 import { readGroupCapacities } from "@/lib/tournament-payload";
+import { balancedGroupCapacity, groupStructureError } from "@/lib/group-structure";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -200,7 +201,9 @@ export function TournamentForm({
   }, [values.team_count, initial]);
 
   const set = <K extends keyof TournamentValues>(key: K, value: TournamentValues[K]) =>
-    setValues((v) => ({ ...v, [key]: value }));
+    setValues((v) => ({ ...v, [key]: value,
+      ...(key === "team_count" || key === "group_count" ? { group_capacities: null } : {}),
+    }));
 
   const setTeam = (index: number, team: Partial<TeamValue>) => {
     setValues((v) => {
@@ -315,11 +318,9 @@ export function TournamentForm({
       }
       const isGroupKnockout = values.format === "group_knockout";
       if (isGroupKnockout) {
-        // Enforce power-of-two group counts
-        const isValidGroupCount =
-          values.group_count > 0 && (values.group_count & (values.group_count - 1)) === 0;
-        if (!isValidGroupCount) {
-          toast.error("Group count must be a power of two (2, 4, 8, 16...)");
+        const structureError = groupStructureError(values.team_count, values.group_count);
+        if (structureError) {
+          toast.error(structureError);
           return false;
         }
 
@@ -356,18 +357,25 @@ export function TournamentForm({
 
       // Group capacity validation
       if (values.format === "group_knockout" && values.group_count > 0) {
-        const teamsPerGroup = Math.ceil(values.team_count / values.group_count);
         const groupCounts: Record<string, number> = {};
         for (let j = 0; j < teams.length; j++) {
           const team = teams[j];
           if (team?.group_label) {
             groupCounts[team.group_label] = (groupCounts[team.group_label] || 0) + 1;
-            if (groupCounts[team.group_label]! > teamsPerGroup) {
+            const capacity = values.group_capacities?.[team.group_label] ?? balancedGroupCapacity(values.team_count, values.group_count, team.group_label);
+            if ((groupCounts[team.group_label] ?? 0) > capacity) {
               toast.error(
-                `Group ${team.group_label} already has the maximum of ${teamsPerGroup} teams.`,
+                `Group ${team.group_label} already has the maximum of ${capacity} teams.`,
               );
               return false;
             }
+          }
+        }
+        for (let i = 0; i < values.group_count; i++) {
+          const label = String.fromCharCode(65 + i);
+          if ((groupCounts[label] ?? 0) < 2) {
+            toast.error(`Group ${label} needs at least 2 teams for its two qualifying places.`);
+            return false;
           }
         }
       }
@@ -531,10 +539,7 @@ export function TournamentForm({
     const getCapacityForGroup = (label: string) => {
       if (currentCapacities?.[label]) return currentCapacities[label];
       // Fallback to even/uneven calculation if not explicitly set yet
-      const base = Math.floor(values.team_count / values.group_count);
-      const rem = values.team_count % values.group_count;
-      const idx = label.charCodeAt(0) - 65;
-      return idx < rem ? base + 1 : base;
+      return balancedGroupCapacity(values.team_count, values.group_count, label);
     };
 
     return (
@@ -1093,9 +1098,13 @@ export function TournamentForm({
                   value={values.group_count}
                   onChange={(e) => set("group_count", Number(e.target.value) || 0)}
                 />
-                {isUnevenGroups && (
+                {groupStructureError(values.team_count, values.group_count) ? (
                   <p className="mt-1 text-xs text-destructive">
-                    Warning: Teams cannot be evenly distributed.
+                    {groupStructureError(values.team_count, values.group_count)}
+                  </p>
+                ) : isUnevenGroups && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Uneven groups allowed — each group has at least 2 teams.
                   </p>
                 )}
               </Field>
@@ -1103,7 +1112,7 @@ export function TournamentForm({
               <Field label="Teams per Group" hint="Editing this updates the total number of teams.">
                 <Input
                   type="number"
-                  min={1}
+                  min={2}
                   value={isUnevenGroups ? "" : teamsPerGroup || ""}
                   placeholder={isUnevenGroups ? "Uneven" : "—"}
                   onChange={(e) => {
@@ -1148,6 +1157,7 @@ export function TournamentForm({
                     </p>
                   </div>
                   <div className="col-span-full">
+                    <p className="mb-2 text-muted-foreground">Top 2 from each group qualify; both teams qualify from a two-team group.</p>
                     <p className="text-muted-foreground">Rounds</p>
                     <p className="font-medium">{knockoutRoundLabel(knockoutTeams)}</p>
                   </div>

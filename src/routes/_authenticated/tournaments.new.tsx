@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_authenticated/tournaments/new")({
           "Set up a new basketball tournament: format, legs, playoffs, dates, venue and branding.",
       },
       { property: "og:title", content: "New tournament — Ecluid Basketball" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content: "Configure format, schedule and branding for your competition.",

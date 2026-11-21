@@ -42,3 +42,6 @@
 
 - [x] Prevent repeated league double-game days while preserving limits, rest and phase deadlines
 - [x] Test fair scheduling and apply date-only changes to the unstarted current tournament
+
+- [x] Allow uneven groups including two-team groups with consistent capacity validation
+- [x] Test and verify the uneven-group creation flow
