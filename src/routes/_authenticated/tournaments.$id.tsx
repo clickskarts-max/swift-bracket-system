@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app-shell";
 import { EmptyState, StatCard, StatusPill } from "@/components/data-bits";
 import { TournamentForm } from "@/components/tournament-form";
+import { TournamentContainerForm } from "@/components/tournament-container-form";
+import { eventConfig } from "@/lib/event-details";
 import { TeamsTab } from "@/components/tabs/teams-tab";
 import { PlayersTab } from "@/components/tabs/players-tab";
 import { ScheduleTab } from "@/components/tabs/schedule-tab";
@@ -95,7 +97,8 @@ function TournamentDetail() {
   const played = visibleMatches.filter((m) => isFinalStatus(m.status)).length;
   const parentId = tournament.parent_tournament_id ?? id;
   const parent = events.find((event) => event.id === parentId);
-  const showEvent = !!tournament.parent_tournament_id || view === "event";
+  const isContainer = eventConfig(tournament.config)["event_container"] === true;
+  const showEvent = !!tournament.parent_tournament_id || (view === "event" && !isContainer);
 
   return (
     <div>
@@ -109,7 +112,7 @@ function TournamentDetail() {
       </nav>
       <PageHeader
         title={tournament.name}
-        description={`${tournament.event_type ? `${eventLabel(tournament.event_type)} · ` : ""}${TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label ?? ""}`}
+        description={!showEvent ? `${events.filter(event => event.parent_tournament_id === id).length} events` : `${tournament.event_type ? `${eventLabel(tournament.event_type)} · ` : ""}${TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label ?? ""}`}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={tournament.status} />
@@ -131,8 +134,11 @@ function TournamentDetail() {
       <TournamentEventSwitcher tournament={tournament} events={events} />
 
       {!showEvent ? <section aria-label="Events" className="space-y-4">
-        <h2 className="text-lg font-semibold">Events</h2>
-        <EventsTab key={parentId} tournament={tournament} events={events} />
+        <Tabs defaultValue="events">
+          <TabsList><TabsTrigger value="events">Events</TabsTrigger>{isContainer && <TabsTrigger value="settings">Tournament settings</TabsTrigger>}</TabsList>
+          <TabsContent value="events"><EventsTab key={parentId} tournament={tournament} events={events} /></TabsContent>
+          {isContainer && <TabsContent value="settings"><TournamentContainerForm key={id} initial={tournament} pending={update.isPending} onSubmit={values => update.mutate({ ...values, id }, { onSuccess: () => toast.success("Tournament updated"), onError: error => toast.error(error.message) })} /></TabsContent>}
+        </Tabs>
       </section> : <>
       <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">

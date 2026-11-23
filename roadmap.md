@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Separate parent tournament creation from event competition setup
+- [x] Show each event's own format and preserve existing competitions
+- [x] Verify tournament → multiple events with different formats and public navigation
+
 - [x] Delete confirmed old National Games fixtures, teams and players while preserving the parent tournament
 - [x] Add organizer-created multiple events with optional Under 25 / Under 19 age groups
 - [x] Redesign public parent tournaments as event directories

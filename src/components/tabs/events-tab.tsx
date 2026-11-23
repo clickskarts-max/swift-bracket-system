@@ -11,6 +11,7 @@ import { useTournaments, type Tournament } from "@/lib/queries";
 import { useTournamentPermissions } from "@/lib/permissions";
 import { BASKETBALL_EVENTS } from "@/lib/tournament-events";
 import { competitionEvents, eventTitle } from "@/lib/event-details";
+import { TOURNAMENT_FORMATS } from "@/lib/formats";
 
 export function EventsTab({ tournament, events }: { tournament: Tournament; events: Tournament[] }) {
   const parentId = tournament.parent_tournament_id ?? tournament.id;
@@ -20,7 +21,7 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
   const qc = useQueryClient();
   const [existingId, setExistingId] = useState("");
   const [linkCategory, setLinkCategory] = useState("");
-  const [cloneSource, setCloneSource] = useState(tournament.id);
+  const [cloneSource, setCloneSource] = useState(competitionEvents(events)[0]?.id ?? "");
   const [cloneCategory, setCloneCategory] = useState("");
   const available = BASKETBALL_EVENTS;
   const competitions = competitionEvents(events);
@@ -43,7 +44,8 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
 
   return <div className="space-y-6">
     {canEdit && <Link to="/tournaments/new" search={{ parent: parentId }}><Button><Plus className="mr-2 h-4 w-4" />Create event</Button></Link>}
-    {competitions.length > 0 && <div className="grid gap-3 sm:grid-cols-2">{competitions.map(event => <div key={event.id} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4"><div><h3 className="font-semibold">{eventTitle(event)}</h3><p className="mt-1 text-xs text-muted-foreground">{event.team_count} teams</p></div><Link to="/tournaments/$id" params={{ id: event.id }} search={{ view: "event" }}><Button variant="outline" size="sm">Open event</Button></Link></div>)}</div>}
+    {competitions.length === 0 && <p className="py-4 text-sm text-muted-foreground">No events yet.</p>}
+    {competitions.length > 0 && <div className="grid gap-3 sm:grid-cols-2">{competitions.map(event => <div key={event.id} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4"><div><h3 className="font-semibold">{eventTitle(event)}</h3><p className="mt-1 text-xs text-muted-foreground">{event.team_count} teams · {TOURNAMENT_FORMATS.find(format => format.value === event.format)?.label ?? event.format}</p></div><Link to="/tournaments/$id" params={{ id: event.id }} search={{ view: "event" }}><Button variant="outline" size="sm">Open event</Button></Link></div>)}</div>}
     <div className="grid gap-3 sm:grid-cols-2">
       {BASKETBALL_EVENTS.map((category) => {
         return <div key={category.value} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
@@ -52,10 +54,10 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
         </div>;
       })}
     </div>
-    {canEdit && available.length > 0 && <div className="space-y-3 border-t border-border pt-5">
+    {canEdit && competitions.length > 0 && <div className="space-y-3 border-t border-border pt-5">
       <h3 className="font-semibold">Clone an event</h3>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label="Copy setup from"><Select value={cloneSource} onValueChange={setCloneSource}><SelectTrigger className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{events.map((row) => <SelectItem key={row.id} value={row.id}>{row.event_type ? eventTitle(row) : row.name}</SelectItem>)}</SelectContent></Select></Field>
+        <Field label="Copy setup from"><Select value={cloneSource} onValueChange={setCloneSource}><SelectTrigger className="w-64 max-w-full"><SelectValue placeholder="Select event" /></SelectTrigger><SelectContent>{competitions.map((row) => <SelectItem key={row.id} value={row.id}>{eventTitle(row)}</SelectItem>)}</SelectContent></Select></Field>
         <Field label="New event category"><Select value={cloneCategory} onValueChange={setCloneCategory}><SelectTrigger className="w-52 max-w-full"><SelectValue placeholder="Select event" /></SelectTrigger><SelectContent>{available.map((event) => <SelectItem key={event.value} value={event.value}>{event.label}</SelectItem>)}</SelectContent></Select></Field>
         {cloneSource && cloneCategory ? <Link to="/tournaments/new" search={{ parent: parentId, event: cloneCategory, clone: cloneSource }}><Button variant="outline"><Copy className="mr-2 h-4 w-4" />Clone event</Button></Link> : <Button variant="outline" disabled><Copy className="mr-2 h-4 w-4" />Clone event</Button>}
       </div>

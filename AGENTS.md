@@ -31,3 +31,4 @@
 - Clone events through the existing creation wizard with an allowlisted setup projection and fresh team placeholders; never copy fixtures, results, champion IDs, player data, or memberships into another event.
 - Parent tournament management opens the Events directory; its existing competition workspace uses validated view=event search state so fixtures stay under Events without moving or relabeling stored games.
 - Store optional event age_group and parent event_container in existing config JSON; public parent directories and switchers include only actual competition events, not an unassigned parent workspace.
+- Use a dedicated container form for new parent tournaments and keep competition setup in the event wizard; neutral required legacy columns are storage defaults, never a parent-wide format.

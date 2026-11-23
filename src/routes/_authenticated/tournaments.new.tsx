@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app-shell";
 import { TournamentForm } from "@/components/tournament-form";
+import { TournamentContainerForm } from "@/components/tournament-container-form";
+import type { TournamentValues } from "@/components/tournament-form";
 import { useUpsert, useTournament } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
 import { eventLabel, isBasketballEvent } from "@/lib/tournament-events";
@@ -19,14 +21,14 @@ export const Route = createFileRoute("/_authenticated/tournaments/new")({
       {
         name: "description",
         content:
-          "Set up a new basketball tournament: format, legs, playoffs, dates, venue and branding.",
+          "Create a basketball tournament, then add events with independent formats, teams and fixtures.",
       },
       { property: "og:title", content: "New tournament — Ecluid Basketball" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
-        content: "Configure format, schedule and branding for your competition.",
+        content: "Create your tournament and manage independently configured basketball events.",
       },
     ],
   }),
@@ -51,25 +53,7 @@ function NewTournament() {
   const cloneDefaults = cloneTournament && parentTournament && isBasketballEvent(event)
     ? eventCloneDefaults(cloneTournament, parentTournament, event) : null;
 
-  return (
-    <div>
-      <PageHeader
-        title={parentTournament ? `${cloneDefaults ? "Clone" : "Add"} event — ${parentTournament.name}` : "Create tournament"}
-        description={parentTournament ? eventLabel(event) : "Choose a format now — you can regenerate the schedule anytime."}
-      />
-      <TournamentForm
-        key={`${parent ?? "new"}:${event ?? "none"}:${clone ?? "none"}`}
-        defaults={cloneDefaults ?? (parentTournament ? {
-          name: event ? `${parentTournament.name} — ${eventLabel(event)}` : "",
-          event_type: event ?? null,
-          start_date: parentTournament.start_date,
-          end_date: parentTournament.end_date,
-          logo_url: parentTournament.logo_url,
-          is_public: parentTournament.is_public,
-        } : {})}
-        submitLabel={cloneDefaults ? "Create cloned event" : "Create tournament"}
-        pending={create.isPending}
-        onSubmit={async (values) => {
+  const onSubmit = async (values: TournamentValues) => {
           const { teams, venues, ...tournamentData } = values;
           if (parent && !isBasketballEvent(values.event_type)) {
             toast.error("Choose the basketball event category"); return;
@@ -123,13 +107,30 @@ function NewTournament() {
                 }
               }
 
-              toast.success("Tournament created");
+              toast.success(parent ? "Event created" : "Tournament created");
               if (created?.id) navigate({ to: "/tournaments/$id", params: { id: created.id } });
             },
             onError: (e) => toast.error(e.message),
           });
+  };
+
+  return (
+    <div>
+      <PageHeader title={parentTournament ? `${cloneDefaults ? "Clone" : "Add"} event — ${parentTournament.name}` : "Create tournament"} />
+      {parentTournament ? <TournamentForm
+        key={`${parent}:${event ?? "none"}:${clone ?? "none"}`}
+        defaults={cloneDefaults ?? {
+          name: event ? `${parentTournament.name} — ${eventLabel(event)}` : "",
+          event_type: event ?? null,
+          start_date: parentTournament.start_date,
+          end_date: parentTournament.end_date,
+          logo_url: parentTournament.logo_url,
+          is_public: parentTournament.is_public,
         }}
-      />
+        submitLabel={cloneDefaults ? "Create cloned event" : "Create event"}
+        pending={create.isPending}
+        onSubmit={onSubmit}
+      /> : <TournamentContainerForm pending={create.isPending} onSubmit={onSubmit} />}
     </div>
   );
 }

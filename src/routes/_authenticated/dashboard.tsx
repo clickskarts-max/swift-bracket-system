@@ -21,6 +21,7 @@ import { useTournaments, useUpsert, useRemove } from "@/lib/queries";
 import { formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { eventLabel } from "@/lib/tournament-events";
+import { eventTitle, isEventDirectory } from "@/lib/event-details";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -98,7 +99,10 @@ function Dashboard() {
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {visible.map((t) => (
+          {visible.map((t) => {
+            const children = tournaments.filter(event => event.parent_tournament_id === t.id);
+            const directory = isEventDirectory(t, children.length);
+            return (
             <div
               key={t.id}
               className="surface-card animate-rise overflow-hidden transition-transform hover:-translate-y-0.5"
@@ -130,7 +134,7 @@ function Dashboard() {
                       >
                         {t.name}
                       </Link>
-                      <p className="text-xs text-muted-foreground">{formatLabel(t.format)}</p>
+                      <p className="text-xs text-muted-foreground">{directory ? `${children.length} events` : formatLabel(t.format)}</p>
                       {t.event_type && <p className="mt-1 text-xs font-medium text-primary">{eventLabel(t.event_type)}</p>}
                     </div>
                   </div>
@@ -149,11 +153,11 @@ function Dashboard() {
                   )}
                   <span className="flex items-center gap-1">
                     <Users className="h-3.5 w-3.5" />
-                    {t.team_count} teams
+                    {directory ? `${children.length} events` : `${t.team_count} teams`}
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {tournaments.filter((event) => event.parent_tournament_id === t.id).map((event) => <Link key={event.id} to="/tournaments/$id" params={{ id: event.id }}><Button variant="outline" size="sm">{eventLabel(event.event_type)}</Button></Link>)}
+                  {children.map((event) => <Link key={event.id} to="/tournaments/$id" params={{ id: event.id }}><Button variant="outline" size="sm">{eventTitle(event)}</Button></Link>)}
                   <Link to="/tournaments/$id" params={{ id: t.id }}>
                     <Button size="sm">Manage</Button>
                   </Link>
@@ -215,7 +219,7 @@ function Dashboard() {
                 </div>
               </div>
             </div>
-          ))}
+          );})}
         </div>
       )}
     </div>
