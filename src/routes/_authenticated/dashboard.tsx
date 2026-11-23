@@ -20,6 +20,7 @@ import { EmptyState, StatCard, StatusPill } from "@/components/data-bits";
 import { useTournaments, useUpsert, useRemove } from "@/lib/queries";
 import { formatDateRangeInline } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
+import { eventLabel } from "@/lib/tournament-events";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -31,6 +32,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       },
       { property: "og:title", content: "Dashboard — Ecluid Basketball" },
       { property: "og:description", content: "Manage every basketball tournament you run." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Dashboard,
@@ -45,7 +48,7 @@ function Dashboard() {
   const remove = useRemove("tournaments", [["tournaments"]]);
   const [tab, setTab] = useState("active");
 
-  const visible = tournaments.filter((t) => (tab === "archived" ? t.archived : !t.archived));
+  const visible = tournaments.filter((t) => (tab === "archived" ? t.archived : !t.archived) && (!t.parent_tournament_id || !tournaments.some((parent) => parent.id === t.parent_tournament_id)));
   const live = tournaments.filter((t) => t.status === "live" && !t.archived).length;
 
   return (
@@ -128,6 +131,7 @@ function Dashboard() {
                         {t.name}
                       </Link>
                       <p className="text-xs text-muted-foreground">{formatLabel(t.format)}</p>
+                      {t.event_type && <p className="mt-1 text-xs font-medium text-primary">{eventLabel(t.event_type)}</p>}
                     </div>
                   </div>
                   <StatusPill status={t.status} />
@@ -149,6 +153,7 @@ function Dashboard() {
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {tournaments.filter((event) => event.parent_tournament_id === t.id).map((event) => <Link key={event.id} to="/tournaments/$id" params={{ id: event.id }}><Button variant="outline" size="sm">{eventLabel(event.event_type)}</Button></Link>)}
                   <Link to="/tournaments/$id" params={{ id: t.id }}>
                     <Button size="sm">Manage</Button>
                   </Link>
@@ -190,7 +195,7 @@ function Dashboard() {
                         <AlertDialogTitle>Delete “{t.name}”?</AlertDialogTitle>
                         <AlertDialogDescription>
                           This permanently removes the tournament with all its teams, players,
-                          matches and sponsors.
+                          matches and sponsors. Tournaments with linked events cannot be deleted until those events are unlinked.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

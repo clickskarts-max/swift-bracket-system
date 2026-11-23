@@ -1283,6 +1283,7 @@ export type Database = {
           created_at: string
           description: string | null
           end_date: string | null
+          event_type: string | null
           format: string
           group_count: number
           id: string
@@ -1291,6 +1292,7 @@ export type Database = {
           logo_url: string | null
           name: string
           owner_id: string
+          parent_tournament_id: string | null
           playoff_format: string
           qualifiers_per_group: number
           slug: string
@@ -1308,6 +1310,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          event_type?: string | null
           format?: string
           group_count?: number
           id?: string
@@ -1316,6 +1319,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           owner_id: string
+          parent_tournament_id?: string | null
           playoff_format?: string
           qualifiers_per_group?: number
           slug: string
@@ -1333,6 +1337,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          event_type?: string | null
           format?: string
           group_count?: number
           id?: string
@@ -1341,6 +1346,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           owner_id?: string
+          parent_tournament_id?: string | null
           playoff_format?: string
           qualifiers_per_group?: number
           slug?: string
@@ -1351,7 +1357,15 @@ export type Database = {
           venue?: string | null
           venue_map_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_parent_tournament_id_fkey"
+            columns: ["parent_tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1479,6 +1493,7 @@ export type Database = {
           created_at: string
           description: string | null
           end_date: string | null
+          event_type: string | null
           format: string
           group_count: number
           id: string
@@ -1487,6 +1502,7 @@ export type Database = {
           logo_url: string | null
           name: string
           owner_id: string
+          parent_tournament_id: string | null
           playoff_format: string
           qualifiers_per_group: number
           slug: string

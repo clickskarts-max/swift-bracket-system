@@ -36,6 +36,13 @@
       "when": 1795271810565,
       "tag": "0004_owner_approval_for_ads_and_activation_for_tournaments",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795420999442,
+      "tag": "0005_tournament_event_hierarchy",
+      "breakpoints": true
     }
   ]
 }

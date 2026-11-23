@@ -41,6 +41,14 @@ import { SponsorCreatives } from "@/components/ads/sponsor-creatives";
 import { INVENTORY_BY_KEY } from "@/lib/ad-inventory";
 
 export const Route = createFileRoute("/_authenticated/advertising_/campaign/$id")({
+  head: () => ({ meta: [
+    { title: "Campaign workspace — Ecluid Basketball" },
+    { name: "description", content: "Manage basketball advertising creatives, inventory, targeting and performance." },
+    { property: "og:title", content: "Campaign workspace — Ecluid Basketball" },
+    { property: "og:description", content: "Manage campaign creatives, targeting and performance." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CampaignWorkspace,
 });
 

@@ -14,7 +14,10 @@ import { BracketTab } from "@/components/tabs/bracket-tab";
 import { SponsorsTab } from "@/components/tabs/sponsors-tab";
 import { formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
-import { useMatches, usePlayers, useTeams, useTournament, useUpsert } from "@/lib/queries";
+import { useMatches, usePlayers, useTeams, useTournament, useTournamentEvents, useUpsert } from "@/lib/queries";
+import { TournamentEventSwitcher } from "@/components/tournament-event-switcher";
+import { EventsTab } from "@/components/tabs/events-tab";
+import { eventLabel } from "@/lib/tournament-events";
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,10 +45,11 @@ export const Route = createFileRoute("/_authenticated/tournaments/$id")({
 function TournamentDetail() {
   const { id } = Route.useParams();
   const { data: tournament, isLoading } = useTournament(id);
+  const { data: events = [] } = useTournamentEvents(tournament);
   const { data: teams = [] } = useTeams(id);
   const { data: players = [] } = usePlayers(id);
   const { data: matches = [] } = useMatches(id);
-  const update = useUpsert("tournaments", [["tournaments"], ["tournament", id]]);
+  const update = useUpsert("tournaments", [["tournaments"], ["tournament", id], ["tournament-events"], ["tournament-slug"]]);
   const qc = useQueryClient();
   const syncing = useRef(false);
 
@@ -90,7 +94,7 @@ function TournamentDetail() {
     <div>
       <PageHeader
         title={tournament.name}
-        description={TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label ?? ""}
+        description={`${tournament.event_type ? `${eventLabel(tournament.event_type)} · ` : ""}${TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label ?? ""}`}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill status={tournament.status} />
@@ -108,6 +112,8 @@ function TournamentDetail() {
           </div>
         }
       />
+
+      <TournamentEventSwitcher tournament={tournament} events={events} />
 
       <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
@@ -150,10 +156,11 @@ function TournamentDetail() {
             <TabsTrigger value="players">Players</TabsTrigger>
             <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="events">Events</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="schedule">
-          <ScheduleTab tournament={tournament} />
+          <ScheduleTab key={id} tournament={tournament} />
         </TabsContent>
         <TabsContent value="standings">
           <StandingsTab teams={teams} matches={matches} tournament={tournament ?? null} />
@@ -172,6 +179,7 @@ function TournamentDetail() {
         </TabsContent>
         <TabsContent value="settings">
           <TournamentForm
+            key={id}
             initial={tournament}
             submitLabel="Save changes"
             pending={update.isPending}
@@ -186,6 +194,7 @@ function TournamentDetail() {
             }
           />
         </TabsContent>
+        <TabsContent value="events"><EventsTab key={tournament.parent_tournament_id ?? id} tournament={tournament} events={events} /></TabsContent>
       </Tabs>
     </div>
   );

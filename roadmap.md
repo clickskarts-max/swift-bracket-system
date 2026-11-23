@@ -1,5 +1,10 @@
 # Roadmap
 
+- [x] Add parent tournament/event grouping with safe existing-data preservation
+- [x] Add event creation and switching in tournament management and public pages
+- [x] Test event isolation and verify signed-in and public event flows
+- [ ] Label the current National Games event — waiting for organizer to identify the existing event category
+
 - [x] Confirm the completed best-of-3 result and championship winner
 - [x] Remove the unnecessary third final from active displays
 - [x] Mark the tournament ended and show the champion publicly and internally

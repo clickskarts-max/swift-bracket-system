@@ -69,6 +69,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PlacementRulesPanel } from "@/components/ads/placement-rules-panel";
 
 export const Route = createFileRoute("/_authenticated/advertising")({
+  head: () => ({ meta: [
+    { title: "Advertising — Ecluid Basketball" },
+    { name: "description", content: "Manage basketball tournament advertising, sponsorship inventory and placement rules." },
+    { property: "og:title", content: "Advertising — Ecluid Basketball" },
+    { property: "og:description", content: "Manage campaigns, sponsorships and advertising placements." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdvertisingPage,
 });
 

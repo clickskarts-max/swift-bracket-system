@@ -22,6 +22,8 @@ export const Route = createFileRoute("/auth")({
       },
       { property: "og:title", content: "Sign in — Ecluid Basketball" },
       { property: "og:description", content: "Access your basketball tournament control room." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,

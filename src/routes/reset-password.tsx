@@ -22,6 +22,8 @@ export const Route = createFileRoute("/reset-password")({
         property: "og:description",
         content: "Complete your password recovery and get back to your tournaments.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ResetPasswordPage,

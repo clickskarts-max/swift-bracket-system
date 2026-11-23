@@ -141,6 +141,14 @@ const SECTIONS: {
 const SECTION_KEYS = SECTIONS.map((s) => s.key);
 
 export const Route = createFileRoute("/_authenticated/owner")({
+  head: () => ({ meta: [
+    { title: "Platform administration — Ecluid Basketball" },
+    { name: "description", content: "Administer tournament accounts, activation plans, advertising and platform activity." },
+    { property: "og:title", content: "Platform administration — Ecluid Basketball" },
+    { property: "og:description", content: "Manage basketball tournament accounts and platform operations." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   validateSearch: (search: Record<string, unknown>) => ({
     section: (SECTION_KEYS.includes(search["section"] as SectionKey)
       ? (search["section"] as SectionKey)

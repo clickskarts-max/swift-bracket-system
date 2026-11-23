@@ -23,6 +23,8 @@ import {
 } from "@/components/ads/tab-ad-slots";
 import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
 import { TournamentChampion } from "@/components/tournament-champion";
+import { TournamentEventSwitcher } from "@/components/tournament-event-switcher";
+import { eventLabel } from "@/lib/tournament-events";
 import { formatDate, formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { fixtureDisplayNumbers } from "@/lib/fixture-display";
@@ -33,6 +35,7 @@ import {
   usePublicSponsors,
   usePublicTeams,
   useTournamentBySlug,
+  useTournamentEvents,
   useVenues,
 } from "@/lib/queries";
 
@@ -64,6 +67,7 @@ const dayKeyFromIso = (iso: string) => {
 function PublicTournament() {
   const { slug } = Route.useParams();
   const { data: tournament, isLoading } = useTournamentBySlug(slug);
+  const { data: events = [] } = useTournamentEvents(tournament, true);
   const { data: teams = [] } = usePublicTeams(tournament?.id ?? "");
   const { data: matches = [] } = useMatches(tournament?.id ?? "");
   const { data: sponsors = [] } = usePublicSponsors(tournament?.id ?? "");
@@ -118,6 +122,7 @@ function PublicTournament() {
       jersey_color: null,
     };
   const header = sponsors.filter((s) => s.placement === "public_header");
+  const parentTournament = events.find((event) => event.id === (tournament.parent_tournament_id ?? tournament.id));
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = visibleMatches.filter((m) => !isFinalStatus(m.status));
   const results = visibleMatches.filter((m) => isFinalStatus(m.status));
@@ -281,7 +286,8 @@ function PublicTournament() {
               <img src={tournament.logo_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
             )}
             <div>
-              <h1 className="font-display text-3xl font-bold sm:text-4xl">{tournament.name}</h1>
+              <h1 className="font-display text-3xl font-bold sm:text-4xl">{parentTournament?.name ?? tournament.name}</h1>
+              {tournament.event_type && <p className="mt-2 font-display text-xl font-semibold text-primary">{eventLabel(tournament.event_type)}</p>}
               <p className="mt-1 text-sm text-muted-foreground">
                 {TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label}
               </p>
@@ -334,6 +340,7 @@ function PublicTournament() {
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
+        <TournamentEventSwitcher tournament={tournament} events={events} publicPage />
         <TournamentChampion tournament={tournament} teams={teams} matches={matches} />
         <Tabs defaultValue="fixtures">
           <div className="-mx-4 mb-4 overflow-x-auto px-4">

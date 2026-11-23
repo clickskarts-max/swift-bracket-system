@@ -27,3 +27,4 @@
 - Keep PDF column selection and blank-value projection in a pure model; export parent tournament context and local-calendar day sections from loaded data so customization never alters fixtures.
 - Generate editable Word fixture files with docx using the PDF's shared projection and blank-pool options; prepare files before download to preserve mobile user activation.
 - Keep download column order and per-game custom times in the shared export projection, never write them to fixtures; both PDF layouts and Word must reflect the same export choices.
+- Represent basketball events as independently managed tournament rows linked by parent_tournament_id, preserving existing IDs and event-specific data; validate same-account, single-level, unique-category links in the database and never inherit tournament memberships implicitly.

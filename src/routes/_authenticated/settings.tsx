@@ -51,6 +51,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
         property: "og:description",
         content: "Branding and contact details for your basketball organization.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: SettingsPage,

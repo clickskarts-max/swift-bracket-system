@@ -46,6 +46,7 @@ import type { Tournament } from "@/lib/queries";
 import type { Json } from "@/integrations/supabase/types";
 import { readGroupCapacities } from "@/lib/tournament-payload";
 import { balancedGroupCapacity, groupStructureError } from "@/lib/group-structure";
+import { BASKETBALL_EVENTS } from "@/lib/tournament-events";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -75,6 +76,7 @@ export type VenueValue = {
 };
 
 export type TournamentValues = {
+  event_type?: string | null;
   name: string;
   slug: string;
   format: string;
@@ -133,11 +135,13 @@ const empty = (): TournamentValues => ({
 
 export function TournamentForm({
   initial,
+  defaults,
   submitLabel,
   onSubmit,
   pending,
 }: {
   initial?: Tournament | null;
+  defaults?: Partial<TournamentValues>;
   submitLabel: string;
   onSubmit: (values: TournamentValues) => void;
   pending?: boolean;
@@ -169,10 +173,11 @@ export function TournamentForm({
           description: initial.description,
           is_public: initial.is_public,
           config: initial.config,
+          event_type: initial.event_type,
           group_capacities: readGroupCapacities(initial.config),
           teams: [], // Handled separately if needed, but usually creation only
         }
-      : { ...empty(), qualifiers_per_group: 2 },
+      : { ...empty(), qualifiers_per_group: 2, ...defaults },
   );
 
   // Initialize teams when team_count changes in Step 1
@@ -1015,6 +1020,17 @@ export function TournamentForm({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t border-border/40">
+          <div className="col-span-full">
+            <Field label="Basketball event">
+              <Select value={values.event_type ?? "unassigned"} onValueChange={(value) => set("event_type", value === "unassigned" ? null : value)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned / single event</SelectItem>
+                  {BASKETBALL_EVENTS.map((event) => <SelectItem value={event.value} key={event.value}>{event.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
           <div className="col-span-full">
             <Field label="Format">
               <Select value={values.format} onValueChange={(v) => set("format", v)}>

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { tournamentPayload } from "@/lib/tournament-payload";
+import { tournamentFamily } from "@/lib/tournament-events";
 
 export type Tournament = Tables<"tournaments">;
 export type Team = Tables<"teams">;
@@ -43,6 +44,21 @@ export const useTournamentBySlug = (slug: string) =>
       ) as Tournament | null,
     enabled: !!slug,
   });
+
+export const useTournamentEvents = (tournament: Tournament | null | undefined, publicOnly = false) => {
+  const parentId = tournament?.parent_tournament_id ?? tournament?.id ?? "";
+  return useQuery({
+    queryKey: ["tournament-events", parentId, publicOnly],
+    enabled: !!parentId,
+    queryFn: async () => {
+      let query = supabase.from("tournaments").select("*")
+        .or(`id.eq.${parentId},parent_tournament_id.eq.${parentId}`);
+      if (publicOnly) query = query.eq("is_public", true).eq("archived", false);
+      const rows = unwrap(await query) ?? [];
+      return tournamentFamily(rows, parentId);
+    },
+  });
+};
 
 export const useTeams = (tournamentId: string) =>
   useQuery({

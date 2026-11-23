@@ -4,8 +4,13 @@ import { PageHeader } from "@/components/app-shell";
 import { TournamentForm } from "@/components/tournament-form";
 import { useUpsert, useTournament } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
+import { eventLabel, isBasketballEvent } from "@/lib/tournament-events";
 
 export const Route = createFileRoute("/_authenticated/tournaments/new")({
+  validateSearch: (search: Record<string, unknown>): { parent?: string; event?: string } => ({
+    ...(typeof search["parent"] === "string" && /^[0-9a-f-]{36}$/i.test(search["parent"]) ? { parent: search["parent"] } : {}),
+    ...(isBasketballEvent(search["event"]) ? { event: search["event"] } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "New tournament — Ecluid Basketball" },
@@ -27,21 +32,37 @@ export const Route = createFileRoute("/_authenticated/tournaments/new")({
 });
 
 function NewTournament() {
+  const { parent, event } = Route.useSearch();
+  const { data: parentTournament, isLoading: parentLoading } = useTournament(parent ?? "");
   const navigate = useNavigate();
-  const create = useUpsert("tournaments", [["tournaments"]]);
+  const create = useUpsert("tournaments", [["tournaments"], ["tournament-events"]]);
+
+  if (parent && parentLoading) return <p>Loading parent tournament…</p>;
+  if (parent && !parentTournament) return <p>This parent tournament is unavailable.</p>;
 
   return (
     <div>
       <PageHeader
-        title="Create tournament"
-        description="Choose a format now — you can regenerate the schedule anytime."
+        title={parentTournament ? `Add event — ${parentTournament.name}` : "Create tournament"}
+        description={parentTournament ? eventLabel(event) : "Choose a format now — you can regenerate the schedule anytime."}
       />
       <TournamentForm
+        defaults={parentTournament ? {
+          name: `${parentTournament.name} — ${eventLabel(event)}`,
+          event_type: event ?? null,
+          start_date: parentTournament.start_date,
+          end_date: parentTournament.end_date,
+          logo_url: parentTournament.logo_url,
+          is_public: parentTournament.is_public,
+        } : {}}
         submitLabel="Create tournament"
         pending={create.isPending}
         onSubmit={async (values) => {
           const { teams, venues, ...tournamentData } = values;
-          create.mutate(tournamentData, {
+          if (parent && !isBasketballEvent(values.event_type)) {
+            toast.error("Choose the basketball event category"); return;
+          }
+          create.mutate({ ...tournamentData, ...(parent ? { parent_tournament_id: parent } : {}) }, {
             onSuccess: async (row) => {
               const created = row as { id: string } | null;
               if (created?.id) {
