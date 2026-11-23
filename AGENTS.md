@@ -26,3 +26,4 @@
 - Generate fixture PDFs on demand in the browser from loaded tournament data and shared display numbering; prepare a Blob before a separate download click so downloads keep user activation on mobile without extra data access or fixture writes.
 - Keep PDF column selection and blank-value projection in a pure model; export parent tournament context and local-calendar day sections from loaded data so customization never alters fixtures.
 - Generate editable Word fixture files with docx using the PDF's shared projection and blank-pool options; prepare files before download to preserve mobile user activation.
+- Keep download column order and per-game custom times in the shared export projection, never write them to fixtures; both PDF layouts and Word must reflect the same export choices.

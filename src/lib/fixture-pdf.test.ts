@@ -121,3 +121,40 @@ test("Word keeps fixture names when only pool names are blank", async () => {
   equal(xml.split("Home Club").length - 1, 2);
   equal(xml.split("Away Club").length - 1, 2);
 });
+
+test("download column order is shared by detailed and tie sheets", () => {
+  const model = fixturePdfModel(input, { columns: [{ key: "date" }, { key: "away" }, { key: "home" }, { key: "number" }] });
+  deepEqual(model.columns.map(column => column.key), ["date", "away", "home", "number"]);
+  deepEqual(model.tieColumns.map(column => column.key), ["date", "teams", "number"]);
+});
+
+test("five custom game times on each of five days only change export values", () => {
+  const matches = Array.from({ length: 25 }, (_, index) => match(`game-${index}`, index + 1, `2026-11-${24 + Math.floor(index / 5)}T${String(3 + index % 5).padStart(2, "0")}:00:00Z`));
+  const original = JSON.stringify(matches);
+  const times = ["09:00", "11:00", "13:00", "15:00", "17:00"];
+  const gameTimes = Object.fromEntries(matches.map((game, index) => [game.id, times[index % 5] ?? ""]));
+  const model = fixturePdfModel({ ...input, matches }, { gameTimes, columns: [{ key: "date" }] });
+  equal(model.days.length, 5);
+  for (const day of model.days) {
+    equal(day.matches.length, 5);
+    deepEqual(day.matches.map(game => model.cell(game, { key: "date" })), times);
+    deepEqual(day.matches.map(game => model.tieCell(game, "date")), times);
+  }
+  equal(JSON.stringify(matches), original);
+  const first = matches[0];
+  ok(first);
+  equal(model.cell(first, { key: "date", blank: true }), "");
+});
+
+test("PDF and Word include reordered custom times and respect blank times", async () => {
+  const options = { layout: "tiesheet" as const, columns: [{ key: "date" as const }, { key: "number" as const }], gameTimes: { first: "09:17", second: "11:43" } };
+  const pdf = await buildFixturePdf(input, undefined, options).text();
+  ok(pdf.includes("(09:17)") && pdf.includes("(11:43)"));
+  const blob = await buildFixtureWord(input, options);
+  const bytes = unzipSync(new Uint8Array(await blob.arrayBuffer()))["word/document.xml"];
+  ok(bytes);
+  const xml = new TextDecoder().decode(bytes);
+  ok(xml.includes("09:17") && xml.includes("11:43"));
+  const blank = await buildFixturePdf(input, undefined, { ...options, columns: [{ key: "date", blank: true }, { key: "number" }] }).text();
+  ok(!blank.includes("09:17") && !blank.includes("11:43"));
+});

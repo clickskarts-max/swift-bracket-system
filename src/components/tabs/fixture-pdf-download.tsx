@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
-import { Download, FileDown, LoaderCircle, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, FileDown, LoaderCircle, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { deliverFile } from "@/lib/download-file";
-import { FIXTURE_PDF_COLUMNS, type FixturePdfColumn, type FixturePdfInput } from "@/lib/fixture-pdf-model";
+import { FIXTURE_PDF_COLUMNS, fixturePdfModel, type FixturePdfColumnKey, type FixturePdfColumn, type FixturePdfInput } from "@/lib/fixture-pdf-model";
 
 async function logoPng(src: string): Promise<string> {
   const image = new Image(); image.crossOrigin = "anonymous"; image.src = src;
@@ -28,6 +28,19 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
   const [heading, setHeading] = useState("");
   const [subheading, setSubheading] = useState("");
   const [columns, setColumns] = useState<FixturePdfColumn[]>(FIXTURE_PDF_COLUMNS.map(({ key }) => ({ key })));
+  const [columnOrder, setColumnOrder] = useState<FixturePdfColumnKey[]>(FIXTURE_PDF_COLUMNS.map(({ key }) => key));
+  const [gameTimes, setGameTimes] = useState<Record<string, string>>({});
+  const days = fixturePdfModel(input).days;
+  const moveColumn = (key: FixturePdfColumnKey, direction: -1 | 1) => {
+    const next = [...columnOrder];
+    const index = next.indexOf(key);
+    const adjacent = next[index + direction];
+    if (!adjacent) return;
+    next[index] = adjacent; next[index + direction] = key;
+    setColumnOrder(next);
+    setColumns(current => next.flatMap(key => current.filter(column => column.key === key)));
+    setReady(null);
+  };
   const [showGroups, setShowGroups] = useState(true);
   const [blankPools, setBlankPools] = useState(true);
   const [fileFormat, setFileFormat] = useState<"pdf" | "docx">("pdf");
@@ -55,7 +68,7 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
       const source = useParentLogo ? logo ?? input.logoUrl : null;
       const image = source ? await logoPng(source) : undefined;
       const exportInput = { ...input, ...(input.tournamentUrl ? { tournamentUrl: new URL(input.tournamentUrl, window.location.origin).href } : {}) };
-      const options = { heading, subheading: subheading.split("|").map(part => part.trim()).filter(Boolean).join("\n") || (mode === "blank" ? "Blank tie-sheet" : "Fixture sheet"), columns, showGroups, blankPools, layout, ...(image ? { logo: image } : {}) };
+      const options = { heading, subheading: subheading.split("|").map(part => part.trim()).filter(Boolean).join("\n") || (mode === "blank" ? "Blank tie-sheet" : "Fixture sheet"), columns, gameTimes, showGroups, blankPools, layout, ...(image ? { logo: image } : {}) };
       const blob = fileFormat === "docx"
         ? await (await import("@/lib/fixture-word")).buildFixtureWord(exportInput, options)
         : (await import("@/lib/fixture-pdf")).buildFixturePdf(exportInput, undefined, options);
@@ -66,7 +79,7 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
   };
   return <Dialog open={open} onOpenChange={value => { setOpen(value); invalidate(); }}>
     <Button variant="outline" onClick={() => { invalidate(); setOpen(true); }}><FileDown className="mr-1.5 h-4 w-4" />Download PDF / Word</Button>
-    <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+    <DialogContent className="max-h-[90dvh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
       <DialogHeader><DialogTitle>Download fixtures</DialogTitle></DialogHeader>
       <p className="min-w-0 break-words text-sm text-muted-foreground">{input.tournamentName} · {input.teams?.length ?? 0} teams · {count} active games</p>
       <fieldset disabled={busy} className="min-w-0 space-y-4">
@@ -93,15 +106,27 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
         {showGroups && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-primary" checked={blankPools} onChange={event => { setBlankPools(event.target.checked); invalidate(); }} />Blank pool team names</label>}
         <div className="space-y-2">
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem] gap-2 text-xs font-semibold text-muted-foreground"><span>Include column</span><span>Custom column heading</span><span>Blank</span></div>
-          {FIXTURE_PDF_COLUMNS.map(item => {
+          {columnOrder.map((key, index) => {
+            const item = FIXTURE_PDF_COLUMNS.find(item => item.key === key);
+            if (!item) return null;
             const column = columns.find(column => column.key === item.key);
             const update = (change: Partial<FixturePdfColumn>) => { setColumns(current => current.map(column => column.key === item.key ? { ...column, ...change } : column)); invalidate(); };
             return <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem] items-center gap-2 border-b border-border pb-2">
-              <label className="flex min-w-0 items-center gap-2 text-sm"><input type="checkbox" className="shrink-0 accent-primary" aria-label={`Include ${item.label}`} checked={Boolean(column)} onChange={event => { setColumns(current => event.target.checked ? FIXTURE_PDF_COLUMNS.flatMap(itemColumn => itemColumn.key === item.key ? [{ key: item.key, blank: mode === "blank" && ["home", "away", "date", "score"].includes(item.key) }] : current.filter(column => column.key === itemColumn.key)) : current.filter(column => column.key !== item.key)); invalidate(); }} />{item.label}</label>
+              <div className="flex min-w-0 flex-wrap items-center gap-1">
+                <div className="flex shrink-0"><Button variant="ghost" size="icon" className="h-7 w-7" disabled={index === 0} aria-label={`Move ${item.label} up`} title={`Move ${item.label} up`} onClick={() => moveColumn(item.key, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-7 w-7" disabled={index === columnOrder.length - 1} aria-label={`Move ${item.label} down`} title={`Move ${item.label} down`} onClick={() => moveColumn(item.key, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button></div>
+                <label className="flex min-w-0 items-center gap-2 text-sm"><input type="checkbox" className="shrink-0 accent-primary" aria-label={`Include ${item.label}`} checked={Boolean(column)} onChange={event => { setColumns(current => event.target.checked ? columnOrder.flatMap(key => key === item.key ? [{ key: item.key, blank: mode === "blank" && ["home", "away", "date", "score"].includes(item.key) }] : current.filter(column => column.key === key)) : current.filter(column => column.key !== item.key)); invalidate(); }} />{item.label}</label>
+              </div>
               <Input aria-label={`${item.label} heading`} disabled={!column} placeholder={item.label} maxLength={60} value={column?.heading ?? ""} onChange={event => update({ heading: event.target.value })} />
               <input type="checkbox" className="justify-self-center accent-primary" aria-label={`Leave ${item.label} blank`} disabled={!column} checked={column?.blank ?? false} onChange={event => update({ blank: event.target.checked })} />
             </div>;
           })}
+        </div>
+        <div className="space-y-3 border-t border-border pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">Game times by day</h3><Button variant="ghost" size="sm" onClick={() => { setGameTimes({}); invalidate(); }}>Reset times</Button></div>
+          {days.map((day, dayIndex) => <div key={`${day.label}-${day.date}`} className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-medium">{day.label} · {day.date} · {day.matches.length} games</span>{dayIndex === 0 && days.length > 1 && <Button variant="outline" size="sm" onClick={() => { setGameTimes(current => { const next = { ...current }; for (const other of days.slice(1)) other.matches.forEach((match, index) => { const source = day.matches[index]; if (source) { const value = current[source.id] ?? (source.scheduled_at ? new Date(source.scheduled_at).toTimeString().slice(0, 5) : ""); next[match.id] = value; } }); return next; }); setColumns(current => current.map(column => column.key === "date" ? { ...column, blank: false } : column)); invalidate(); }}>Use these times for all days</Button>}</div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{day.matches.map((match, index) => <label key={match.id} className="space-y-1 text-xs text-muted-foreground">Game {index + 1}<Input type="time" aria-label={`Day ${dayIndex + 1} game ${index + 1} time`} value={gameTimes[match.id] ?? (match.scheduled_at ? new Date(match.scheduled_at).toTimeString().slice(0, 5) : "")} onChange={event => { setGameTimes(current => ({ ...current, [match.id]: event.target.value })); setColumns(current => current.map(column => column.key === "date" ? { ...column, blank: false } : column)); invalidate(); }} /></label>)}</div>
+          </div>)}
         </div>
       </fieldset>
       {!columns.length && <p role="alert" className="text-sm text-destructive">Select at least one column.</p>}

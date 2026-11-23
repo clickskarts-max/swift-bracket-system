@@ -20,6 +20,7 @@ export type FixturePdfOptions = {
   blankPools?: boolean;
   logo?: string;
   layout?: "table" | "tiesheet";
+  gameTimes?: Record<string, string>;
 };
 export type FixturePdfInput = {
   tournamentName: string;
@@ -53,7 +54,7 @@ export function fixturePdfModel(input: FixturePdfInput, options: FixturePdfOptio
     if (column.blank) return "";
     const values: Record<FixturePdfColumnKey, string> = {
       number: `M${numbers.get(match.id) ?? ""}`, day: input.matchday(match),
-      date: match.scheduled_at ? `${formatDate(match.scheduled_at)}\n${new Date(match.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "TBD",
+      date: options.gameTimes?.[match.id] !== undefined ? options.gameTimes[match.id] ?? "" : match.scheduled_at ? `${formatDate(match.scheduled_at)}\n${new Date(match.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "TBD",
       group: match.group_label ? `Group ${match.group_label}` : match.round_name ?? match.stage,
       home: input.label(match, "a").name, away: input.label(match, "b").name,
       score: isFinalStatus(match.status) ? `${match.score_a ?? 0} - ${match.score_b ?? 0}` : "",
@@ -72,7 +73,22 @@ export function fixturePdfModel(input: FixturePdfInput, options: FixturePdfOptio
   const seeds = new Map<string, number>();
   for (const [, ids] of groupIds) ids.forEach((id, index) => seeds.set(id, index + 1));
   const blankTeams = columns.some(column => (column.key === "home" || column.key === "away") && column.blank);
-  return { columns, seeds, blankTeams, days: [...days.values()], groups: [...groups].sort(([a], [b]) => a.localeCompare(b)), cell,
+  const tieColumns: { key: FixturePdfColumnKey | "teams"; heading: string }[] = [];
+  for (const column of columns) {
+    if (column.key === "home" || column.key === "away") {
+      if (!tieColumns.some(item => item.key === "teams")) tieColumns.push({ key: "teams", heading: columns.filter(item => item.key === "home" || item.key === "away").map(item => item.heading?.trim()).filter(Boolean).join(" / ") || "Teams" });
+    } else tieColumns.push({ key: column.key, heading: column.heading?.trim() || ({ number: "Match No.", group: "Pool", date: "Time" } as Partial<Record<FixturePdfColumnKey, string>>)[column.key] || FIXTURE_PDF_COLUMNS.find(item => item.key === column.key)?.label || column.key });
+  }
+  const tieCell = (match: Match, key: FixturePdfColumnKey | "teams") => {
+    if (key === "teams") return `${columns.some(item => item.key === "home") ? cell(match, columns.find(item => item.key === "home") ?? { key: "home" }) : ""}     Vs     ${columns.some(item => item.key === "away") ? cell(match, columns.find(item => item.key === "away") ?? { key: "away" }) : ""}`;
+    const column = columns.find(item => item.key === key) ?? { key };
+    if (column.blank) return "";
+    if (key === "date") return options.gameTimes?.[match.id] ?? (match.scheduled_at ? new Date(match.scheduled_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "");
+    if (key === "number") return cell(match, column).replace(/^M/, "");
+    if (key === "group") return match.group_label ?? match.round_name ?? "";
+    return cell(match, column);
+  };
+  return { columns, tieColumns, tieCell, seeds, blankTeams, days: [...days.values()], groups: [...groups].sort(([a], [b]) => a.localeCompare(b)), cell,
     headings: columns.map(column => column.heading?.trim() || FIXTURE_PDF_COLUMNS.find(item => item.key === column.key)?.label || column.key),
     gameCount: ordered.length };
 }

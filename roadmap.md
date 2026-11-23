@@ -56,3 +56,6 @@
 - [x] Add blank pool tables for handwriting without changing fixture data
 - [x] Add Word downloads using the same fixture customization options
 - [x] Test and verify PDF and Word downloads
+
+- [x] Add reorderable download columns and per-day custom game times
+- [x] Verify PDF and Word use custom order/times without changing fixtures

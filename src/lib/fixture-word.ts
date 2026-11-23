@@ -39,15 +39,7 @@ export async function buildFixtureWord(input: FixturePdfInput, options: FixtureP
     children.push(new Paragraph({ keepNext: true, spacing: { before: 220, after: 120 }, children: [new TextRun({ text: `${day.label} | ${day.date}`, bold: true, size: 24 })] }));
     if (options.layout === "table") children.push(table(model.headings, day.matches.map(match => model.columns.map(column => model.cell(match, column)))));
     else {
-      const timeColumn = model.columns.find(column => column.key === "date");
-      const showTime = !timeColumn?.blank;
-      const homeColumn = model.columns.find(column => column.key === "home");
-      const awayColumn = model.columns.find(column => column.key === "away");
-      children.push(table(["Match No.", "Pool", "Teams", ...(showTime ? ["Time"] : [])], day.matches.map(match => {
-        const home = model.cell(match, homeColumn ?? { key: "home" });
-        const away = model.cell(match, awayColumn ?? { key: "away" });
-        return [model.cell(match, { key: "number" }).replace(/^M/, ""), match.group_label ?? match.round_name ?? "", `${home}     Vs     ${away}`, ...(showTime ? [match.scheduled_at ? new Date(match.scheduled_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : ""] : [])];
-      })));
+      children.push(table(model.tieColumns.map(column => column.heading), day.matches.map(match => model.tieColumns.map(column => model.tieCell(match, column.key)))));
     }
   }
   return Packer.toBlob(new Document({ creator: "Ecluid Basketball", title: `${input.tournamentName} - Fixture sheet`, sections: [{ properties: { page: { size: { width: options.layout === "table" ? 16838 : 11906, height: options.layout === "table" ? 11906 : 16838 }, margin: { top: 900, bottom: 900, left: 1000, right: 1000 } } }, children }] }));

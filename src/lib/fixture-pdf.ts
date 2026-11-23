@@ -78,18 +78,16 @@ export function buildFixturePdf(input: FixturePdfInput, blankRows?: number, opti
   return doc.output("blob");
 }
 
-const time = (iso: string | null) => iso ? new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "";
-
 /** Classic printed tie-sheet: centred titles, numbered pools side by side, one table per day. */
 export function buildTieSheetPdf(input: FixturePdfInput, options: FixturePdfOptions = {}): Blob {
   const model = fixturePdfModel(input, options);
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const doc = new jsPDF({ orientation: model.tieColumns.length > 5 ? "landscape" : "portrait", unit: "mm", format: "a4" });
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
   const margin = 18;
   const blankHome = model.columns.some(c => c.key === "home" && c.blank);
   const blankAway = model.columns.some(c => c.key === "away" && c.blank);
-  const showTime = !model.columns.some(c => c.key === "date" && c.blank);
+  const teamsIndex = model.tieColumns.findIndex(column => column.key === "teams");
   doc.setProperties({ title: `${input.tournamentName} - Tie sheet`, creator: "Ecluid Basketball" });
   let y = 18;
   if (options.logo) { doc.addImage(options.logo, "PNG", width / 2 - 9, y - 6, 18, 18); y += 16; }
@@ -125,19 +123,18 @@ export function buildTieSheetPdf(input: FixturePdfInput, options: FixturePdfOpti
     doc.text(day.date, margin, y); y += 2;
     autoTable(doc, {
       startY: y, margin: { left: margin, right: margin, bottom: 15 }, theme: "grid",
-      head: [["Match No.", "Pool", "Teams", ...(showTime ? ["Time"] : [])]],
+      head: [model.tieColumns.map(column => column.heading)],
       body: day.matches.map(match => {
-        const home = blankHome ? "" : input.label(match, "a").name;
-        const away = blankAway ? "" : input.label(match, "b").name;
-        const pool = match.group_label ?? match.round_name ?? "";
-        return [String(model.cell(match, { key: "number" })).replace(/^M/, ""), pool, { content: `${home}`, seedA: blankHome ? "" : seed(match.team_a_id), seedB: blankAway ? "" : seed(match.team_b_id), away } as never, ...(showTime ? [time(match.scheduled_at)] : [])];
+        const home = blankHome || !model.columns.some(column => column.key === "home") ? "" : input.label(match, "a").name;
+        const away = blankAway || !model.columns.some(column => column.key === "away") ? "" : input.label(match, "b").name;
+        return model.tieColumns.map(column => column.key === "teams" ? { content: home, seedA: home ? seed(match.team_a_id) : "", seedB: away ? seed(match.team_b_id) : "", away } as never : model.tieCell(match, column.key));
       }),
       styles: { font: "helvetica", fontSize: 10, textColor: 25, lineColor: 60, lineWidth: 0.3, minCellHeight: 9, valign: "middle", halign: "center" },
       headStyles: { fillColor: 255, textColor: 25, fontStyle: "normal" },
-      columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 18 }, ...(showTime ? { 3: { cellWidth: 28 } } : {}) },
-      didParseCell: data => { if (data.section === "body" && data.column.index === 2) data.cell.text = [""]; },
+      columnStyles: teamsIndex >= 0 ? { [teamsIndex]: { cellWidth: (width - margin * 2) * 0.45 } } : {},
+      didParseCell: data => { if (data.section === "body" && data.column.index === teamsIndex) data.cell.text = [""]; },
       didDrawCell: data => {
-        if (data.section !== "body" || data.column.index !== 2) return;
+        if (data.section !== "body" || data.column.index !== teamsIndex) return;
         const raw = data.cell.raw as { content: string; seedA: string; seedB: string; away: string };
         const { x, y: top, width: w, height: h } = data.cell;
         const mid = top + h / 2 + 1.3;
