@@ -1,6 +1,7 @@
 import { test } from "node:test";
-import { ok } from "node:assert/strict";
+import { ok, deepEqual, equal, throws } from "node:assert/strict";
 import { buildFixturePdf, type FixturePdfInput } from "./fixture-pdf";
+import { fixturePdfModel } from "./fixture-pdf-model";
 import type { Match } from "./queries";
 
 const match = (id: string, match_no: number, scheduled_at: string, status = "scheduled"): Match => ({
@@ -39,4 +40,31 @@ test("blank tie-sheet leaves teams and results empty and includes drawing space"
   ok(!pdf.includes("Home Club"));
   ok(!pdf.includes("20 - 0"));
   ok(pdf.includes("Tie-sheet drawing / team assignments"));
+});
+
+test("column selection omits unselected fields and blanks only requested values", () => {
+  const model = fixturePdfModel(input, { columns: [{ key: "number" }, { key: "home", blank: true }, { key: "away" }] });
+  const first = model.days[0]?.matches[0];
+  ok(first);
+  deepEqual(model.columns.map(column => model.cell(first, column)), ["M1", "", "Away Club"]);
+  equal(first.team_a_id, "home");
+  throws(() => fixturePdfModel(input, { columns: [] }), /at least one column/);
+});
+
+test("blank column headings fall back to existing labels", () => {
+  const model = fixturePdfModel(input, { columns: [{ key: "home", heading: "  " }, { key: "away", heading: "Visitor" }] });
+  deepEqual(model.headings, ["Home team", "Visitor"]);
+});
+
+test("PDF groups retain two-team rosters and fixtures remain separated by local days", () => {
+  const model = fixturePdfModel({ ...input, teams: [{ id: "home", name: "Home Club", group_label: "A" }, { id: "away", name: "Away Club", group_label: "A" }], matches: [...input.matches, match("next", 3, "2026-11-25T03:00:00Z")] });
+  deepEqual(model.groups, [["Group A", ["Home Club", "Away Club"]]]);
+  deepEqual(model.days.map(day => day.matches.length), [2, 1]);
+});
+
+test("custom PDF retains parent link, saved daily limits and group table before fixtures", async () => {
+  const pdf = await buildFixturePdf({ ...input, tournamentUrl: "https://example.com/public/tournament/test-cup", teams: [{ id: "home", name: "Home Club", group_label: "A" }], settings: { timingMode: "fixed", startDate: "2026-11-24", startTime: "09:00", leagueLimit: 5, leagueDays: 4, knockoutLimit: 2, knockoutDays: 2, restHours: 2, durationMinutes: 90, restDates: [] } }, undefined, { heading: "Championship Fixtures", columns: [{ key: "number" }, { key: "home", blank: true }, { key: "away" }] }).text();
+  ok(pdf.includes("https://example.com/public/tournament/test-cup"));
+  ok(pdf.includes("League: 5/day x 4 days"));
+  ok(pdf.indexOf("Group assignments") < pdf.indexOf("(M1)"));
 });

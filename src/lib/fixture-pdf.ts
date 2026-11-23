@@ -1,91 +1,76 @@
 import { jsPDF } from "jspdf";
 import autoTable, { type RowInput } from "jspdf-autotable";
-import { formatDate, isFinalStatus } from "@/lib/app";
-import { fixtureDisplayNumbers } from "@/lib/fixture-display";
-import type { Match } from "@/lib/queries";
+import { formatDate } from "@/lib/app";
+import { fixturePdfModel, type FixturePdfInput, type FixturePdfOptions } from "@/lib/fixture-pdf-model";
+export type { FixturePdfInput, FixturePdfOptions } from "@/lib/fixture-pdf-model";
 
-export type FixturePdfInput = {
-  tournamentName: string;
-  matches: Match[];
-  label: (match: Match, side: "a" | "b") => { name: string };
-  venue: (match: Match) => string;
-  matchday: (match: Match) => string;
-};
-
-export function buildFixturePdf(input: FixturePdfInput, blankRows?: number): Blob {
+export function buildFixturePdf(input: FixturePdfInput, blankRows?: number, options: FixturePdfOptions = {}): Blob {
+  const model = fixturePdfModel(input, options);
   const blank = blankRows !== undefined;
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
   const margin = 12;
   const title = blank ? "Blank tie-sheet" : "Fixture sheet";
+  const heading = options.heading?.trim() || input.tournamentName;
+  const details = [input.format, `${input.teams?.length ?? 0} teams`, `${model.gameCount} active games`,
+    input.startDate ? `${formatDate(input.startDate)}${input.endDate ? ` to ${formatDate(input.endDate)}` : ""} BS` : ""].filter(Boolean).join(" | ");
+  const plan = input.settings;
+  const planText = plan ? `League: ${plan.leagueLimit}/day${plan.timingMode === "fixed" ? ` x ${plan.leagueDays} days` : ""} | Knockout: ${plan.knockoutLimit}/day${plan.timingMode === "fixed" ? ` x ${plan.knockoutDays} days` : ""} | Rest: ${plan.restHours}h | Game: ${plan.durationMinutes} min` : "";
+  const headerTop = 51;
   doc.setProperties({ title: `${input.tournamentName} - ${title}`, subject: title, creator: "Ecluid Basketball" });
   const header = () => {
-    doc.setTextColor(25);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(15);
-    const lines = doc.splitTextToSize(input.tournamentName, width - margin * 2) as string[];
-    doc.text(lines.slice(0, 2), margin, 18);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`${title}  |  ${blank ? "Team names, dates, times and scores left blank" : "All active games in playing order | Dates: BS | Times: local"}`, margin, 34);
+    const textX = options.logo ? margin + 25 : margin;
+    if (options.logo) doc.addImage(options.logo, "PNG", margin, 10, 20, 20);
+    doc.setTextColor(25); doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+    doc.text((doc.splitTextToSize(heading, width - textX - margin) as string[]).slice(0, 2), textX, 16);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+    const parent = heading !== input.tournamentName ? `${input.tournamentName} | ` : "";
+    doc.text((doc.splitTextToSize(`${parent}${options.subheading?.trim() || title}`, width - textX - margin) as string[]).slice(0, 1), textX, 30);
+    doc.text((doc.splitTextToSize(details, width - margin * 2) as string[]).slice(0, 1), margin, 37);
+    if (planText) doc.text(planText, margin, 43);
+    doc.setDrawColor(150); doc.line(margin, 47, width - margin, 47);
   };
-  const numbers = fixtureDisplayNumbers(input.matches);
-  const ordered = input.matches.filter(match => match.status !== "cancelled")
-    .sort((a, b) => (numbers.get(a.id) ?? 0) - (numbers.get(b.id) ?? 0));
-  const body: RowInput[] = [];
+  let y = headerTop;
+  header();
+  const table = (head: string[], body: RowInput[], section?: string) => {
+    if (y > height - 45) { doc.addPage(); header(); y = headerTop; }
+    const rows: RowInput[] = section ? [[{ content: section, colSpan: head.length, styles: { fontStyle: "bold", fillColor: 225, minCellHeight: 9 } }], ...body] : body;
+    autoTable(doc, {
+      head: [head], body: rows, startY: y,
+      margin: { top: headerTop, bottom: 17, left: margin, right: margin }, theme: "grid",
+      styles: { font: "helvetica", fontSize: 8, cellPadding: 2.2, minCellHeight: blank ? 11 : 10, lineColor: 175, lineWidth: 0.2, textColor: 25, overflow: "linebreak", valign: "middle" },
+      headStyles: { fillColor: 45, textColor: 255, fontStyle: "bold" }, rowPageBreak: "avoid", willDrawPage: header,
+    });
+    y = ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 7;
+  };
+  if (!blank && options.showGroups !== false && model.groups.length) {
+    table(["Group", "Teams", "Team count"], model.groups.map(([group, names]) => [group, names.join(" / "), String(names.length)]), "Group assignments");
+  }
   if (blank) {
     const count = Math.max(1, Math.min(200, Math.trunc(blankRows)));
-    for (let index = 0; index < count; index++) body.push([String(index + 1), "", "", "", "", "", "", "", ""]);
+    table(model.headings, Array.from({ length: count }, (_, index) => model.columns.map(column => column.key === "number" ? String(index + 1) : "")));
+    doc.addPage(); header(); doc.setFontSize(10); doc.text("Tie-sheet drawing / team assignments", margin, 56);
+    doc.setDrawColor(210); doc.setLineWidth(0.15);
+    for (let line = 62; line < height - 20; line += 10) doc.line(margin, line, width - margin, line);
+    for (let x = margin; x <= width - margin; x += 10) doc.line(x, 62, x, height - 20);
   } else {
-    let lastDay = "";
-    for (const match of ordered) {
-      const day = input.matchday(match);
-      if (day !== lastDay) {
-        body.push([{ content: `${day}${match.scheduled_at ? `  |  ${formatDate(match.scheduled_at)} BS` : ""}`, colSpan: 9, styles: { fontStyle: "bold", fillColor: 236, minCellHeight: 8 } }]);
-        lastDay = day;
+    for (const day of model.days) {
+      const appearances = new Map<string, number>();
+      for (const match of day.matches) {
+        if (match.status === "forfeit") continue;
+        for (const id of new Set([match.team_a_id, match.team_b_id])) if (id) appearances.set(id, (appearances.get(id) ?? 0) + 1);
       }
-      body.push([
-        `M${numbers.get(match.id) ?? ""}`, day,
-        match.scheduled_at ? `${formatDate(match.scheduled_at)}\n${new Date(match.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "TBD",
-        match.group_label ? `Group ${match.group_label}` : match.round_name ?? match.stage,
-        input.label(match, "a").name,
-        isFinalStatus(match.status) ? `${match.score_a ?? 0} - ${match.score_b ?? 0}` : "",
-        input.label(match, "b").name,
-        input.venue(match),
-        match.status === "forfeit" ? "FORFEIT" : match.status === "completed" ? "Final" : match.status,
-      ]);
+      const repeat = [...appearances].filter(([, count]) => count > 1).map(([id, count]) => `${input.teams?.find(team => team.id === id)?.name ?? id}: ${count} games`);
+      const info = `${day.label} | ${day.date} | ${day.matches.length} ${day.matches.length === 1 ? "game" : "games"}${repeat.length ? `\nMultiple games: ${repeat.join("; ")}` : ""}`;
+      table(model.headings, day.matches.map(match => model.columns.map(column => model.cell(match, column))), info);
     }
-  }
-  autoTable(doc, {
-    head: [["Match", "Matchday", "Date / time", "Group / round", "Home team", "Score", "Away team", "Venue", "Status"]],
-    body,
-    startY: 41,
-    margin: { top: 41, bottom: 14, left: margin, right: margin },
-    theme: "grid",
-    styles: { font: "helvetica", fontSize: 8, cellPadding: 2.2, minCellHeight: blank ? 11 : 10, lineColor: 175, lineWidth: 0.2, textColor: 25, overflow: "linebreak", valign: "middle" },
-    headStyles: { fillColor: 45, textColor: 255, fontStyle: "bold" },
-    columnStyles: { 0: { cellWidth: 14 }, 1: { cellWidth: 23 }, 2: { cellWidth: 29 }, 3: { cellWidth: 34 }, 4: { cellWidth: 44 }, 5: { cellWidth: 18 }, 6: { cellWidth: 44 }, 7: { cellWidth: 39 }, 8: { cellWidth: 28 } },
-    rowPageBreak: "avoid",
-    willDrawPage: header,
-  });
-  if (blank) {
-    doc.addPage();
-    header();
-    doc.setFontSize(10);
-    doc.text("Tie-sheet drawing / team assignments", margin, 46);
-    doc.setDrawColor(210);
-    doc.setLineWidth(0.15);
-    for (let y = 52; y < height - 20; y += 10) doc.line(margin, y, width - margin, y);
-    for (let x = margin; x <= width - margin; x += 10) doc.line(x, 52, x, height - 20);
   }
   const pages = doc.getNumberOfPages();
   for (let page = 1; page <= pages; page++) {
-    doc.setPage(page);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(100);
-    doc.text(title, margin, height - 7);
+    doc.setPage(page); doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(100);
+    if (input.tournamentUrl) doc.textWithLink("Parent tournament", margin, height - 7, { url: input.tournamentUrl });
+    else doc.text(input.tournamentName, margin, height - 7);
     doc.text(`${page} / ${pages}`, width - margin, height - 7, { align: "right" });
   }
   return doc.output("blob");

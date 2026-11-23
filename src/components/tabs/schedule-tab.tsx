@@ -349,7 +349,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           <span>Fixtures</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-        <FixturePdfDownload input={{ tournamentName: tournament.name, matches, label, venue: match => venues.find(venue => venue.id === match.venue_id)?.name ?? tournament.venue ?? "", matchday: resultGroupKey }} />
+        <FixturePdfDownload input={{ tournamentName: tournament.name, logoUrl: tournament.logo_url, teams, format: tournament.format === "group_knockout" ? "League-cum-knockout" : tournament.format === "league" ? "League" : tournament.format, startDate: tournament.start_date, endDate: tournament.end_date, ...(tournament.config && typeof tournament.config === "object" && !Array.isArray(tournament.config) && tournament.config["fixture_settings"] ? { settings: readFixtureSettings(tournament.config, tournament.start_date) } : {}), tournamentUrl: `/public/tournament/${encodeURIComponent(tournament.slug)}`, matches, label, venue: match => venues.find(venue => venue.id === match.venue_id)?.name ?? match.venue ?? tournament.venue ?? "", matchday: resultGroupKey }} />
         <Button variant="outline" disabled={busy} onClick={() => { setSettingsOnly(true); setGenerationOpen(true); }}>
           <SlidersHorizontal className="mr-1.5 h-4 w-4" /> Fixture settings
         </Button>

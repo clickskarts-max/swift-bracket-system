@@ -48,3 +48,7 @@
 
 - [x] Add filled fixture-sheet and blank tie-sheet PDF downloads
 - [x] Verify downloaded PDFs, page layout, and mobile controls
+
+- [x] Customize fixture PDF headings, logo, columns and per-column current/blank values
+- [x] Include parent tournament details, group rosters and distinct matchday sections
+- [x] Test and verify customized downloads on desktop and mobile
