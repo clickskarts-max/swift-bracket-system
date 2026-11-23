@@ -29,6 +29,7 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
   const [subheading, setSubheading] = useState("");
   const [columns, setColumns] = useState<FixturePdfColumn[]>(FIXTURE_PDF_COLUMNS.map(({ key }) => ({ key })));
   const [showGroups, setShowGroups] = useState(true);
+  const [layout, setLayout] = useState<"tiesheet" | "table">("tiesheet");
   const [logo, setLogo] = useState<string | null>(null);
   const [useParentLogo, setUseParentLogo] = useState(true);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -52,7 +53,7 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
       const { buildFixturePdf } = await import("@/lib/fixture-pdf");
       const source = useParentLogo ? logo ?? input.logoUrl : null;
       const image = source ? await logoPng(source) : undefined;
-      const blob = buildFixturePdf({ ...input, ...(input.tournamentUrl ? { tournamentUrl: new URL(input.tournamentUrl, window.location.origin).href } : {}) }, undefined, { heading, subheading: subheading.trim() || (mode === "blank" ? "Blank tie-sheet" : "Fixture sheet"), columns, showGroups, ...(image ? { logo: image } : {}) });
+      const blob = buildFixturePdf({ ...input, ...(input.tournamentUrl ? { tournamentUrl: new URL(input.tournamentUrl, window.location.origin).href } : {}) }, undefined, { heading, subheading: subheading.split("|").map(part => part.trim()).filter(Boolean).join("\n") || (mode === "blank" ? "Blank tie-sheet" : "Fixture sheet"), columns, showGroups, layout, ...(image ? { logo: image } : {}) });
       const name = input.tournamentName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "tournament";
       setReady({ blob, filename: `${name}-${mode === "blank" ? "blank-tie-sheet" : "fixtures"}.pdf` });
     } catch { toast.error("Could not prepare the PDF. Check the logo or remove it and try again."); }
@@ -67,9 +68,13 @@ export function FixturePdfDownload({ input }: { input: FixturePdfInput }) {
         <Tabs value={mode} onValueChange={value => { setMode(value); setColumns(current => current.map(column => ({ ...column, blank: value === "blank" && ["home", "away", "date", "score"].includes(column.key) }))); invalidate(); }}>
           <TabsList className="w-full"><TabsTrigger className="flex-1" value="filled">Current fixture</TabsTrigger><TabsTrigger className="flex-1" value="blank">Blank tie-sheet</TabsTrigger></TabsList>
         </Tabs>
+        <Tabs value={layout} onValueChange={value => { setLayout(value as "tiesheet" | "table"); invalidate(); }}>
+          <TabsList className="w-full"><TabsTrigger className="flex-1" value="tiesheet">Tie sheet layout</TabsTrigger><TabsTrigger className="flex-1" value="table">Detailed table</TabsTrigger></TabsList>
+        </Tabs>
+        {layout === "tiesheet" && <p className="text-xs text-muted-foreground">Pools with numbered teams, then one table per day: Match No., Pool, Teams (Vs), Time. Tick Blank on Home/Away team to leave names empty.</p>}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="space-y-1 text-sm font-medium">Custom heading<Input aria-label="Custom heading" maxLength={120} placeholder={input.tournamentName} value={heading} onChange={event => { setHeading(event.target.value); invalidate(); }} /></label>
-          <label className="space-y-1 text-sm font-medium">Subheading<Input aria-label="Subheading" maxLength={160} placeholder="Fixture sheet" value={subheading} onChange={event => { setSubheading(event.target.value); invalidate(); }} /></label>
+          <label className="space-y-1 text-sm font-medium">Subheading (use | for new line)<Input aria-label="Subheading" maxLength={160} placeholder="Fixture sheet" value={subheading} onChange={event => { setSubheading(event.target.value); invalidate(); }} /></label>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {useParentLogo && (logo || input.logoUrl) && <img src={logo ?? input.logoUrl ?? ""} alt="PDF logo" className="h-12 w-12 object-contain" />}

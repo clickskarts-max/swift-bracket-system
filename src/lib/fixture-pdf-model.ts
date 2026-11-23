@@ -18,6 +18,7 @@ export type FixturePdfOptions = {
   columns?: FixturePdfColumn[];
   showGroups?: boolean;
   logo?: string;
+  layout?: "table" | "tiesheet";
 };
 export type FixturePdfInput = {
   tournamentName: string;
@@ -60,11 +61,16 @@ export function fixturePdfModel(input: FixturePdfInput, options: FixturePdfOptio
     return values[column.key];
   };
   const groups = new Map<string, string[]>();
+  const groupIds = new Map<string, string[]>();
   for (const team of input.teams ?? []) {
     const label = team.group_label ? `Group ${team.group_label}` : "Teams";
     groups.set(label, [...(groups.get(label) ?? []), team.name]);
+    groupIds.set(label, [...(groupIds.get(label) ?? []), team.id]);
   }
-  return { columns, days: [...days.values()], groups: [...groups].sort(([a], [b]) => a.localeCompare(b)), cell,
+  const seeds = new Map<string, number>();
+  for (const [, ids] of groupIds) ids.forEach((id, index) => seeds.set(id, index + 1));
+  const blankTeams = columns.some(column => (column.key === "home" || column.key === "away") && column.blank);
+  return { columns, seeds, blankTeams, days: [...days.values()], groups: [...groups].sort(([a], [b]) => a.localeCompare(b)), cell,
     headings: columns.map(column => column.heading?.trim() || FIXTURE_PDF_COLUMNS.find(item => item.key === column.key)?.label || column.key),
     gameCount: ordered.length };
 }

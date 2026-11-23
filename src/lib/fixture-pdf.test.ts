@@ -68,3 +68,14 @@ test("custom PDF retains parent link, saved daily limits and group table before 
   ok(pdf.includes("League: 5/day x 4 days"));
   ok(pdf.indexOf("Group assignments") < pdf.indexOf("(M1)"));
 });
+test("tie sheet layout leaves team names empty when home and away are blank", async () => {
+  const pdf = await buildFixturePdf({ ...input, teams: [{ id: "home", name: "Home Club", group_label: "A" }, { id: "away", name: "Away Club", group_label: "A" }] }, undefined, { layout: "tiesheet", columns: [{ key: "number" }, { key: "home", blank: true }, { key: "away", blank: true }] }).text();
+  ok(pdf.startsWith("%PDF"));
+  ok(!pdf.includes("Home Club") && !pdf.includes("Away Club"));
+  ok(pdf.includes("(Pool - A)") && pdf.includes("(Vs)"));
+});
+
+test("tie sheet layout shows team names when not blank", async () => {
+  const pdf = await buildFixturePdf(input, undefined, { layout: "tiesheet" }).text();
+  ok(pdf.includes("(Home Club)") && pdf.includes("(Away Club)"));
+});
