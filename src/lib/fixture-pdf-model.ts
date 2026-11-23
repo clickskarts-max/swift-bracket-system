@@ -17,6 +17,7 @@ export type FixturePdfOptions = {
   subheading?: string;
   columns?: FixturePdfColumn[];
   showGroups?: boolean;
+  blankPools?: boolean;
   logo?: string;
   layout?: "table" | "tiesheet";
 };
@@ -64,7 +65,8 @@ export function fixturePdfModel(input: FixturePdfInput, options: FixturePdfOptio
   const groupIds = new Map<string, string[]>();
   for (const team of input.teams ?? []) {
     const label = team.group_label ? `Group ${team.group_label}` : "Teams";
-    groups.set(label, [...(groups.get(label) ?? []), team.name]);
+    const blankPool = options.blankPools || columns.some(column => column.key === "home" && column.blank) && columns.some(column => column.key === "away" && column.blank);
+    groups.set(label, [...(groups.get(label) ?? []), blankPool ? "" : team.name]);
     groupIds.set(label, [...(groupIds.get(label) ?? []), team.id]);
   }
   const seeds = new Map<string, number>();

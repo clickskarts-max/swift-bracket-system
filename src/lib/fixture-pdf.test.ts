@@ -3,6 +3,8 @@ import { ok, deepEqual, equal, throws } from "node:assert/strict";
 import { buildFixturePdf, type FixturePdfInput } from "./fixture-pdf";
 import { fixturePdfModel } from "./fixture-pdf-model";
 import type { Match } from "./queries";
+import { buildFixtureWord } from "./fixture-word";
+import { unzipSync } from "fflate";
 
 const match = (id: string, match_no: number, scheduled_at: string, status = "scheduled"): Match => ({
   id, match_no, scheduled_at, status, tournament_id: "cup", owner_id: "owner",
@@ -78,4 +80,44 @@ test("tie sheet layout leaves team names empty when home and away are blank", as
 test("tie sheet layout shows team names when not blank", async () => {
   const pdf = await buildFixturePdf(input, undefined, { layout: "tiesheet" }).text();
   ok(pdf.includes("(Home Club)") && pdf.includes("(Away Club)"));
+});
+
+const poolInput: FixturePdfInput = { ...input, teams: [{ id: "home", name: "Home Club", group_label: "A" }, { id: "away", name: "Away Club", group_label: "B" }] };
+
+test("blank pools preserve A and B and roster slots without altering fixture teams", () => {
+  const model = fixturePdfModel(poolInput, { blankPools: true });
+  deepEqual(model.groups, [["Group A", [""]], ["Group B", [""]]]);
+  const first = model.days[0]?.matches[0];
+  ok(first);
+  equal(model.cell(first, { key: "home" }), "Home Club");
+  equal(poolInput.teams?.[0]?.name, "Home Club");
+});
+
+test("blank pool PDF omits roster names while keeping pool labels and numbered slots", async () => {
+  const pdf = await buildFixturePdf({ ...poolInput, matches: [] }, undefined, { layout: "tiesheet", blankPools: true }).text();
+  ok(pdf.includes("(Pool - A)") && pdf.includes("(Pool - B)"));
+  ok(pdf.includes("(1. )"));
+  ok(!pdf.includes("Home Club") && !pdf.includes("Away Club"));
+});
+
+test("Word blanks pool and fixture team names when requested and retains days", async () => {
+  const blob = await buildFixtureWord(poolInput, { layout: "tiesheet", blankPools: true, columns: [{ key: "number" }, { key: "home", blank: true }, { key: "away", blank: true }] });
+  equal(blob.type, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+  const xmlBytes = entries["word/document.xml"];
+  ok(xmlBytes);
+  const xml = new TextDecoder().decode(xmlBytes);
+  ok(xml.includes("Pool - A") && xml.includes("Pool - B"));
+  ok(xml.includes("Matchday 1") && xml.includes("Vs"));
+  ok(!xml.includes("Home Club") && !xml.includes("Away Club"));
+});
+
+test("Word keeps fixture names when only pool names are blank", async () => {
+  const blob = await buildFixtureWord(poolInput, { layout: "tiesheet", blankPools: true });
+  const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+  const xmlBytes = entries["word/document.xml"];
+  ok(xmlBytes);
+  const xml = new TextDecoder().decode(xmlBytes);
+  equal(xml.split("Home Club").length - 1, 2);
+  equal(xml.split("Away Club").length - 1, 2);
 });

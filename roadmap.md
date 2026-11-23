@@ -52,3 +52,7 @@
 - [x] Customize fixture PDF headings, logo, columns and per-column current/blank values
 - [x] Include parent tournament details, group rosters and distinct matchday sections
 - [x] Test and verify customized downloads on desktop and mobile
+
+- [x] Add blank pool tables for handwriting without changing fixture data
+- [x] Add Word downloads using the same fixture customization options
+- [x] Test and verify PDF and Word downloads

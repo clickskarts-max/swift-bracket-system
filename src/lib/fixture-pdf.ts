@@ -46,7 +46,8 @@ export function buildFixturePdf(input: FixturePdfInput, blankRows?: number, opti
     y = ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 7;
   };
   if (!blank && options.showGroups !== false && model.groups.length) {
-    table(["Group", "Teams", "Team count"], model.groups.map(([group, names]) => [group, names.join(" / "), String(names.length)]), "Group assignments");
+    const rows = Math.max(...model.groups.map(([, names]) => names.length));
+    table(model.groups.map(([group]) => group.replace(/^Group /, "Pool ")), Array.from({ length: rows }, (_, index) => model.groups.map(([, names]) => index < names.length ? `${index + 1}. ${names[index] ?? ""}` : "")), "Group assignments");
   }
   if (blank) {
     const count = Math.max(1, Math.min(200, Math.trunc(blankRows)));
@@ -105,18 +106,15 @@ export function buildTieSheetPdf(input: FixturePdfInput, options: FixturePdfOpti
       const slice = model.groups.slice(start, start + cols);
       const rows = Math.max(...slice.map(([, names]) => names.length));
       if (y + 8 + rows * 6 > height - 15) { doc.addPage(); y = 18; }
-      slice.forEach(([group, names], index) => {
-        const x = margin + index * colWidth + 6;
-        doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-        doc.text(group.replace(/^Group /, "Pool - "), x + 8, y);
-        doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-        names.forEach((name, row) => {
-          doc.text(String(row + 1), x, y + 7 + row * 6);
-          if (blankHome && blankAway) doc.line(x + 6, y + 7 + row * 6 + 0.8, x + colWidth - 12, y + 7 + row * 6 + 0.8);
-          else doc.text(doc.splitTextToSize(name, colWidth - 14)[0] as string, x + 6, y + 7 + row * 6);
-        });
+      autoTable(doc, {
+        startY: y, margin: { left: margin, right: margin, bottom: 15 }, theme: "grid",
+        head: [slice.map(([group]) => group.replace(/^Group /, "Pool - "))],
+        body: Array.from({ length: rows }, (_, row) => slice.map(([, names]) => row < names.length ? `${row + 1}. ${names[row] ?? ""}` : "")),
+        styles: { font: "helvetica", fontSize: 10, textColor: 25, lineColor: 60, lineWidth: 0.3, minCellHeight: 10, valign: "middle", cellWidth: colWidth },
+        headStyles: { fillColor: 255, textColor: 25, fontStyle: "bold", halign: "center" },
+        rowPageBreak: "avoid",
       });
-      y += 10 + rows * 6 + 6;
+      y = ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 10;
     }
   }
   const seed = (id: string | null) => (id && model.seeds.get(id)) ? String(model.seeds.get(id)) : "";
