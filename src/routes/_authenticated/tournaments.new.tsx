@@ -5,11 +5,13 @@ import { TournamentForm } from "@/components/tournament-form";
 import { useUpsert, useTournament } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
 import { eventLabel, isBasketballEvent } from "@/lib/tournament-events";
+import { eventCloneDefaults } from "@/lib/event-clone";
 
 export const Route = createFileRoute("/_authenticated/tournaments/new")({
-  validateSearch: (search: Record<string, unknown>): { parent?: string; event?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { parent?: string; event?: string; clone?: string } => ({
     ...(typeof search["parent"] === "string" && /^[0-9a-f-]{36}$/i.test(search["parent"]) ? { parent: search["parent"] } : {}),
     ...(isBasketballEvent(search["event"]) ? { event: search["event"] } : {}),
+    ...(typeof search["clone"] === "string" && /^[0-9a-f-]{36}$/i.test(search["clone"]) ? { clone: search["clone"] } : {}),
   }),
   head: () => ({
     meta: [
@@ -32,30 +34,40 @@ export const Route = createFileRoute("/_authenticated/tournaments/new")({
 });
 
 function NewTournament() {
-  const { parent, event } = Route.useSearch();
+  const { parent, event, clone } = Route.useSearch();
   const { data: parentTournament, isLoading: parentLoading } = useTournament(parent ?? "");
+  const { data: cloneTournament, isLoading: cloneLoading } = useTournament(clone ?? "");
   const navigate = useNavigate();
   const create = useUpsert("tournaments", [["tournaments"], ["tournament-events"]]);
 
   if (parent && parentLoading) return <p>Loading parent tournament…</p>;
   if (parent && !parentTournament) return <p>This parent tournament is unavailable.</p>;
+  if (clone && cloneLoading) return <p>Loading event setup…</p>;
+  if (clone && (!cloneTournament || !parentTournament || !isBasketballEvent(event) ||
+    cloneTournament.owner_id !== parentTournament.owner_id ||
+    (cloneTournament.parent_tournament_id ?? cloneTournament.id) !== parentTournament.id)) {
+    return <p>This event cannot be cloned into this tournament.</p>;
+  }
+  const cloneDefaults = cloneTournament && parentTournament && isBasketballEvent(event)
+    ? eventCloneDefaults(cloneTournament, parentTournament, event) : null;
 
   return (
     <div>
       <PageHeader
-        title={parentTournament ? `Add event — ${parentTournament.name}` : "Create tournament"}
+        title={parentTournament ? `${cloneDefaults ? "Clone" : "Add"} event — ${parentTournament.name}` : "Create tournament"}
         description={parentTournament ? eventLabel(event) : "Choose a format now — you can regenerate the schedule anytime."}
       />
       <TournamentForm
-        defaults={parentTournament ? {
+        key={`${parent ?? "new"}:${event ?? "none"}:${clone ?? "none"}`}
+        defaults={cloneDefaults ?? (parentTournament ? {
           name: `${parentTournament.name} — ${eventLabel(event)}`,
           event_type: event ?? null,
           start_date: parentTournament.start_date,
           end_date: parentTournament.end_date,
           logo_url: parentTournament.logo_url,
           is_public: parentTournament.is_public,
-        } : {}}
-        submitLabel="Create tournament"
+        } : {})}
+        submitLabel={cloneDefaults ? "Create cloned event" : "Create tournament"}
         pending={create.isPending}
         onSubmit={async (values) => {
           const { teams, venues, ...tournamentData } = values;

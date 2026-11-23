@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link2, Plus, Save } from "lucide-react";
+import { Copy, Link2, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +20,8 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
   const [mainCategory, setMainCategory] = useState(parent?.event_type ?? "unassigned");
   const [existingId, setExistingId] = useState("");
   const [linkCategory, setLinkCategory] = useState("");
+  const [cloneSource, setCloneSource] = useState(tournament.id);
+  const [cloneCategory, setCloneCategory] = useState("");
   const available = availableEventTypes(events);
   const canEdit = permissions.includes("tournament.edit");
   const update = useMutation({
@@ -62,6 +64,14 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
       })}
     </div>
     {!parent?.event_type && <p className="text-sm text-muted-foreground">Current teams and fixtures: {eventLabel(parent?.event_type)} (category unassigned).</p>}
+    {canEdit && available.length > 0 && <div className="space-y-3 border-t border-border pt-5">
+      <h3 className="font-semibold">Clone an event</h3>
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label="Copy setup from"><Select value={cloneSource} onValueChange={setCloneSource}><SelectTrigger className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{events.map((row) => <SelectItem key={row.id} value={row.id}>{row.event_type ? eventLabel(row.event_type) : row.name}</SelectItem>)}</SelectContent></Select></Field>
+        <Field label="New event category"><Select value={cloneCategory} onValueChange={setCloneCategory}><SelectTrigger className="w-52 max-w-full"><SelectValue placeholder="Select event" /></SelectTrigger><SelectContent>{available.map((event) => <SelectItem key={event.value} value={event.value}>{event.label}</SelectItem>)}</SelectContent></Select></Field>
+        {cloneSource && cloneCategory ? <Link to="/tournaments/new" search={{ parent: parentId, event: cloneCategory, clone: cloneSource }}><Button variant="outline"><Copy className="mr-2 h-4 w-4" />Clone event</Button></Link> : <Button variant="outline" disabled><Copy className="mr-2 h-4 w-4" />Clone event</Button>}
+      </div>
+    </div>}
     {canEdit && candidates.length > 0 && available.length > 0 && <div className="space-y-3 border-t border-border pt-5">
       <h3 className="font-semibold">Link an existing event</h3>
       <div className="flex flex-wrap items-end gap-3">
