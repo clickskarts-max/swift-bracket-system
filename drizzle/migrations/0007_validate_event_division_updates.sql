@@ -1,0 +1,1 @@
+CREATE OR REPLACE TRIGGER validate_tournament_event BEFORE INSERT OR UPDATE OF parent_tournament_id,event_type,config ON public.tournaments FOR EACH ROW EXECUTE FUNCTION public.guard_tournament_event();

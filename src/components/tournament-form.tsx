@@ -47,6 +47,7 @@ import type { Json } from "@/integrations/supabase/types";
 import { readGroupCapacities } from "@/lib/tournament-payload";
 import { balancedGroupCapacity, groupStructureError } from "@/lib/group-structure";
 import { BASKETBALL_EVENTS } from "@/lib/tournament-events";
+import { EVENT_AGE_GROUPS, eventAgeGroup, eventConfig } from "@/lib/event-details";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -1028,6 +1029,14 @@ export function TournamentForm({
                   <SelectItem value="unassigned">Unassigned / single event</SelectItem>
                   {BASKETBALL_EVENTS.map((event) => <SelectItem value={event.value} key={event.value}>{event.label}</SelectItem>)}
                 </SelectContent>
+              </Select>
+            </Field>
+          </div>
+          <div className="col-span-full">
+            <Field label="Age group (optional)">
+              <Select value={eventAgeGroup(values.config) ?? "open"} onValueChange={(value) => set("config", { ...eventConfig(values.config), age_group: value === "open" ? null : value })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{EVENT_AGE_GROUPS.map(age => <SelectItem key={age.value} value={age.value}>{age.label}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
           </div>

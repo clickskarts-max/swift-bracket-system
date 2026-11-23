@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Copy, Link2, ListOrdered, Plus, Save } from "lucide-react";
+import { Copy, Link2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Field, StatusPill } from "@/components/data-bits";
+import { Field } from "@/components/data-bits";
 import { supabase } from "@/integrations/supabase/client";
 import { useTournaments, type Tournament } from "@/lib/queries";
 import { useTournamentPermissions } from "@/lib/permissions";
-import { availableEventTypes, BASKETBALL_EVENTS, eventLabel } from "@/lib/tournament-events";
+import { BASKETBALL_EVENTS } from "@/lib/tournament-events";
+import { competitionEvents, eventTitle } from "@/lib/event-details";
 
 export function EventsTab({ tournament, events }: { tournament: Tournament; events: Tournament[] }) {
   const parentId = tournament.parent_tournament_id ?? tournament.id;
@@ -17,12 +18,12 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
   const { data: permissions = [] } = useTournamentPermissions(parentId);
   const { data: tournaments = [] } = useTournaments();
   const qc = useQueryClient();
-  const [mainCategory, setMainCategory] = useState(parent?.event_type ?? "unassigned");
   const [existingId, setExistingId] = useState("");
   const [linkCategory, setLinkCategory] = useState("");
   const [cloneSource, setCloneSource] = useState(tournament.id);
   const [cloneCategory, setCloneCategory] = useState("");
-  const available = availableEventTypes(events);
+  const available = BASKETBALL_EVENTS;
+  const competitions = competitionEvents(events);
   const canEdit = permissions.includes("tournament.edit");
   const update = useMutation({
     mutationFn: async (values: { id: string; event_type: string | null; parent_tournament_id?: string }) => {
@@ -41,37 +42,20 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
   const candidates = tournaments.filter((row) => row.id !== parentId && !row.parent_tournament_id && row.owner_id === parent?.owner_id && !tournaments.some((child) => child.parent_tournament_id === row.id));
 
   return <div className="space-y-6">
-    {parent && !parent.event_type && <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
-      <div><h3 className="font-semibold">Current event</h3><p className="mt-1 text-xs text-muted-foreground">{parent.team_count} teams · Category unassigned</p></div>
-      <Link to="/tournaments/$id" params={{ id: parentId }} search={{ view: "event" }}><Button variant="outline" size="sm"><ListOrdered className="mr-1.5 h-4 w-4" />Open current fixtures</Button></Link>
-    </div>}
-    {parent && canEdit && <div className="flex flex-wrap items-end gap-3 border-b border-border pb-5">
-      <Field label="Current main event category">
-        <Select value={mainCategory} onValueChange={setMainCategory}>
-          <SelectTrigger className="w-60"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="unassigned">Unassigned</SelectItem>
-            {BASKETBALL_EVENTS.filter((event) => event.value === parent.event_type || available.some((item) => item.value === event.value)).map((event) => <SelectItem key={event.value} value={event.value}>{event.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </Field>
-      <Button disabled={update.isPending} onClick={() => update.mutate({ id: parentId, event_type: mainCategory === "unassigned" ? null : mainCategory })}><Save className="mr-2 h-4 w-4" />Save category</Button>
-    </div>}
+    {canEdit && <Link to="/tournaments/new" search={{ parent: parentId }}><Button><Plus className="mr-2 h-4 w-4" />Create event</Button></Link>}
+    {competitions.length > 0 && <div className="grid gap-3 sm:grid-cols-2">{competitions.map(event => <div key={event.id} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4"><div><h3 className="font-semibold">{eventTitle(event)}</h3><p className="mt-1 text-xs text-muted-foreground">{event.team_count} teams</p></div><Link to="/tournaments/$id" params={{ id: event.id }} search={{ view: "event" }}><Button variant="outline" size="sm">Open event</Button></Link></div>)}</div>}
     <div className="grid gap-3 sm:grid-cols-2">
       {BASKETBALL_EVENTS.map((category) => {
-        const event = events.find((row) => row.event_type === category.value);
         return <div key={category.value} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
-          <div><h3 className="font-semibold">{category.label}</h3><p className="mt-1 text-xs text-muted-foreground">{event ? `${event.team_count} teams` : "Not added"}</p></div>
-          {event ? <div className="flex items-center gap-2"><StatusPill status={event.status} /><Link to="/tournaments/$id" params={{ id: event.id }} search={{ view: "event" }}><Button variant="outline" size="sm">Open event</Button></Link></div>
-            : canEdit && <Link to="/tournaments/new" search={{ parent: parentId, event: category.value }}><Button variant="outline" size="sm"><Plus className="mr-1.5 h-4 w-4" />Add event</Button></Link>}
+          <div><h3 className="font-semibold">{category.label}</h3></div>
+          {canEdit && <Link to="/tournaments/new" search={{ parent: parentId, event: category.value }}><Button variant="outline" size="sm"><Plus className="mr-1.5 h-4 w-4" />Add event</Button></Link>}
         </div>;
       })}
     </div>
-    {!parent?.event_type && <p className="text-sm text-muted-foreground">Current teams and fixtures: {eventLabel(parent?.event_type)} (category unassigned).</p>}
     {canEdit && available.length > 0 && <div className="space-y-3 border-t border-border pt-5">
       <h3 className="font-semibold">Clone an event</h3>
       <div className="flex flex-wrap items-end gap-3">
-        <Field label="Copy setup from"><Select value={cloneSource} onValueChange={setCloneSource}><SelectTrigger className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{events.map((row) => <SelectItem key={row.id} value={row.id}>{row.event_type ? eventLabel(row.event_type) : row.name}</SelectItem>)}</SelectContent></Select></Field>
+        <Field label="Copy setup from"><Select value={cloneSource} onValueChange={setCloneSource}><SelectTrigger className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{events.map((row) => <SelectItem key={row.id} value={row.id}>{row.event_type ? eventTitle(row) : row.name}</SelectItem>)}</SelectContent></Select></Field>
         <Field label="New event category"><Select value={cloneCategory} onValueChange={setCloneCategory}><SelectTrigger className="w-52 max-w-full"><SelectValue placeholder="Select event" /></SelectTrigger><SelectContent>{available.map((event) => <SelectItem key={event.value} value={event.value}>{event.label}</SelectItem>)}</SelectContent></Select></Field>
         {cloneSource && cloneCategory ? <Link to="/tournaments/new" search={{ parent: parentId, event: cloneCategory, clone: cloneSource }}><Button variant="outline"><Copy className="mr-2 h-4 w-4" />Clone event</Button></Link> : <Button variant="outline" disabled><Copy className="mr-2 h-4 w-4" />Clone event</Button>}
       </div>

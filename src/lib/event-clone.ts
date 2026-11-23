@@ -6,7 +6,7 @@ import { readGroupCapacities } from "./tournament-payload";
 export function eventCloneDefaults(source: Tournament, parent: Tournament, category: BasketballEvent) {
   const sourceConfig = source.config && typeof source.config === "object" && !Array.isArray(source.config) ? source.config : {};
   const config = Object.fromEntries(
-    ["group_capacities", "fixture_settings", "finals_best_of"].flatMap((key) => sourceConfig[key] === undefined ? [] : [[key, structuredClone(sourceConfig[key])]]),
+    ["group_capacities", "fixture_settings", "finals_best_of", "age_group"].flatMap((key) => sourceConfig[key] === undefined ? [] : [[key, structuredClone(sourceConfig[key])]]),
   );
   const capacities = readGroupCapacities(source.config);
   const groups = source.format === "group_knockout"

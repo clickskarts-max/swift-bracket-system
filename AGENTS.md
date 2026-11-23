@@ -27,6 +27,7 @@
 - Keep PDF column selection and blank-value projection in a pure model; export parent tournament context and local-calendar day sections from loaded data so customization never alters fixtures.
 - Generate editable Word fixture files with docx using the PDF's shared projection and blank-pool options; prepare files before download to preserve mobile user activation.
 - Keep download column order and per-game custom times in the shared export projection, never write them to fixtures; both PDF layouts and Word must reflect the same export choices.
-- Represent basketball events as independently managed tournament rows linked by parent_tournament_id, preserving existing IDs and event-specific data; validate same-account, single-level, unique-category links in the database and never inherit tournament memberships implicitly.
+- Represent basketball events as independently managed tournament rows linked by parent_tournament_id; validate same-account, single-level and unique category/optional age-group links in the database, without inheriting memberships.
 - Clone events through the existing creation wizard with an allowlisted setup projection and fresh team placeholders; never copy fixtures, results, champion IDs, player data, or memberships into another event.
 - Parent tournament management opens the Events directory; its existing competition workspace uses validated view=event search state so fixtures stay under Events without moving or relabeling stored games.
+- Store optional event age_group and parent event_container in existing config JSON; public parent directories and switchers include only actual competition events, not an unassigned parent workspace.

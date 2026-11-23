@@ -1,5 +1,10 @@
 # Roadmap
 
+- [x] Delete confirmed old National Games fixtures, teams and players while preserving the parent tournament
+- [x] Add organizer-created multiple events with optional Under 25 / Under 19 age groups
+- [x] Redesign public parent tournaments as event directories
+- [x] Test event setup and public desktop/mobile navigation
+
 - [x] Place existing fixture management inside Tournament → Events → Current event
 - [x] Verify event navigation and unchanged fixtures on desktop and mobile
 

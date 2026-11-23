@@ -60,7 +60,7 @@ function NewTournament() {
       <TournamentForm
         key={`${parent ?? "new"}:${event ?? "none"}:${clone ?? "none"}`}
         defaults={cloneDefaults ?? (parentTournament ? {
-          name: `${parentTournament.name} — ${eventLabel(event)}`,
+          name: event ? `${parentTournament.name} — ${eventLabel(event)}` : "",
           event_type: event ?? null,
           start_date: parentTournament.start_date,
           end_date: parentTournament.end_date,

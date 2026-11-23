@@ -24,7 +24,8 @@ import {
 import { StickyMobileAd } from "@/components/ads/sticky-mobile-ad";
 import { TournamentChampion } from "@/components/tournament-champion";
 import { TournamentEventSwitcher } from "@/components/tournament-event-switcher";
-import { eventLabel } from "@/lib/tournament-events";
+import { competitionEvents, eventTitle, isEventDirectory } from "@/lib/event-details";
+import { PublicEventDirectory } from "@/components/public-event-directory";
 import { formatDate, formatDateRangeInline, isFinalStatus } from "@/lib/app";
 import { TOURNAMENT_FORMATS } from "@/lib/formats";
 import { fixtureDisplayNumbers } from "@/lib/fixture-display";
@@ -123,6 +124,8 @@ function PublicTournament() {
     };
   const header = sponsors.filter((s) => s.placement === "public_header");
   const parentTournament = events.find((event) => event.id === (tournament.parent_tournament_id ?? tournament.id));
+  const competitions = competitionEvents(events);
+  const showDirectory = isEventDirectory(tournament, events.filter(event => event.parent_tournament_id === tournament.id).length);
   const footer = sponsors.filter((s) => s.placement !== "public_header");
   const upcoming = visibleMatches.filter((m) => !isFinalStatus(m.status));
   const results = visibleMatches.filter((m) => isFinalStatus(m.status));
@@ -287,9 +290,9 @@ function PublicTournament() {
             )}
             <div>
               <h1 className="font-display text-3xl font-bold sm:text-4xl">{parentTournament?.name ?? tournament.name}</h1>
-              {tournament.event_type && <p className="mt-2 font-display text-xl font-semibold text-primary">{eventLabel(tournament.event_type)}</p>}
+              {!showDirectory && tournament.event_type && <p className="mt-2 font-display text-xl font-semibold text-primary">{eventTitle(tournament)}</p>}
               <p className="mt-1 text-sm text-muted-foreground">
-                {TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label}
+                {showDirectory ? `${competitions.length} basketball events` : TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label}
               </p>
             </div>
             <StatusPill status={tournament.status} />
@@ -340,6 +343,8 @@ function PublicTournament() {
       </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
+        {showDirectory ? <PublicEventDirectory events={competitions} /> : <>
+        {tournament.parent_tournament_id && parentTournament && <Link to="/public/tournament/$slug" params={{ slug: parentTournament.slug }} className="mb-4 inline-block text-sm font-medium text-primary">← All events</Link>}
         <TournamentEventSwitcher tournament={tournament} events={events} publicPage />
         <TournamentChampion tournament={tournament} teams={teams} matches={matches} />
         <Tabs defaultValue="fixtures">
@@ -475,6 +480,7 @@ function PublicTournament() {
             <TabAdBlock tab="teams" position="bottom" tournamentId={tournament.id} className="mt-6" />
           </TabsContent>
         </Tabs>
+        </>}
       </main>
 
       <div className="mx-auto max-w-5xl px-4 pb-8">
