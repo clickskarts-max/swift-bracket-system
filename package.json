@@ -35,6 +35,8 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^13.1.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "lucide-react": "^1.33.0",
     "nepali-date-converter": "^3.4.0",
     "react": "^19.2.0",

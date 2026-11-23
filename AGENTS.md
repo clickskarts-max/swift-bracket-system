@@ -23,3 +23,4 @@
 - Derive organizer multi-game-day notices from existing fixture data using the same local calendar as the schedule; count completed games toward days with games still due, exclude non-played results and unresolved participants, and never alter fixtures.
 - Balance fixed-window league dates with bounded backtracking and per-team daily appearance tracking; reject infeasible plans rather than repeating a team's double-game day or spilling into knockout days.
 - Validate group setup with shared pure helpers and clear cached capacities when team/group totals change, so roster limits agree with the current structure.
+- Generate fixture PDFs on demand in the browser from loaded tournament data and shared display numbering; prepare a Blob before a separate download click so downloads keep user activation on mobile without extra data access or fixture writes.

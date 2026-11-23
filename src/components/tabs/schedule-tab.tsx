@@ -46,6 +46,7 @@ import { EmptyState, ScoreLine, StatusPill, TeamChip, Field } from "@/components
 import { TipoffCountdown } from "@/components/tipoff-countdown";
 import { FixtureSheet } from "@/components/tabs/fixture-sheet";
 import { TeamDayNotice } from "@/components/tabs/team-day-notice";
+import { FixturePdfDownload } from "@/components/tabs/fixture-pdf-download";
 import { formatDate, isFinalStatus, MATCH_STATUSES, toLocalInput } from "@/lib/app";
 import { generateSchedule } from "@/lib/formats";
 import { scheduleFixtureDates } from "@/lib/fixture-timing";
@@ -348,6 +349,7 @@ export function ScheduleTab({ tournament }: { tournament: Tournament }) {
           <span>Fixtures</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+        <FixturePdfDownload input={{ tournamentName: tournament.name, matches, label, venue: match => venues.find(venue => venue.id === match.venue_id)?.name ?? tournament.venue ?? "", matchday: resultGroupKey }} />
         <Button variant="outline" disabled={busy} onClick={() => { setSettingsOnly(true); setGenerationOpen(true); }}>
           <SlidersHorizontal className="mr-1.5 h-4 w-4" /> Fixture settings
         </Button>

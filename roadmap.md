@@ -45,3 +45,6 @@
 
 - [x] Allow uneven groups including two-team groups with consistent capacity validation
 - [x] Test and verify the uneven-group creation flow
+
+- [x] Add filled fixture-sheet and blank tie-sheet PDF downloads
+- [x] Verify downloaded PDFs, page layout, and mobile controls
