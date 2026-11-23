@@ -29,3 +29,4 @@
 - Keep download column order and per-game custom times in the shared export projection, never write them to fixtures; both PDF layouts and Word must reflect the same export choices.
 - Represent basketball events as independently managed tournament rows linked by parent_tournament_id, preserving existing IDs and event-specific data; validate same-account, single-level, unique-category links in the database and never inherit tournament memberships implicitly.
 - Clone events through the existing creation wizard with an allowlisted setup projection and fresh team placeholders; never copy fixtures, results, champion IDs, player data, or memberships into another event.
+- Parent tournament management opens the Events directory; its existing competition workspace uses validated view=event search state so fixtures stay under Events without moving or relabeling stored games.

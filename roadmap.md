@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Place existing fixture management inside Tournament → Events → Current event
+- [x] Verify event navigation and unchanged fixtures on desktop and mobile
+
 - [x] Add parent tournament/event grouping with safe existing-data preservation
 - [x] Add event creation and switching in tournament management and public pages
 - [x] Test event isolation and verify signed-in and public event flows

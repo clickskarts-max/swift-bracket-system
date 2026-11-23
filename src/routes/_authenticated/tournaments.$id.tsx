@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, ExternalLink, MapPin, Users } from "lucide-react";
+import { CalendarDays, ChevronRight, ExternalLink, MapPin, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +25,9 @@ import { computeProgression } from "@/lib/progression";
 import { TournamentChampion } from "@/components/tournament-champion";
 
 export const Route = createFileRoute("/_authenticated/tournaments/$id")({
+  validateSearch: (search: Record<string, unknown>): { view?: "event" } => (
+    search["view"] === "event" ? { view: "event" } : {}
+  ),
   head: () => ({
     meta: [
       { title: "Tournament control room — Ecluid Basketball" },
@@ -44,6 +47,7 @@ export const Route = createFileRoute("/_authenticated/tournaments/$id")({
 
 function TournamentDetail() {
   const { id } = Route.useParams();
+  const { view } = Route.useSearch();
   const { data: tournament, isLoading } = useTournament(id);
   const { data: events = [] } = useTournamentEvents(tournament);
   const { data: teams = [] } = useTeams(id);
@@ -89,9 +93,20 @@ function TournamentDetail() {
 
   const visibleMatches = matches.filter((m) => m.status !== "cancelled");
   const played = visibleMatches.filter((m) => isFinalStatus(m.status)).length;
+  const parentId = tournament.parent_tournament_id ?? id;
+  const parent = events.find((event) => event.id === parentId);
+  const showEvent = !!tournament.parent_tournament_id || view === "event";
 
   return (
     <div>
+      <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        <Link to="/dashboard" className="hover:text-foreground">Tournaments</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <Link to="/tournaments/$id" params={{ id: parentId }} search={{}} className="hover:text-foreground">{parent?.name ?? tournament.name}</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <Link to="/tournaments/$id" params={{ id: parentId }} search={{}} className="hover:text-foreground">Events</Link>
+        {showEvent && <><ChevronRight className="h-3.5 w-3.5" /><span className="text-foreground">{tournament.event_type ? eventLabel(tournament.event_type) : "Current event"}</span></>}
+      </nav>
       <PageHeader
         title={tournament.name}
         description={`${tournament.event_type ? `${eventLabel(tournament.event_type)} · ` : ""}${TOURNAMENT_FORMATS.find((f) => f.value === tournament.format)?.label ?? ""}`}
@@ -115,6 +130,10 @@ function TournamentDetail() {
 
       <TournamentEventSwitcher tournament={tournament} events={events} />
 
+      {!showEvent ? <section aria-label="Events" className="space-y-4">
+        <h2 className="text-lg font-semibold">Events</h2>
+        <EventsTab key={parentId} tournament={tournament} events={events} />
+      </section> : <>
       <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           <CalendarDays className="h-3.5 w-3.5" />
@@ -196,6 +215,7 @@ function TournamentDetail() {
         </TabsContent>
         <TabsContent value="events"><EventsTab key={tournament.parent_tournament_id ?? id} tournament={tournament} events={events} /></TabsContent>
       </Tabs>
+      </>}
     </div>
   );
 }

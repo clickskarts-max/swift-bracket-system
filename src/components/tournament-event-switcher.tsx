@@ -25,7 +25,7 @@ export function TournamentEventSwitcher({ tournament, events, publicPage = false
           return publicPage ? (
             <Link key={event.id} to="/public/tournament/$slug" params={{ slug: event.slug }} aria-current={event.id === tournament.id ? "page" : undefined}>{content}</Link>
           ) : (
-            <Link key={event.id} to="/tournaments/$id" params={{ id: event.id }} aria-current={event.id === tournament.id ? "page" : undefined}>{content}</Link>
+            <Link key={event.id} to="/tournaments/$id" params={{ id: event.id }} search={{ view: "event" }} aria-current={event.id === tournament.id ? "page" : undefined}>{content}</Link>
           );
         })}
       </div>

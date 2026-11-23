@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Copy, Link2, Plus, Save } from "lucide-react";
+import { Copy, Link2, ListOrdered, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,6 +41,10 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
   const candidates = tournaments.filter((row) => row.id !== parentId && !row.parent_tournament_id && row.owner_id === parent?.owner_id && !tournaments.some((child) => child.parent_tournament_id === row.id));
 
   return <div className="space-y-6">
+    {parent && !parent.event_type && <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
+      <div><h3 className="font-semibold">Current event</h3><p className="mt-1 text-xs text-muted-foreground">{parent.team_count} teams · Category unassigned</p></div>
+      <Link to="/tournaments/$id" params={{ id: parentId }} search={{ view: "event" }}><Button variant="outline" size="sm"><ListOrdered className="mr-1.5 h-4 w-4" />Open current fixtures</Button></Link>
+    </div>}
     {parent && canEdit && <div className="flex flex-wrap items-end gap-3 border-b border-border pb-5">
       <Field label="Current main event category">
         <Select value={mainCategory} onValueChange={setMainCategory}>
@@ -58,7 +62,7 @@ export function EventsTab({ tournament, events }: { tournament: Tournament; even
         const event = events.find((row) => row.event_type === category.value);
         return <div key={category.value} className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
           <div><h3 className="font-semibold">{category.label}</h3><p className="mt-1 text-xs text-muted-foreground">{event ? `${event.team_count} teams` : "Not added"}</p></div>
-          {event ? <div className="flex items-center gap-2"><StatusPill status={event.status} /><Link to="/tournaments/$id" params={{ id: event.id }}><Button variant="outline" size="sm">Open event</Button></Link></div>
+          {event ? <div className="flex items-center gap-2"><StatusPill status={event.status} /><Link to="/tournaments/$id" params={{ id: event.id }} search={{ view: "event" }}><Button variant="outline" size="sm">Open event</Button></Link></div>
             : canEdit && <Link to="/tournaments/new" search={{ parent: parentId, event: category.value }}><Button variant="outline" size="sm"><Plus className="mr-1.5 h-4 w-4" />Add event</Button></Link>}
         </div>;
       })}
